@@ -256,3 +256,5 @@ Cargo.lock
 *.out
 *.app
 
+# IDEA Stuff
+**/.idea/
