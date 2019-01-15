@@ -1,0 +1,6 @@
+[server]
+listen_address = "127.0.0.1"
+port = 8000
+ssl = false
+ssl_cert_pub_key = ""
+ssl_cert_priv_key = ""
