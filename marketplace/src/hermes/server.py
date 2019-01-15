@@ -1,74 +1,79 @@
-from .methods import 
+from hermes.methods import flask_methods
 
 from flask import Flask
 
 app = Flask(__name__)
 # app.session_interface = MySessionInterface()
-get, post, put, patch, delete =
+get, post, put, patch, delete = flask_methods(app)
 
 
-@app.route('/', methods=['GET'])
+@get('/')
 def index():
     return 'Hello World!'
 
 
-@app.route('/api/v1/user/register', methods=['POST'])
+@post('/api/v1/user/register')
 def register():
     return 'Hello World!'
 
 
-@app.route('/api/v1/user/<string:user_id>/deregister', methods=['POST'])
+@post('/api/v1/user/<string:user_id>/deregister')
 def deregister(user_id: str):
     return 'Hello World!'
 
 
-@app.route('/api/v1/user/login', methods=['POST'])
+@post('/api/v1/user/login')
 def login():
     return 'Hello World!'
 
 
-@app.route('/api/v1/user/logout', methods=['POST'])
+@post('/api/v1/user/logout')
 def logout():
     return 'Hello World!'
 
 
-@app.route('/api/v1/user/<string:user_id>', methods=['GET'])
-def user(user_id: str):
+@get('/api/v1/user/<string:user_id>')
+def user_details(user_id: str):
     return 'Hello World!'
 
 
-@app.route('/api/v1/user/<string:user_id>', methods=['PATCH'])
-def user(user_id: str):
+@patch('/api/v1/user/<string:user_id>')
+def patch_user(user_id: str):
     return 'Hello World!'
 
 
-@app.route('/api/v1/user/<string:user_id>/token', methods=['POST'])
+@post('/api/v1/user/<string:user_id>/token')
 def token(user_id: str):
     return 'Hello World!'
 
 
-@app.route('/api/v1/user/<string:user_id>/token', methods=['DELETE'])
+@delete('/api/v1/user/<string:user_id>/token')
 def token(user_id: str):
     return 'Hello World!'
 
 
-@app.route('/api/v1/ad/', methods=['GET'])
-def hello_world():
+@get('/api/v1/ad/')
+def list_ads():
     return 'Hello World!'
 
 
-@app.route('/api/v1/ad/', methods=['POST'])
-def hello_world():
+@post('/api/v1/ad/')
+def create_ad():
     return 'Hello World!'
 
 
-@app.route('/api/v1/ad/', methods=['DELETE'])
-def hello_world():
+@get('/api/v1/ad/<string:ad_id>')
+def get_ad(ad_id: str):
     return 'Hello World!'
 
 
-@app.route('/api/v1/ad/{ad_id}', methods=['GET'])
-def hello_world():
+@patch('/api/v1/ad/<string:ad_id>')
+def modify_ad(ad_id: str):
+    return 'Hello World!'
+
+
+@delete('/api/v1/ad/<string:ad_id>')
+def delete_ad(ad_id: str):
     return 'Hello World!'
 
 
