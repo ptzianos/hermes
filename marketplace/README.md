@@ -23,3 +23,11 @@ For deployments in production there are Ansible roles and playbooks in the
 In order to spin up a development instance you can use the
 `./marketplace/docker-compose.yml` configuration. This will build and run a
 container with the API Server and a container with a PostgreSQL instance.
+
+
+## API Documentation
+
+TODO!
+
+If you want to explore the API of the marketplace there is an OpenAPI doc
+available.
