@@ -8,6 +8,8 @@ authors = ["Pavlos Tzianos <pavlos.tzianos@tum.de>"]
 python = "^3.6"
 Flask = "^1.0"
 cerberus = "^1.2"
+Flask-Session = "^0.3.1"
+SQLAlchemy = "^1.2"
 
 
 [tool.poetry.dev-dependencies]
