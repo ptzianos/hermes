@@ -32,6 +32,21 @@ def logout():
     return 'Hello World!'
 
 
+@post('/api/v1/user/<string:user_id>/sudo')
+def sudo(user_id: str):
+    return 'Hello World!'
+
+
+@get('/api/v1/user/')
+def list_users():
+    return 'Hello World!'
+
+
+@get('/api/v1/user/me')
+def me():
+    return 'Hello World!'
+
+
 @get('/api/v1/user/<string:user_id>')
 def user_details(user_id: str):
     return 'Hello World!'
