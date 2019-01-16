@@ -1,15 +1,18 @@
+from flask import Flask
+from flask_session import Session
+
+import hermes.config
 from hermes.methods import flask_methods
 
-from flask import Flask
-
 app = Flask(__name__)
-# app.session_interface = MySessionInterface()
+app.config.from_object(hermes.config)
 get, post, put, patch, delete = flask_methods(app)
+Session(app)
 
 
 @get('/')
 def index():
-    return 'Hello World!'
+    return 'Welcome to Hermes Marketplace'
 
 
 @post('/api/v1/user/register')
