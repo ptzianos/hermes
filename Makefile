@@ -9,3 +9,6 @@ market-tests:
 
 poetry-docker:
 	docker build -t poetry -f docker/Dockerfile.poetry .
+
+debug-market:
+	cd marketplace && poetry run python3 src/hermes/server.py --host=127.0.0.1 --port=8000 --dev --run-migrations
