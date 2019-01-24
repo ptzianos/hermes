@@ -1,99 +1,52 @@
+import argparse
+import logging
+import sys
+
 from flask import Flask
-from flask_session import Session
+from flask.logging import create_logger
 
 import hermes.config
-from hermes.methods import flask_methods
+from hermes.signals import register_signals
+from hermes.user.session import HermesSession
 
 app = Flask(__name__)
 app.config.from_object(hermes.config)
-get, post, put, patch, delete = flask_methods(app)
-Session(app)
+app.session_interface = HermesSession()
+logger = create_logger(app)
+log = create_logger(app)
+log.setLevel(logging.INFO)
+register_signals(app)
 
 
-@get('/')
-def index():
-    return 'Welcome to Hermes Marketplace'
+# Import all the endpoints
+from hermes.views import *
 
 
-@post('/api/v1/user/register')
-def register():
-    return 'Hello World!'
-
-
-@post('/api/v1/user/<string:user_id>/deregister')
-def deregister(user_id: str):
-    return 'Hello World!'
-
-
-@post('/api/v1/user/login')
-def login():
-    return 'Hello World!'
-
-
-@post('/api/v1/user/logout')
-def logout():
-    return 'Hello World!'
-
-
-@post('/api/v1/user/<string:user_id>/sudo')
-def sudo(user_id: str):
-    return 'Hello World!'
-
-
-@get('/api/v1/user/')
-def list_users():
-    return 'Hello World!'
-
-
-@get('/api/v1/user/me')
-def me():
-    return 'Hello World!'
-
-
-@get('/api/v1/user/<string:user_id>')
-def user_details(user_id: str):
-    return 'Hello World!'
-
-
-@patch('/api/v1/user/<string:user_id>')
-def patch_user(user_id: str):
-    return 'Hello World!'
-
-
-@post('/api/v1/user/<string:user_id>/token')
-def token(user_id: str):
-    return 'Hello World!'
-
-
-@delete('/api/v1/user/<string:user_id>/token')
-def token(user_id: str):
-    return 'Hello World!'
-
-
-@get('/api/v1/ad/')
-def list_ads():
-    return 'Hello World!'
-
-
-@post('/api/v1/ad/')
-def create_ad():
-    return 'Hello World!'
-
-
-@get('/api/v1/ad/<string:ad_id>')
-def get_ad(ad_id: str):
-    return 'Hello World!'
-
-
-@patch('/api/v1/ad/<string:ad_id>')
-def modify_ad(ad_id: str):
-    return 'Hello World!'
-
-
-@delete('/api/v1/ad/<string:ad_id>')
-def delete_ad(ad_id: str):
-    return 'Hello World!'
+def run_migrations(exit_immediately=False):
+    from hermes.db.config import Base
+    # TODO: Make this an automatic scan process along with a singleton registry class
+    from hermes.user.models import SessionToken, User
+    log.info('Running schema migrations')
+    Base.metadata.create_all()
+    if exit_immediately:
+        sys.exit(status=1)
 
 
 if __name__ == '__main__':
-    app.run()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--dev', action='store_true',
+                        help='run the server in development mode')
+    parser.add_argument('--run-migrations', action='store_true',
+                        help='run database migrations when starting the server')
+    parser.add_argument('--run-migrations-and-exitt', action='store_true',
+                        help='run database migrations and exit immediately')
+    parser.add_argument('--host', type=str, default=None)
+    parser.add_argument('--port', type=int, default=None)
+    parser.add_argument('--log-to-file', action='store_true', help='Use rotating file logger')
+
+    args = parser.parse_args()
+
+    if args.run_migrations:
+        run_migrations()
+
+    app.run(host=args.host, port=args.port, debug=args.dev)
