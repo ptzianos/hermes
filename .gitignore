@@ -259,3 +259,5 @@ Cargo.lock
 # IDEA Stuff
 **/.idea/
 **/*.iml
+
+**/*.db
