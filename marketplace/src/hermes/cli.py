@@ -1,0 +1,41 @@
+import argparse
+import sys
+from logging import getLogger
+
+
+def run_migrations(log, exit_immediately=False):
+    from hermes.db.config import Base
+    # TODO: Make this an automatic scan process along with a singleton registry class
+    from hermes.user.models import SessionToken, User
+    log.info('Running schema migrations')
+    Base.metadata.create_all()
+    if exit_immediately:
+        sys.exit(status=1)
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--dev', action='store_true',
+                        help='run the server in development mode')
+    parser.add_argument('--run-migrations', action='store_true',
+                        help='run database migrations when starting the server')
+    parser.add_argument('--run-migrations-and-exitt', action='store_true',
+                        help='run database migrations and exit immediately')
+    parser.add_argument('--host', type=str, default=None)
+    parser.add_argument('--port', type=int, default=None)
+    parser.add_argument('--log-to-file', action='store_true', help='Use rotating file logger')
+
+    args = parser.parse_args()
+
+    if args.run_migrations:
+        run_migrations(getLogger(__name__))
+
+    from flask.cli import get_env, show_server_banner
+    from werkzeug.serving import run_simple
+
+    import hermes.server
+
+    show_server_banner(get_env(), debug=args.dev, app_import_path=hermes.server.__name__,
+                       eager_loading=False)
+    run_simple(args.host, args.port, hermes.server.app, use_reloader=args.dev,
+               use_debugger=args.dev)
