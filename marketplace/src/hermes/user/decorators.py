@@ -13,6 +13,7 @@ def authenticated_only(func) -> Callable[[Any], Response]:
     def decorator(*args, **kwargs) -> Response:
         if session.is_anonymous:
             return make_response('', 403)
+        # TODO: Add expired check here with appropriate message
         return func(*args, **kwargs)
     return decorator
 
