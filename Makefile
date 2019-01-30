@@ -11,4 +11,4 @@ poetry-docker:
 	docker build -t poetry -f docker/Dockerfile.poetry .
 
 debug-market:
-	cd marketplace && poetry run python3 src/hermes/server.py --host=127.0.0.1 --port=8000 --dev --run-migrations
+	cd marketplace && poetry run src/hermes/cli --host=127.0.0.1 --port=8000 --dev
