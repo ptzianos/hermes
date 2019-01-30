@@ -67,7 +67,9 @@ def deregister() -> ViewResponse:
 @unauthenticated_only
 def login() -> ViewResponse:
     try:
-        authenticate_user(request.form['username'], request.form['password'])
+        user = authenticate_user(request.form['username'], request.form['password'])
+        session.owner = user
+        session.refresh()
         return redirect(url_for(index))
     except (UnknownUser, WrongParameters):
         return make_response('wrong credentials', 400)
