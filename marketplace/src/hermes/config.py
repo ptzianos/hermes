@@ -11,4 +11,4 @@ SQL_ALCHEMY_POSTGRESQL_PSYCOPG = 'postgresql+psycopg2://{username}:{password}@{d
 
 SALT = '2sTOkalOpHhHuNmod5GrGgijXkmkUsJz'
 
-DEBUG_DB = True
+DEBUG_DB = False
