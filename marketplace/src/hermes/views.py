@@ -40,7 +40,7 @@ def index() -> ViewResponse:
     import ipdb
     ipdb.set_trace()
     if session.is_anonymous:
-        return redirect(url_for(login))
+        return redirect(url_for(login.__name__))
     return 'Welcome to the Hermes Marketplace'
 
 
