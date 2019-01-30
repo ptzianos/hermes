@@ -157,6 +157,18 @@ class ProxySession(SessionMixin):
         if key not in SessionToken.Meta.non_pickled_fields:
             self.data.__delitem__(key)
 
+    def __getattr__(self, item: Any) -> Any:
+        self.accessed = True
+        if item in ['new', 'accessed', 'modified', 'data', 'persistent_session']:
+            return self.__getattribute__(item)
+        return getattr(self.persistent_session, item)
+
+    def __setattr__(self, key, value):
+        if key in ['new', 'accessed', 'modified', 'data', 'persistent_session']:
+            return super().__setattr__(key, value)
+        else:
+            return setattr(self.persistent_session, key, value)
+
     def __iter__(self):
         return chain(self.data.__iter__(),
                      map(lambda key: getattr(self.persistent_session, key), SessionToken.Meta.non_pickled_fields))
