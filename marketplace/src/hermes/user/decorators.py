@@ -5,6 +5,10 @@ from flask import make_response, redirect, Response, session, url_for
 
 
 def authenticated_only(func) -> Callable[[Any], Response]:
+    """A decorator for views that allows only authenticated users.
+
+    Unauthenticated users will get a 403 response.
+    """
     @wraps(func)
     def decorator(*args, **kwargs) -> Response:
         if session.is_anonymous:
@@ -14,6 +18,10 @@ def authenticated_only(func) -> Callable[[Any], Response]:
 
 
 def unauthenticated_only(func) -> Callable[[Any], Response]:
+    """A decorator that allows only unauthenticated users to access a view.
+
+    Authenticated users will be redirected to the index page.
+    """
     @wraps(func)
     def decorator(*args, **kwargs) -> Response:
         if not session.is_anonymous:
@@ -24,6 +32,10 @@ def unauthenticated_only(func) -> Callable[[Any], Response]:
 
 
 def admin_only(func) -> Callable[[Any], Response]:
+    """A decorator that allows only admin users to access a view.
+
+    All other users will get a 403 response.
+    """
     @wraps(func)
     def decorator(*args, **kwargs) -> Response:
         if session.is_anonymous or not session.owner.admin:
