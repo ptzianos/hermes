@@ -9,8 +9,8 @@ from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String
 from sqlalchemy.ext.declarative import declared_attr
 from werkzeug.datastructures import CallbackDict
 
-from hermes.config import (API_TOKEN_DURATION, EMAIL_VERIFICATION_TOKEN_DURATION, PASSWORD_RESET_TOKEN_DURATION,
-                           SESSION_DURATION)
+from hermes.config import (API_TOKEN_DURATION, EMAIL_VERIFICATION_TOKEN_DURATION,
+                           PASSWORD_RESET_TOKEN_DURATION, SESSION_DURATION)
 from hermes.db.config import Base
 
 
