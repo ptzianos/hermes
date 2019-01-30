@@ -1,11 +1,10 @@
-from functools import partial
-from typing import Callable, Iterable, Tuple, Union
+from typing import Any, Callable, Tuple, Union
 
 from flask import (Flask, make_response, redirect, request,
                    Response, session, url_for)
 from flask.logging import create_logger
 
-import hermes.server
+from hermes.server import app as hermes_app
 from hermes.exceptions import *
 from hermes.user.controllers import (authenticate_user, deregister_user, exit_su,
                                      generate_api_token, register_user, resolve_user,
@@ -14,26 +13,32 @@ from hermes.user.decorators import admin_only, authenticated_only, unauthenticat
 from hermes.utils import make_json_response
 
 
-log = create_logger(hermes.server.app)
+log = create_logger(hermes_app)
 ViewResponse = Union[Response, Tuple[str, int], str]
 
 
 def http_methods(flask_app: Flask):
     """Decorator factory for outputting which API endpoints have been registered."""
-    def method_decorator(http_method: str) -> Callable:
-        def anon(rule: str, route: Callable[[str, Iterable[str]], Callable], method: str):
-            log.info('Registering endpoint: {} {}'.format(method, rule))
-            return route(rule, methods=[method])
-        return partial(anon, route=flask_app.route, method=http_method)
-    return (method_decorator('GET'), method_decorator('PUT'), method_decorator('POST'),
-            method_decorator('PATCH'), method_decorator('DELETE'))
+    def decorator_factory(http_method: str):
+        def rule_factory(rule: str):
+            def method_decorator(func: Callable[[Any], Response]) -> Callable[[Any], Response]:
+                log.debug('Registering endpoint: {} {}'.format(http_method, rule))
+                flask_app.add_url_rule(rule, func.__name__, func, methods=[http_method])
+                return func
+            return method_decorator
+        return rule_factory
+    return (decorator_factory('GET'), decorator_factory('PUT'),
+            decorator_factory('POST'), decorator_factory('PATCH'),
+            decorator_factory('DELETE'))
 
 
-get, post, put, patch, delete = http_methods(hermes.server.app)
+get, post, put, patch, delete = http_methods(hermes_app)
 
 
 @get('/')
 def index() -> ViewResponse:
+    import ipdb
+    ipdb.set_trace()
     if session.is_anonymous:
         return redirect(url_for(login))
     return 'Welcome to the Hermes Marketplace'
@@ -97,7 +102,6 @@ def list_users() -> ViewResponse:
     return 'Hello World!'
 
 
-@get('/api/v1/user')
 @get('/api/v1/user/me')
 @authenticated_only
 def me() -> ViewResponse:
