@@ -2,6 +2,7 @@ import json
 from datetime import datetime
 from itertools import chain
 from functools import partial
+from typing import Any
 from uuid import uuid4
 
 from flask.sessions import SessionMixin
@@ -132,7 +133,7 @@ class ProxySession(SessionMixin):
         def json_updater(updated_dict):
             self.persistent_session.data = json.dumps(updated_dict)
 
-        self.new = True
+        self.new = session.id is None
         self.accessed = False
         self.modified = False
         self.data = CallbackDict(initial=json.loads(session.data) if session.data else {},
