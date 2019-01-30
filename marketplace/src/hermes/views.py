@@ -66,8 +66,6 @@ def deregister() -> ViewResponse:
 @post('/api/v1/user/login')
 @unauthenticated_only
 def login() -> ViewResponse:
-    if not session.is_anonymous:
-        return redirect(url_for(index))
     try:
         authenticate_user(request.form['username'], request.form['password'])
         return redirect(url_for(index))
