@@ -127,10 +127,17 @@ def patch_user(user_id: str) -> ViewResponse:
 
 
 @post('/api/v1/user/token')
-@authenticated_only
 def create_token() -> ViewResponse:
-    token = generate_api_token(session['owner'])
-    return make_json_response(token=token.token,
+    if session.is_anonymous:
+        try:
+            user = authenticate_user(request.form.get('username'), request.form.get('password'))
+            token = generate_api_token(user)
+        except (UnknownUser, WrongParameters):
+            return make_response('forbidden', 403)
+    else:
+        token = generate_api_token(session['owner'])
+    return make_json_response(id=token.id,
+                              token=token.token,
                               expiration_date=token.expiry)
 
 
