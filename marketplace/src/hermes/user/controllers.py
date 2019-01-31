@@ -102,12 +102,13 @@ def register_user(email: Optional[str] = '',
             administrator.
 
     Returns:
-        User: a new instance of ``hermes.user.models.User``.
+        User: a new instance of `hermes.user.models.User`.
 
     Todo:
         - add more checks for existence of duplicate user.
-        - fix Exceptions being raised to be of correct type.
-        - implement public key only
+        - implement public key only registration.
+        - change user email to be instance of EmailAddress model.
+        - add verification for emails and public keys.
 
     """
     if not email or not name or not password:
