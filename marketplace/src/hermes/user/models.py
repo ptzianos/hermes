@@ -31,6 +31,7 @@ class User(Base):
     uuid = Column(String, unique=True, default=partial(lambda: str(uuid4().hex)))
     admin = Column(Boolean, default=False)
     name = Column(String)
+    # TODO: Change this to be a foreign key to the EmailAddress model
     email = Column(String)
     fullname = Column(String)
     password = Column(String)
