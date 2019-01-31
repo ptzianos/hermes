@@ -34,7 +34,7 @@ class User(Base):
     email = Column(String)
     fullname = Column(String)
     password = Column(String)
-    public_key = Column(String, nullable=False)
+    public_key = Column(String, nullable=True)
 
     def __repr__(self) -> str:
         return ("<User(id='{}', name='{}', fullname='{}', public_key='{}')>"
