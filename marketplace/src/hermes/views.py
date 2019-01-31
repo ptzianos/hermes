@@ -32,7 +32,7 @@ def http_methods(flask_app: Flask):
             decorator_factory('DELETE'))
 
 
-get, post, put, patch, delete = http_methods(hermes_app)
+get, put, post, patch, delete = http_methods(hermes_app)
 
 
 @get('/')
