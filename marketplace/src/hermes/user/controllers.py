@@ -127,8 +127,6 @@ def register_user(email: Optional[str] = '',
                 admin=admin)
     db_session.add(user)
     db_session.commit()
-    session['owner'] = user
-    session.refresh()
     return user
 
 
