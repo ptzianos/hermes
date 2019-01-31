@@ -1,43 +1,187 @@
 #!/usr/bin/env python3
 
 import argparse
+import json
+import os
+import requests
 import sys
-from logging import getLogger
+from collections import namedtuple
+from datetime import datetime, timedelta
+from getpass import getpass
+from urllib.parse import urljoin
 
 
-def run_migrations(log, exit_immediately=False):
+def _get_host(cli_args: argparse.Namespace) -> str:
+    if not cli_args.host.startswith('http://') and not cli_args.host.startswith('https://'):
+        host = 'http://' + cli_args.host
+    else:
+        host = cli_args.host
+    if cli_args.port:
+        if host.endswith('/'):
+            host = host[:-1] + ':' + str(cli_args.port)
+        else:
+            host += ':' + str(cli_args.port)
+    return host
+
+
+def run_migrations(cli_args: argparse.Namespace):
     from hermes.db.config import Base
     # TODO: Make this an automatic scan process along with a singleton registry class
     from hermes.user.models import SessionToken, User
-    log.info('Running schema migrations')
+    print('Running schema migrations')
     Base.metadata.create_all()
-    if exit_immediately:
-        sys.exit(status=1)
 
 
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--dev', action='store_true',
-                        help='run the server in development mode')
-    parser.add_argument('--run-migrations', action='store_true',
-                        help='run database migrations when starting the server')
-    parser.add_argument('--run-migrations-and-exitt', action='store_true',
-                        help='run database migrations and exit immediately')
-    parser.add_argument('--host', type=str, default=None)
-    parser.add_argument('--port', type=int, default=None)
-    parser.add_argument('--log-to-file', action='store_true', help='Use rotating file logger')
-
-    args = parser.parse_args()
-
-    if args.run_migrations:
-        run_migrations(getLogger(__name__))
+def run_server(cli_args: argparse.Namespace):
+    if cli_args.run_migrations:
+        run_migrations(cli_args)
 
     from flask.cli import get_env, show_server_banner
     from werkzeug.serving import run_simple
 
     import hermes.server
 
-    show_server_banner(get_env(), debug=args.dev, app_import_path=hermes.server.__name__,
+    show_server_banner(get_env(),
+                       debug=cli_args.dev,
+                       app_import_path=hermes.server.__name__,
                        eager_loading=False)
-    run_simple(args.host, args.port, hermes.server.app, use_reloader=args.dev,
-               use_debugger=args.dev)
+
+    run_simple(cli_args.host, cli_args.port, hermes.server.app,
+               use_reloader=cli_args.dev, use_debugger=cli_args.dev)
+
+
+def register(cli_args: argparse.Namespace):
+    host = _get_host(cli_args)
+    data = {
+        'username': cli_args.user,
+        'email': cli_args.email,
+        'name': cli_args.name,
+        'password': getpass(),
+    }
+    with open(os.path.expanduser('~/.hermes'), 'w') as fp:
+        register_url = '/api/v1/user/register'
+        register_endpoint = urljoin(host, register_url)
+        import ipdb
+        ipdb.set_trace()
+        resp = requests.post(register_endpoint, data=data)
+        if resp.status_code == requests.codes.ok:
+            json.dump(resp.json(), fp)
+            print('Registered successfully')
+            sys.exit(0)
+        else:
+            print('There was some issue with the registration!')
+
+
+def authenticate_with_server(cli_args: argparse.Namespace):
+    host = _get_host(cli_args)
+    data = {
+        'username': cli_args.user,
+        'password': getpass(),
+    }
+    # Make sure we can open the file to store the token
+    with open(os.path.expanduser('~/.hermes'), 'r+w') as fp:
+        auth_json = json.load(fp)
+        create_token_url = '/api/v1/user/token'
+        create_token_endpoint = urljoin(cli_args.host, create_token_url)
+        # Check if there is already a token that has not already expired and is valid
+        if auth_json.get('expiration', datetime.now() - timedelta(hours=1)) > datetime.now():
+            resp = requests.get(urljoin(host, '/me'))
+            if resp.status_code == requests.codes.ok:
+                print('You are already authenticated!')
+                sys.exit(0)
+        resp = requests.post(create_token_endpoint, data=data)
+        if resp.status_code == requests.codes.ok:
+            json.dump(resp.json(), fp)
+            print('Authenticated successfully')
+            sys.exit(0)
+        else:
+            print('There was some issue with the authentication!')
+
+
+def disconnect(cli_args: argparse.Namespace):
+    host = _get_host(cli_args)
+    data = {
+        'username': cli_args.user,
+        'password': getpass(),
+    }
+    # Make sure we can open the file to store the token
+    with open('~/.hermes', 'r') as fp:
+        auth_json = json.load(fp)
+
+
+def create_token(cli_args: argparse.Namespace):
+    pass
+
+
+def list_tokens(cli_args: argparse.Namespace):
+    pass
+
+
+def delete_token(cli_args: argparse.Namespace):
+    pass
+
+
+def whoami(cli_args: argparse.Namespace):
+    pass
+
+
+def su(cli_args: argparse.Namespace):
+    pass
+
+
+def list_sensors(cli_args: argparse.Namespace):
+    pass
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--verbose', action='store_true')
+    parser.add_argument('--host', type=str, default=None)
+    parser.add_argument('--port', type=int, default=None)
+
+    subparsers = parser.add_subparsers()
+
+    run_command_parser = subparsers.add_parser('run')
+    run_command_parser.add_argument('--dev', action='store_true',
+                                    help='run the server in development mode')
+    run_command_parser.add_argument('--run-migrations', action='store_true',
+                                    help='run database migrations when starting the server')
+    run_command_parser.add_argument('--log-to-file', action='store_true',
+                                    help='Use rotating file logger. (Unused at the moment)')
+    run_command_parser.set_defaults(func=run_server)
+
+    migrate_command_parser = subparsers.add_parser('migrate')
+    migrate_command_parser.set_defaults(func=run_migrations)
+
+    auth_command_parser = subparsers.add_parser('auth')
+    auth_command_parser.add_argument('--user', type=str)
+    auth_command_parser.set_defaults(func=authenticate_with_server)
+
+    register_command_parser = subparsers.add_parser('register')
+    register_command_parser.add_argument('--user', type=str)
+    register_command_parser.add_argument('--email', type=str)
+    register_command_parser.add_argument('--name', type=str)
+    register_command_parser.set_defaults(func=register)
+
+    whoami_command_parser = subparsers.add_parser('whoami')
+    whoami_command_parser.set_defaults(func=whoami)
+
+    su_command_parser = subparsers.add_parser('su')
+    su_command_parser.add_argument('user')
+    su_command_parser.set_defaults(func=su)
+
+    disconnect_command_parser = subparsers.add_parser('disconnect')
+    disconnect_command_parser.set_defaults(func=disconnect)
+
+    create_token_command_parser = subparsers.add_parser('create-token')
+    create_token_command_parser.set_defaults(func=create_token)
+
+    list_tokens_command_parser = subparsers.add_parser('list-tokens')
+    list_tokens_command_parser.set_defaults(func=list_tokens)
+
+    delete_token_command_parser = subparsers.add_parser('delete-token')
+    delete_token_command_parser.add_argument('--token-id', type=str)
+    delete_token_command_parser.set_defaults(func=delete_token)
+
+    args = parser.parse_args()
+    args.func(args)
