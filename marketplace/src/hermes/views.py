@@ -49,9 +49,9 @@ def register() -> ViewResponse:
     try:
         user = register_user(email=request.form.get('email'),
                              password=request.form.get('password'),
-                             name=request.form.get('password'),
-                             fullname=request.form.get('password'),
-                             public_key=request.form.get('password'))
+                             name=request.form.get('name'),
+                             fullname=request.form.get('fullname'),
+                             public_key=request.form.get('public_key'))
         return make_json_response(uuid=user.uuid)
     except AlreadyRegistered:
         return make_response('already_registered', 400)
