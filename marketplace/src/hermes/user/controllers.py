@@ -114,8 +114,9 @@ def register_user(email: Optional[str] = '',
         raise WrongParameters()
     # check if the public key is valid
     db_session = new_db_session_instance()
-    if (db_session.query(User)
-            .find(or_(User.email == email, User.name == name))
+    if (db_session
+            .query(User)
+            .filter(or_(User.email == email, User.name == name))
             .first()):
         raise AlreadyRegistered()
     user = User(email=email,

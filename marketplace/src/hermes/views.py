@@ -55,6 +55,8 @@ def register() -> ViewResponse:
         return make_response('already_registered', 400)
 
 
+# TODO: Add endpoint for confirming email with a GET
+
 @post('/api/v1/user/deregister')
 @unauthenticated_only
 def deregister() -> ViewResponse:
