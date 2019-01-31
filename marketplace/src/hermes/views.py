@@ -37,8 +37,6 @@ get, post, put, patch, delete = http_methods(hermes_app)
 
 @get('/')
 def index() -> ViewResponse:
-    import ipdb
-    ipdb.set_trace()
     if session.is_anonymous:
         return redirect(url_for(login.__name__))
     return 'Welcome to the Hermes Marketplace'

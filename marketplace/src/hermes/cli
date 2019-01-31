@@ -61,8 +61,6 @@ def register(cli_args: argparse.Namespace):
     with open(os.path.expanduser('~/.hermes'), 'w') as fp:
         register_url = '/api/v1/user/register'
         register_endpoint = urljoin(host, register_url)
-        import ipdb
-        ipdb.set_trace()
         resp = requests.post(register_endpoint, data=data)
         if resp.status_code == requests.codes.ok:
             json.dump(resp.json(), fp)
