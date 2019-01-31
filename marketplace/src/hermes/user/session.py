@@ -1,6 +1,6 @@
 import base64
 
-from flask import Flask, g, make_response, Request, Response
+from flask import Flask, make_response, Request, Response
 from flask.sessions import SessionInterface
 
 from hermes.db.session import new_db_session_instance
@@ -12,9 +12,9 @@ class HermesSession(SessionInterface):
     """
     def open_session(self, app: Flask, request: Request, *args) -> 'ProxySession':
         session_token = request.cookies.get(app.session_cookie_name) or None
-        g.db_session = new_db_session_instance()
+        db_session = new_db_session_instance()
         if session_token:
-            user_session = (g.db_session
+            user_session = (db_session
                             .query(SessionToken)
                             .filter_by(token=session_token, expired=False)
                             .first())  # type: SessionToken
@@ -41,7 +41,9 @@ class HermesSession(SessionInterface):
         if session_token is None:
             user_session = SessionToken()
             user_session.refresh()
-            g.db_session.add(user_session)
+            db_session.add(user_session)
+
+        user_session.proxy.db_session = db_session
 
         return user_session.proxy
 
