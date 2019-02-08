@@ -263,3 +263,5 @@ Cargo.lock
 
 **/*.db
 **/local.properties
+**/.gradle
+**/gradle-wrapper.jar
