@@ -32,7 +32,7 @@ class HermesSession(SessionInterface):
             if not base64_token:
                 raise Exception  # 403
             token = base64.decodebytes(base64_token.encode('ascii', errors='ignore'))
-            api_token = g.db_session.query(APIToken).filter_by(token=token, expired=False)
+            api_token = db_session.query(APIToken).filter_by(token=token, expired=False)
             if not api_token:
                 return make_response()
             # TODO: Fix the session object. Probably create one but don't save it
