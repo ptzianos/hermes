@@ -1,3 +1,4 @@
+
 # Created by .ignore support plugin (hsz.mobi)
 ### Vim template
 # Swap
@@ -261,3 +262,4 @@ Cargo.lock
 **/*.iml
 
 **/*.db
+**/local.properties
