@@ -9,4 +9,5 @@
     <string name="title_activity_setup">SetupActivity</string>
     <string name="setupButtonText">Setup</string>
     <string name="emailSetupInput">Your email</string>
+    <string name="auth_preference_key">auth</string>
 </resources>
