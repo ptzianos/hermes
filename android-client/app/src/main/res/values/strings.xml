@@ -10,4 +10,5 @@
     <string name="setupButtonText">Setup</string>
     <string name="emailSetupInput">Your email</string>
     <string name="auth_preference_key">auth</string>
+    <string name="auth_hashed_pin">hashed_pin</string>
 </resources>
