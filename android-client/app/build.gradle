@@ -61,6 +61,7 @@ entangled repository is osn branch: ${res.toString()}
 }
 
 dependencies {
+    api 'com.github.iotaledger:iota-java:1.0.0-beta3'
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:${rootProject.ext.kotlin_version}"
     implementation "com.android.support:appcompat-v7:${rootProject.ext.support_lib_version}"

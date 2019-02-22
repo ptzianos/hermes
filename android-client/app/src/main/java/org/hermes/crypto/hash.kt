@@ -69,7 +69,6 @@ object PasswordHasher {
     }
 
     fun isPasswordValid(password: CharArray): Boolean {
-        // TODO: Fetch the stored hash value using Room
         val storedHash = unPackHash("")
         val (hashingAlgo, iterations, salt, _) = storedHash
         if (hashingAlgo != CryptoAlgorithms.PBKDF2_HMC_SHA1) {
