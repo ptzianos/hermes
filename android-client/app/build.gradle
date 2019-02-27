@@ -48,7 +48,7 @@ task buildJnis(type: Exec) {
 
 Android SDK Path: ${sdkDir}
 Android NDK Path: ${ndkDir}
-entangled repository is osn branch: ${res.toString()}
+entangled repository is on branch: ${res.toString()}
 
 =============================
 """
@@ -69,6 +69,7 @@ dependencies {
     implementation "com.android.support:design:${rootProject.ext.support_lib_version}"
     implementation 'com.android.support.constraint:constraint-layout:1.1.3'
     testImplementation 'org.junit.jupiter:junit-jupiter:5.4.0'
+    testImplementation 'it.ozimov:assertj:2.0.0'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
 }
