@@ -7,7 +7,6 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
 import org.hermes.crypto.PasswordHasher
-import java.util.*
 
 /**
  * A login screen that offers to access the app via pin.
