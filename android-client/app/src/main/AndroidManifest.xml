@@ -10,6 +10,7 @@
             android:name=".HermesClientApp"
             android:roundIcon="@mipmap/ic_launcher_round"
             android:supportsRtl="true"
+            android:installLocation="internalOnly"
             android:theme="@style/AppTheme">
         <activity
                 android:name=".LoginActivity"
