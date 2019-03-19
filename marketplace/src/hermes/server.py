@@ -10,7 +10,6 @@ from hermes.user.session import HermesSession
 app = Flask(__name__)
 app.config.from_object(hermes.config)
 app.session_interface = HermesSession()
-logger = create_logger(app)
 log = create_logger(app)
 log.setLevel(logging.INFO)
 register_signals(app)
