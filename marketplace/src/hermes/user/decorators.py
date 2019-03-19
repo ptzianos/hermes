@@ -1,6 +1,7 @@
 from functools import wraps
 from typing import Any, Callable
 
+import requests
 from flask import make_response, redirect, Response, session, url_for
 
 
@@ -12,8 +13,10 @@ def authenticated_only(func) -> Callable[[Any], Response]:
     @wraps(func)
     def decorator(*args, **kwargs) -> Response:
         if session.is_anonymous:
-            return make_response('', 403)
-        # TODO: Add expired check here with appropriate message
+            return make_response('', requests.codes.forbidden)
+        if session.is_expired:
+            session.revoke()
+            return make_response('', requests.codes.forbidden)
         return func(*args, **kwargs)
     return decorator
 
