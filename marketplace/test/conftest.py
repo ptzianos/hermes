@@ -15,7 +15,7 @@ from hermes.signals import register_signals
 
 
 @pytest.fixture(scope="session")
-def flask_app():
+def flask_app() -> Flask:
     hermes_test_app = Flask(__name__)
     hermes_test_app.config['TESTING'] = True
     db_fd, db_path = tempfile.mkstemp()
