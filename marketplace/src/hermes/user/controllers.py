@@ -1,10 +1,9 @@
 from itertools import chain
 from typing import Dict, Optional, Union
 
-from flask import g, session
+from flask import g
 from sqlalchemy import or_
 
-from hermes.db.session import new_db_session_instance
 from hermes.exceptions import AlreadyRegistered, ForbiddenAction, UnknownUser, WrongParameters
 from hermes.user.models import APIToken, BaseToken, EmailAddress, SessionToken, User
 
@@ -114,7 +113,7 @@ def register_user(email: Optional[str] = '',
     if not email or not name or not password:
         raise WrongParameters()
     # check if the public key is valid
-    db_session = new_db_session_instance()
+    db_session = g.db_session()
     if (db_session
             .query(User)
             .filter(or_(User.email == email, User.name == name))
