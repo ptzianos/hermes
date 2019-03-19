@@ -55,7 +55,7 @@ class User(current_app.Base):
 
     def __repr__(self) -> str:
         return ("<User(id='{}', name='{}', fullname='{}', public_key='{}')>"
-                .format(self.id, self.name, self.fullname, self.public_key))
+                .format(self.id, self.name, self.fullname, "__public_key__"))
 
     def __str__(self) -> str:
         return "<User(id='{}', name='{}')>".format(self.id, self.name)
