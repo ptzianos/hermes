@@ -80,7 +80,7 @@ class BaseToken:
         """
         if self.expired:
             return True
-        if datetime.now() + SESSION_DURATION > self.expiry:
+        if datetime.now() > self.expiry:
             self.expired = True
             return True
         return False
