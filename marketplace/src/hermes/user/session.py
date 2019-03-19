@@ -1,5 +1,6 @@
 import base64
 
+import requests
 from flask import current_app, Flask, g, make_response, Request, Response
 from flask.sessions import SessionInterface
 
@@ -30,7 +31,7 @@ class HermesSession(SessionInterface):
             elif authorization_str.startswith('Bearer'):
                 base64_token = authorization_str.split('Bearer ')[-1]
             if not base64_token:
-                raise Exception  # 403
+                raise make_response('', requests.codes.forbidden)
             token = base64.decodebytes(base64_token.encode('ascii', errors='ignore'))
             api_token = db_session.query(APIToken).filter_by(token=token, expired=False)
             if not api_token:
