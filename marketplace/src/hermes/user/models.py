@@ -5,6 +5,7 @@ from functools import partial
 from typing import Any
 from uuid import uuid4
 
+from flask import current_app
 from flask.sessions import SessionMixin
 from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String
 from sqlalchemy.ext.declarative import declared_attr
@@ -12,19 +13,32 @@ from werkzeug.datastructures import CallbackDict
 
 from hermes.config import (API_TOKEN_DURATION, EMAIL_VERIFICATION_TOKEN_DURATION,
                            PASSWORD_RESET_TOKEN_DURATION, SESSION_DURATION)
-from hermes.db.config import Base
+# from hermes.db.config import Base
 
 
-class EmailAddress(Base):
+class EmailAddress(current_app.Base):
     __tablename__ = 'email_addresses'
 
     id = Column(Integer, primary_key=True)
     address = Column(String, unique=True)
     verified = Column(Boolean, default=False)
     owner = Column(Integer, ForeignKey('users.id'))
+    verified_on = Column(DateTime, nullable=False)
+    created_on = Column(DateTime, nullable=False, default=datetime.now)
+    last_modified_on = Column(DateTime, nullable=False, onupdate=datetime.now)
 
 
-class User(Base):
+class KeyPair(current_app.Base):
+    __tablename__ = 'public_keys'
+
+    id = Column(Integer, primary_key=True)
+    verified = Column(Boolean, default=False)
+    owner = Column(Integer, ForeignKey('users.id'))
+    created_on = Column(DateTime, nullable=False)
+    verified_on = Column(DateTime, nullable=False)
+
+
+class User(current_app.Base):
     __tablename__ = 'users'
 
     id = Column(Integer, primary_key=True)
@@ -35,7 +49,8 @@ class User(Base):
     email = Column(String)
     fullname = Column(String)
     password = Column(String)
-    public_key = Column(String, nullable=True)
+    created_on = Column(DateTime, nullable=False, default=datetime.now)
+    last_modified_on = Column(DateTime, nullable=False, onupdate=datetime.now)
 
     def __repr__(self) -> str:
         return ("<User(id='{}', name='{}', fullname='{}', public_key='{}')>"
@@ -48,6 +63,7 @@ class User(Base):
 class BaseToken:
     id = Column(Integer, primary_key=True)
     token = Column(String, unique=True, nullable=False, default=partial(lambda: str(uuid4().hex)))
+    created_on = Column(DateTime, nullable=False, default=datetime.now)
     expired = Column(Boolean, default=False)
     expiry = Column(DateTime, nullable=False)
 
@@ -79,14 +95,14 @@ class BaseToken:
             self.expiry = datetime.now() + self.duration
 
 
-class SessionToken(BaseToken, Base):
+class SessionToken(BaseToken, current_app.Base):
     __tablename__ = 'session_tokens'
 
     duration = SESSION_DURATION
 
     class Meta:
         non_pickled_fields = ['id', 'owner', 'token', 'expired', 'expiry', 'admin_owner', 'failed_login_attempts',
-                              'data', 'is_expired', 'is_sudo_session', 'is_anonymous']
+                              'created_on', 'data', 'is_expired', 'is_sudo_session', 'is_anonymous']
 
     admin_owner = Column(ForeignKey(User.id))
     failed_login_attempts = Column(Integer, default=0)
@@ -109,19 +125,19 @@ class SessionToken(BaseToken, Base):
         return self.owner is None
 
 
-class APIToken(BaseToken, Base):
+class APIToken(BaseToken, current_app.Base):
     __tablename__ = 'api_tokens'
 
     duration = API_TOKEN_DURATION
 
 
-class EmailVerificationToken(BaseToken, Base):
+class EmailVerificationToken(BaseToken, current_app.Base):
     __tablename__ = 'email_verification_tokens'
 
     duration = EMAIL_VERIFICATION_TOKEN_DURATION
 
 
-class PasswordResetToken(BaseToken, Base):
+class PasswordResetToken(BaseToken, current_app.Base):
     __tablename__ = 'password_reset_tokens'
 
     duration = PASSWORD_RESET_TOKEN_DURATION
