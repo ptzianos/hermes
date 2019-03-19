@@ -1,4 +1,5 @@
 import random
+from datetime import datetime
 from typing import Callable, Iterator
 
 import pytest
@@ -45,6 +46,8 @@ def user_session_factory(flask_app: Flask) -> Callable[[UserType], SessionTokenT
         def session_factory(user: User) -> ProxySession:
             persistent_session = SessionToken()
             persistent_session.owner = user
+            persistent_session.expired = False
+            persistent_session.created_on = datetime.now()
             persistent_session.refresh()
             return persistent_session
 
