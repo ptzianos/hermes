@@ -1,13 +1,8 @@
 from flask import Flask, g
 from flask.wrappers import Response
 
-from hermes.db import init_db
-
 
 def register_signals(app: Flask):
-    @app.before_request
-    def before_request(*args, **kwargs):
-        init_db()
 
     @app.after_request
     def after_request(response: Response):

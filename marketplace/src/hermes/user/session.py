@@ -1,6 +1,6 @@
 import base64
 
-from flask import Flask, g, make_response, Request, Response
+from flask import current_app, Flask, g, make_response, Request, Response
 from flask.sessions import SessionInterface
 
 from hermes.user.models import APIToken, ProxySession, SessionToken
@@ -12,7 +12,7 @@ class HermesSession(SessionInterface):
     def open_session(self, app: Flask, request: Request, *args) -> 'ProxySession':
         session_token = request.cookies.get(app.session_cookie_name) or None
         # Get the db_session object that has been created in the before request hook
-        db_session = g.db_session
+        db_session = g.db_session = current_app.new_db_session_instance()
         if session_token:
             user_session = (db_session
                             .query(SessionToken)
