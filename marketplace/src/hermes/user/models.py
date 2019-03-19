@@ -48,6 +48,7 @@ class User(current_app.Base):
     # TODO: Change this to be a foreign key to the EmailAddress model
     email = Column(String)
     fullname = Column(String)
+    # TODO: Change this to be a property that is hashed when assigned
     password = Column(String)
     created_on = Column(DateTime, nullable=False, default=datetime.now)
     last_modified_on = Column(DateTime, nullable=False, onupdate=datetime.now)
