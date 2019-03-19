@@ -43,8 +43,6 @@ class HermesSession(SessionInterface):
             user_session.refresh()
             db_session.add(user_session)
 
-        user_session.proxy.db_session = db_session
-
         return user_session.proxy
 
     def save_session(self, app: Flask, session: 'ProxySession', response: Response) -> None:
