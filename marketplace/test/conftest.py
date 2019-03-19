@@ -19,6 +19,7 @@ def flask_app() -> Flask:
     hermes_test_app = Flask(__name__)
     hermes_test_app.config['TESTING'] = True
     db_fd, db_path = tempfile.mkstemp()
+    hermes_test_app.config['DATABASE_FILE_PATH'] = db_path
     hermes_test_app.config['DATABASE'] = config.SQL_ALCHEMY_SQLITE_ABS_PATH_TEMPLATE.format(abs_file_path=db_path)
 
     # The database needs to be initialized before the session object
@@ -40,4 +41,4 @@ def flask_app() -> Flask:
     yield hermes_test_app
 
     os.close(db_fd)
-    os.unlink(hermes_test_app.config['DATABASE'])
+    os.unlink(hermes_test_app.config['DATABASE_FILE_PATH'])
