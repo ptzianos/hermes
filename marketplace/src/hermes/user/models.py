@@ -156,8 +156,8 @@ class ProxySession(SessionMixin):
         self.modified = False
         self.data = CallbackDict(initial=json.loads(session.data) if session.data else {},
                                  on_update=json_updater)
+        # Persistent session is the SessionToken model instance
         self.persistent_session = session
-        self.db_session = None
 
     def __getitem__(self, item):
         self.accessed = True
@@ -178,12 +178,12 @@ class ProxySession(SessionMixin):
 
     def __getattr__(self, item: Any) -> Any:
         self.accessed = True
-        if item in ['new', 'accessed', 'modified', 'data', 'persistent_session', 'db_session']:
+        if item in ['new', 'accessed', 'modified', 'data', 'persistent_session']:
             return self.__getattribute__(item)
         return getattr(self.persistent_session, item)
 
     def __setattr__(self, key, value):
-        if key in ['new', 'accessed', 'modified', 'data', 'persistent_session', 'db_session']:
+        if key in ['new', 'accessed', 'modified', 'data', 'persistent_session']:
             return super().__setattr__(key, value)
         else:
             return setattr(self.persistent_session, key, value)
