@@ -5,7 +5,7 @@ from flask import g
 from sqlalchemy import or_
 
 from hermes.exceptions import AlreadyRegistered, ForbiddenAction, UnknownUser, WrongParameters
-from hermes.user.models import APIToken, BaseToken, EmailAddress, KeyPair, SessionToken, User
+from hermes.user.models import APIToken, BaseToken, EmailAddress, PublicKey, SessionToken, User
 
 
 UserLikeObj = Optional[Union[str, User]]
