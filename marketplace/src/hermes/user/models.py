@@ -28,7 +28,7 @@ class EmailAddress(current_app.Base):
     last_modified_on = Column(DateTime, nullable=False, onupdate=datetime.now)
 
 
-class KeyPair(current_app.Base):
+class PublicKey(current_app.Base):
     __tablename__ = 'public_keys'
 
     id = Column(Integer, primary_key=True)

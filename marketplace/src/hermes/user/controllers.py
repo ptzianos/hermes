@@ -1,11 +1,11 @@
 from itertools import chain
-from typing import Dict, Optional, Union
+from typing import Dict, Iterable, Optional, Union
 
 from flask import g
 from sqlalchemy import or_
 
 from hermes.exceptions import AlreadyRegistered, ForbiddenAction, UnknownUser, WrongParameters
-from hermes.user.models import APIToken, BaseToken, EmailAddress, SessionToken, User
+from hermes.user.models import APIToken, BaseToken, EmailAddress, KeyPair, SessionToken, User
 
 
 UserLikeObj = Optional[Union[str, User]]
@@ -286,3 +286,7 @@ def exit_su(session: SessionToken) -> None:
     session.owner = session.admin_owner
     session.admin_owner = None
     session.refresh()
+
+
+def list_keys(user: User) -> Iterable[PublicKey]:
+    pass

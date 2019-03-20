@@ -76,6 +76,13 @@ def login() -> ViewResponse:
         return make_response('wrong credentials', 400)
 
 
+@get('/api/v1/user/key')
+@authenticated_only
+def list_public_keys():
+    """Returns a list of the user's public keys"""
+    return 'Not implemented yet'
+
+
 @post('/api/v1/user/logout')
 @authenticated_only
 def logout() -> ViewResponse:
