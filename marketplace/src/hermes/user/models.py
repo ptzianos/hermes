@@ -9,33 +9,11 @@ from flask import current_app
 from flask.sessions import SessionMixin
 from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String
 from sqlalchemy.ext.declarative import declared_attr
+from sqlalchemy.orm import relationship
 from werkzeug.datastructures import CallbackDict
 
 from hermes.config import (API_TOKEN_DURATION, EMAIL_VERIFICATION_TOKEN_DURATION,
                            PASSWORD_RESET_TOKEN_DURATION, SESSION_DURATION)
-# from hermes.db.config import Base
-
-
-class EmailAddress(current_app.Base):
-    __tablename__ = 'email_addresses'
-
-    id = Column(Integer, primary_key=True)
-    address = Column(String, unique=True)
-    verified = Column(Boolean, default=False)
-    owner = Column(Integer, ForeignKey('users.id'))
-    verified_on = Column(DateTime, nullable=False)
-    created_on = Column(DateTime, nullable=False, default=datetime.now)
-    last_modified_on = Column(DateTime, onupdate=datetime.now)
-
-
-class PublicKey(current_app.Base):
-    __tablename__ = 'public_keys'
-
-    id = Column(Integer, primary_key=True)
-    verified = Column(Boolean, default=False)
-    owner = Column(Integer, ForeignKey('users.id'))
-    created_on = Column(DateTime, nullable=False)
-    verified_on = Column(DateTime, nullable=False)
 
 
 class User(current_app.Base):
@@ -46,7 +24,6 @@ class User(current_app.Base):
     admin = Column(Boolean, default=False)
     name = Column(String)
     fullname = Column(String)
-    # TODO: Change this to be a property that is hashed when assigned
     password = Column(String)
     created_on = Column(DateTime, nullable=False, default=datetime.now)
     last_modified_on = Column(DateTime, onupdate=datetime.now)
@@ -57,6 +34,30 @@ class User(current_app.Base):
 
     def __str__(self) -> str:
         return "<User(id='{}', name='{}')>".format(self.id, self.name)
+
+
+class EmailAddress(current_app.Base):
+    __tablename__ = 'email_addresses'
+
+    id = Column(Integer, primary_key=True)
+    address = Column(String, unique=True)
+    verified = Column(Boolean, default=False)
+    owner_id = Column(Integer, ForeignKey('users.id'))
+    owner = relationship(User, primaryjoin=owner_id == User.id)
+    verified_on = Column(DateTime, nullable=False)
+    created_on = Column(DateTime, nullable=False, default=datetime.now)
+    last_modified_on = Column(DateTime, onupdate=datetime.now)
+
+
+class PublicKey(current_app.Base):
+    __tablename__ = 'public_keys'
+
+    id = Column(Integer, primary_key=True)
+    verified = Column(Boolean, default=False)
+    owner_id = Column(Integer, ForeignKey('users.id'))
+    owner = relationship(User, primaryjoin=owner_id == User.id)
+    created_on = Column(DateTime, nullable=False)
+    verified_on = Column(DateTime, nullable=False)
 
 
 class BaseToken:
