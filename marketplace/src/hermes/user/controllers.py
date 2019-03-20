@@ -51,17 +51,19 @@ def resolve_token(some_token: TokenLikeObj) -> Optional[BaseToken]:
     """
     if some_token is None:
         return None
-    if isinstance(some_token, str):
-        return (g.db_session
-                .query(APIToken)
-                .filter_by(token=some_token)
-                .first()
-                or
-                g.db_session
-                .query(SessionToken)
-                .filter_by(token=some_token)
-                .first())
-    return some_token
+    if type(some_token) not in [str, BaseToken]:
+        raise Exception('not a token')
+    if isinstance(some_token, BaseToken):
+        return some_token
+    return (g.db_session
+            .query(APIToken)
+            .filter_by(token=some_token)
+            .first()
+            or
+            g.db_session
+            .query(SessionToken)
+            .filter_by(token=some_token)
+            .first())
 
 
 def hash_password(passwd: str) -> str:
