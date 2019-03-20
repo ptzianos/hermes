@@ -7,21 +7,26 @@ from uuid import uuid4
 
 from flask import current_app
 from flask.sessions import SessionMixin
-from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String
+from sqlalchemy import (Boolean, Column, DateTime, ForeignKey,
+                        Integer, String)
 from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.orm import relationship
 from sqlalchemy_utils.types.choice import ChoiceType
 from werkzeug.datastructures import CallbackDict
 
-from hermes.config import (API_TOKEN_DURATION, EMAIL_VERIFICATION_TOKEN_DURATION,
-                           PASSWORD_RESET_TOKEN_DURATION, SESSION_DURATION)
+from hermes.config import (API_TOKEN_DURATION,
+                           EMAIL_VERIFICATION_TOKEN_DURATION,
+                           PASSWORD_RESET_TOKEN_DURATION,
+                           PUBLIC_KEY_VERIFICATION_REQUEST_DURATION,
+                           SESSION_DURATION)
 
 
 class User(current_app.Base):
     __tablename__ = 'users'
 
     id = Column(Integer, primary_key=True)
-    uuid = Column(String, unique=True, default=partial(lambda: str(uuid4().hex)))
+    uuid = Column(String, unique=True,
+                  default=partial(lambda: str(uuid4().hex)))
     admin = Column(Boolean, default=False)
     name = Column(String)
     fullname = Column(String)
@@ -71,7 +76,8 @@ class PublicKey(current_app.Base):
 
 class BaseToken:
     id = Column(Integer, primary_key=True)
-    token = Column(String, unique=True, nullable=False, default=partial(lambda: str(uuid4().hex)))
+    token = Column(String, unique=True, nullable=False,
+                   default=partial(lambda: str(uuid4().hex)))
     created_on = Column(DateTime, nullable=False, default=datetime.now)
     expired = Column(Boolean, default=False)
     expiry = Column(DateTime, nullable=False)
@@ -114,8 +120,10 @@ class SessionToken(BaseToken, current_app.Base):
     duration = SESSION_DURATION
 
     class Meta:
-        non_pickled_fields = ['id', 'owner', 'token', 'expired', 'expiry', 'admin_owner', 'failed_login_attempts',
-                              'created_on', 'data', 'is_expired', 'is_sudo_session', 'is_anonymous']
+        non_pickled_fields = ['id', 'owner', 'token', 'expired', 'expiry',
+                              'admin_owner', 'failed_login_attempts',
+                              'created_on', 'data', 'is_expired',
+                              'is_sudo_session', 'is_anonymous']
 
     admin_owner = Column(ForeignKey(User.id))
     failed_login_attempts = Column(Integer, default=0)
@@ -149,11 +157,28 @@ class EmailVerificationToken(BaseToken, current_app.Base):
 
     duration = EMAIL_VERIFICATION_TOKEN_DURATION
 
+    email_id = Column(Integer, ForeignKey('email_addresses.id'))
+    email = relationship(EmailAddress,
+                         primaryjoin=email_id == EmailAddress.id)
+
 
 class PasswordResetToken(BaseToken, current_app.Base):
     __tablename__ = 'password_reset_tokens'
 
     duration = PASSWORD_RESET_TOKEN_DURATION
+
+    user_id = Column(Integer, ForeignKey('users.id'))
+    user = relationship(User, primaryjoin=user_id == User.id)
+
+
+class PublicKeyVerificationRequest(BaseToken, current_app.Base):
+    __tablename__ = 'public_key_verification_requests'
+
+    duration = PUBLIC_KEY_VERIFICATION_REQUEST_DURATION
+
+    public_key_id = Column(Integer, ForeignKey('public_keys.id'))
+    public_key = relationship(PublicKey,
+                              primaryjoin=public_key_id == PublicKey.id)
 
 
 class ProxySession(SessionMixin):
@@ -202,7 +227,8 @@ class ProxySession(SessionMixin):
 
     def __iter__(self):
         return chain(self.data.__iter__(),
-                     map(lambda key: getattr(self.persistent_session, key), SessionToken.Meta.non_pickled_fields))
+                     map(lambda key: getattr(self.persistent_session, key),
+                         SessionToken.Meta.non_pickled_fields))
 
     def __len__(self):
         return len(self.data) + len(SessionToken.Meta.non_pickled_fields)
