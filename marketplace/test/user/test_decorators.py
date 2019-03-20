@@ -110,6 +110,7 @@ def test_admin_only_decorator_allows_admin_session(
 
     with flask_app.test_request_context():
         from flask import session
-        session.persistent_session = user_session_factory(next(admin_user_generator))
+        user, _ = next(admin_user_generator)
+        session.persistent_session = user_session_factory(user)
         resp = admin_only(test_func)()
         assert resp.status_code == requests.codes.ok, 'Decorator prevented admin user'
