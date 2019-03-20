@@ -53,6 +53,9 @@ class PublicKey(current_app.Base):
     __tablename__ = 'public_keys'
 
     id = Column(Integer, primary_key=True)
+    value = Column(String, unique=True, nullable=False)
+    type = Column(String, choices=['ecdsa', 'rsa'], nullable=False)
+    size = Column(Integer, nullable=False)
     verified = Column(Boolean, default=False)
     owner_id = Column(Integer, ForeignKey('users.id'))
     owner = relationship(User, primaryjoin=owner_id == User.id)
