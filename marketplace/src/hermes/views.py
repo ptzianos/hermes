@@ -2,9 +2,8 @@ from typing import Any, Callable, Tuple, Union
 
 from flask import (Flask, make_response, redirect, request,
                    Response, session, url_for)
-from flask.logging import create_logger
+# from flask.logging import create_logger
 
-from hermes.server import app as hermes_app
 from hermes.exceptions import *
 from hermes.user.controllers import (authenticate_user, deregister_user, exit_su,
                                      generate_api_token, register_user, resolve_user,
@@ -13,26 +12,28 @@ from hermes.user.decorators import admin_only, authenticated_only, unauthenticat
 from hermes.utils import make_json_response
 
 
-log = create_logger(hermes_app)
+# log = getLogger(__name__)
 ViewResponse = Union[Response, Tuple[str, int], str]
 
-
-def http_methods(flask_app: Flask):
-    """Decorator factory for outputting which API endpoints have been registered."""
-    def decorator_factory(http_method: str):
-        def rule_factory(rule: str):
-            def method_decorator(func: Callable[[Any], Response]) -> Callable[[Any], Response]:
-                log.debug('Registering endpoint: {} {}'.format(http_method, rule))
-                flask_app.add_url_rule(rule, func.__name__, func, methods=[http_method])
-                return func
-            return method_decorator
-        return rule_factory
-    return (decorator_factory('GET'), decorator_factory('PUT'),
-            decorator_factory('POST'), decorator_factory('PATCH'),
-            decorator_factory('DELETE'))
+view_registry = []
 
 
-get, put, post, patch, delete = http_methods(hermes_app)
+def view_decorator_factory(http_method: str):
+    if http_method not in ['GET', 'POST', 'PUT', 'PATCH', 'DELETE']:
+        raise Exception('Invalid http method')
+
+    def rule_decorator(rule: str):
+        def view_decorator(func: Callable[[Any], Response]) -> Callable[[Any], Response]:
+            view_registry.append((http_method, func, rule))
+            return func
+        return view_decorator
+
+    return rule_decorator
+
+
+get, post, put, patch, delete = (view_decorator_factory('GET'), view_decorator_factory('POST'),
+                                 view_decorator_factory('PUT'), view_decorator_factory('PATCH'),
+                                 view_decorator_factory('DELETE'))
 
 
 @get('/')
@@ -174,3 +175,9 @@ def modify_ad(ad_id: str) -> ViewResponse:
 @authenticated_only
 def delete_ad(ad_id: str) -> ViewResponse:
     return 'Hello World!'
+
+
+def register_views_to_app(flask_app: Flask) -> None:
+    for http_method, func, rule in view_registry:
+        # log.debug('Registering view to flask app: {} {}'.format(http_method, rule))
+        flask_app.add_url_rule(rule, func.__name__, func, methods=[http_method])

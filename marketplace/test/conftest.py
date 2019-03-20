@@ -35,6 +35,9 @@ def flask_app() -> Flask:
 
         hermes_test_app.Base.metadata.create_all()
 
+        from hermes.views import register_views_to_app
+        register_views_to_app(hermes_test_app)
+
     log = create_logger(hermes_test_app)
     log.setLevel(logging.DEBUG)
 
