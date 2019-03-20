@@ -25,7 +25,7 @@ def test_authenticated_only_decorator_forbids_expired_session(
     def test_func(*args, **kwargs):
         return make_response('ok', 200)
 
-    with flask_app.test_request_context() as req:
+    with flask_app.test_request_context():
         from flask import session
         session.persistent_session = user_session_factory(next(user_generator))
         session.persistent_session.expiry = datetime.now() - timedelta(days=1)
@@ -41,7 +41,7 @@ def test_authenticated_only_decorator_allows_authenticated_session(
     def test_func(*args, **kwargs):
         return make_response('ok', 200)
 
-    with flask_app.test_request_context() as req:
+    with flask_app.test_request_context():
         from flask import session
         session.persistent_session = user_session_factory(next(user_generator))
         resp = authenticated_only(test_func)()
@@ -65,7 +65,7 @@ def test_unauthenticated_only_decorator_redirects_authenticated_session(
     def test_func(*args, **kwargs):
         return make_response('', requests.codes.found)
 
-    with flask_app.test_request_context() as req:
+    with flask_app.test_request_context():
         from flask import session
         session.persistent_session = user_session_factory(next(user_generator))
         resp = unauthenticated_only(test_func)()
@@ -89,7 +89,7 @@ def test_admin_only_decorator_forbids_non_admin_session(
     def test_func(*args, **kwargs):
         return make_response('ok', 200)
 
-    with flask_app.test_request_context() as req:
+    with flask_app.test_request_context():
         from flask import session
         session.persistent_session = user_session_factory(next(user_generator))
         resp = admin_only(test_func)()
@@ -104,7 +104,7 @@ def test_admin_only_decorator_allows_admin_session(
     def test_func(*args, **kwargs):
         return make_response('ok', 200)
 
-    with flask_app.test_request_context() as req:
+    with flask_app.test_request_context():
         from flask import session
         session.persistent_session = user_session_factory(next(admin_user_generator))
         resp = admin_only(test_func)()
