@@ -23,4 +23,6 @@ public key has a SHA3-512 digest equal to {digest}.
 This makes you legally responsible for all actions performed on the platform and liable for any malicious
 activities that might occur.
 If you have not yourself requested this key to be verified, please do not sign this document.
+
+Expires on: {expiration_date}
 """
