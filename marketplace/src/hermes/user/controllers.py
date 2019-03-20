@@ -34,8 +34,9 @@ def resolve_user(some_user: UserLikeObj) -> Optional[User]:
             .filter(or_(User.name == some_user, User.uuid == some_user))
             .first()) or \
            (g.db_session
-            .query(EmailAddress)
-            .filter_by(email=some_user)
+            .query(User)
+            .join(EmailAddress)
+            .filter_by(address=some_user)
             .first())
 
 
@@ -51,7 +52,7 @@ def resolve_token(some_token: TokenLikeObj) -> Optional[BaseToken]:
     """
     if some_token is None:
         return None
-    if type(some_token) not in [str, BaseToken]:
+    if type(some_token) not in [str, APIToken, SessionToken]:
         raise Exception('not a token')
     if isinstance(some_token, BaseToken):
         return some_token
