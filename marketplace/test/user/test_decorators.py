@@ -27,7 +27,8 @@ def test_authenticated_only_decorator_forbids_expired_session(
 
     with flask_app.test_request_context():
         from flask import session
-        session.persistent_session = user_session_factory(next(user_generator))
+        user, _ = next(user_generator)
+        session.persistent_session = user_session_factory(user)
         session.persistent_session.expiry = datetime.now() - timedelta(days=1)
         resp = authenticated_only(test_func)()
         assert resp.status_code == requests.codes.forbidden, 'Decorator allowed expired authenticated session'
@@ -43,7 +44,8 @@ def test_authenticated_only_decorator_allows_authenticated_session(
 
     with flask_app.test_request_context():
         from flask import session
-        session.persistent_session = user_session_factory(next(user_generator))
+        user, _ = next(user_generator)
+        session.persistent_session = user_session_factory(user)
         resp = authenticated_only(test_func)()
         assert resp.status_code == requests.codes.ok, 'Decorator prevented authenticated user'
 
@@ -67,7 +69,8 @@ def test_unauthenticated_only_decorator_redirects_authenticated_session(
 
     with flask_app.test_request_context():
         from flask import session
-        session.persistent_session = user_session_factory(next(user_generator))
+        user, _ = next(user_generator)
+        session.persistent_session = user_session_factory(user)
         resp = unauthenticated_only(test_func)()
         assert resp.status_code == requests.codes.found, 'Decorator allowed authenticated user'
 
@@ -91,7 +94,8 @@ def test_admin_only_decorator_forbids_non_admin_session(
 
     with flask_app.test_request_context():
         from flask import session
-        session.persistent_session = user_session_factory(next(user_generator))
+        user, _ = next(user_generator)
+        session.persistent_session = user_session_factory(user)
         resp = admin_only(test_func)()
         assert resp.status_code == requests.codes.forbidden, 'Decorator did not prevent authenticated user'
 

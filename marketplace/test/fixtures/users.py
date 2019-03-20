@@ -1,41 +1,52 @@
 import random
 from datetime import datetime
-from typing import Callable, Iterator
+from typing import Callable, Iterator, Tuple
 
 import pytest
 from flask import Flask
 
-from hermes.types import SessionTokenType, UserType
+from hermes.types import EmailAddressType, SessionTokenType, UserType
 from test.fixtures.seeds import *
 
 
 def infinite_user_generator(
     user_model_factory: Callable[[], UserType],
+    email_model_factory: Callable[[], EmailAddressType],
     admin_user: bool = False
-) -> Iterator[UserType]:
+) -> Iterator[Tuple[UserType, EmailAddressType]]:
     while True:
         first_name = random.choice(first)
         last_name = random.choice(last)
         email_domain = random.choice(email)
         test_user = user_model_factory()
         test_user.name = test_user.fullname = f"{first_name} {last_name}"
-        test_user.email = f"{first_name}.{last_name}@{email_domain}"
         test_user.admin = admin_user
-        yield test_user
+
+        email_instance = email_model_factory()
+        email_instance.address = f"{first_name}.{last_name}@{email_domain}"
+        email_instance.verified = True
+        email_instance.owner = test_user
+        email_instance.verified_on = datetime.now()
+
+        yield test_user, email_instance
 
 
 @pytest.fixture
-def user_generator(flask_app: Flask) -> Iterator[UserType]:
+def user_generator(flask_app: Flask) -> Iterator[Tuple[UserType, EmailAddressType]]:
     with flask_app.app_context():
-        from hermes.user.models import User
-        return infinite_user_generator(user_model_factory=User, admin_user=False)
+        from hermes.user.models import EmailAddress, User
+        return infinite_user_generator(user_model_factory=User,
+                                       email_model_factory=EmailAddress,
+                                       admin_user=False)
 
 
 @pytest.fixture
-def admin_user_generator(flask_app: Flask) -> Iterator[UserType]:
+def admin_user_generator(flask_app: Flask) -> Iterator[Tuple[UserType, EmailAddressType]]:
     with flask_app.app_context():
-        from hermes.user.models import User
-        return infinite_user_generator(user_model_factory=User, admin_user=True)
+        from hermes.user.models import EmailAddress, User
+        return infinite_user_generator(user_model_factory=User,
+                                       email_model_factory=EmailAddress,
+                                       admin_user=True)
 
 
 @pytest.fixture
