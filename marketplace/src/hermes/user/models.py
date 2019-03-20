@@ -25,7 +25,7 @@ class EmailAddress(current_app.Base):
     owner = Column(Integer, ForeignKey('users.id'))
     verified_on = Column(DateTime, nullable=False)
     created_on = Column(DateTime, nullable=False, default=datetime.now)
-    last_modified_on = Column(DateTime, nullable=False, onupdate=datetime.now)
+    last_modified_on = Column(DateTime, onupdate=datetime.now)
 
 
 class PublicKey(current_app.Base):
@@ -49,7 +49,7 @@ class User(current_app.Base):
     # TODO: Change this to be a property that is hashed when assigned
     password = Column(String)
     created_on = Column(DateTime, nullable=False, default=datetime.now)
-    last_modified_on = Column(DateTime, nullable=False, onupdate=datetime.now)
+    last_modified_on = Column(DateTime, onupdate=datetime.now)
 
     def __repr__(self) -> str:
         return ("<User(id='{}', name='{}', fullname='{}', public_key='{}')>"
