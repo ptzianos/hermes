@@ -20,3 +20,7 @@ class WrongParameters(Exception):
 
 class AlreadyRegistered(Exception):
     msg = 'already_registered'
+
+
+class AlreadyVerified(Exception):
+    msg = 'already_verified'
