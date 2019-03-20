@@ -16,6 +16,10 @@ from hermes.signals import register_signals
 
 @pytest.fixture(scope="session")
 def flask_app() -> Flask:
+    """Bootstraps a flask application and initializes all the necessary infrastructure for it to work.
+
+    It registers all the signals and views of the application and sets up the Session mechanism.
+    """
     hermes_test_app = Flask(__name__)
     hermes_test_app.config['TESTING'] = True
     db_fd, db_path = tempfile.mkstemp()
