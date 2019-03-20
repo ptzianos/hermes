@@ -10,6 +10,7 @@ from flask.sessions import SessionMixin
 from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String
 from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.orm import relationship
+from sqlalchemy_utils.types.choice import ChoiceType
 from werkzeug.datastructures import CallbackDict
 
 from hermes.config import (API_TOKEN_DURATION, EMAIL_VERIFICATION_TOKEN_DURATION,
@@ -52,9 +53,14 @@ class EmailAddress(current_app.Base):
 class PublicKey(current_app.Base):
     __tablename__ = 'public_keys'
 
+    PUBLIC_KEY_TYPES = [
+        ('ecdsa', 'ECDSA'),
+        ('rsa', 'RSA')
+    ]
+
     id = Column(Integer, primary_key=True)
     value = Column(String, unique=True, nullable=False)
-    type = Column(String, choices=['ecdsa', 'rsa'], nullable=False)
+    type = Column(ChoiceType(PUBLIC_KEY_TYPES), nullable=False)
     size = Column(Integer, nullable=False)
     verified = Column(Boolean, default=False)
     owner_id = Column(Integer, ForeignKey('users.id'))
