@@ -68,8 +68,12 @@ class BaseToken:
     expiry = Column(DateTime, nullable=False)
 
     @declared_attr
-    def owner(cls) -> Column:
+    def owner_id(cls) -> Column:
         return Column(Integer, ForeignKey('users.id'))
+
+    @declared_attr
+    def owner(cls) -> relationship:
+        return relationship(User, primaryjoin=cls.owner_id == User.id)
 
     @property
     def is_expired(self) -> bool:
