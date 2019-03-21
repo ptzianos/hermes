@@ -531,3 +531,71 @@ def generate_public_key_verification_request(
     public_key_verification_token.refresh()
     g.db_session.add(public_key_verification_token)
     return public_key_verification_token
+
+
+def verify_email(user: User, email_verification_token: str) -> None:
+    user = resolve_user(user)
+    if not user:
+        raise UnknownUser()
+
+    verification_token_model = (g.db_session
+                                .query(EmailVerificationToken)
+                                .filter_by(token=email_verification_token))
+    if not verification_token_model:
+        raise UnknownToken()
+
+
+def reset_password(user: UserLikeObj,
+                   new_password: Optional[str],
+                   password_reset_token: PasswordResetToken) -> None:
+    """Gets a password reset token and the changes the user's password.
+
+    Raises:
+        UnknownUser
+        UnknownToken
+        ExpiredToken
+        AlreadyVerified
+
+    """
+    user = resolve_user(user)
+    if not user:
+        raise UnknownUser()
+    if not new_password or not password_reset_token:
+        raise WrongParameters()
+    password_reset_model = (g.db_session
+                            .query(PasswordResetToken)
+                            .filter_by(token=password_reset_token)
+                            .first())
+    if not password_reset_model:
+        raise UnknownToken()
+
+
+def verify_public_key(
+        user: User,
+        public_key_verification_token: PublicKeyVerificationRequest,
+        proof_of_verification: str
+) -> None:
+    """Gets a public key verification request token and the hash of the message and verifies them.
+
+    Raises:
+        UnknownUser
+        UnknownToken
+        ExpiredToken
+        AlreadyVerified
+
+    """
+    user = resolve_user(user)
+    if not user:
+        raise UnknownUser()
+    request = (g.db_session
+               .query(PublicKeyVerificationRequest)
+               .filter_by(token=public_key_verification_token).first())  # type: Optional[PublicKeyVerificationRequest]
+    if not request or request.owner.id != user.id:
+        raise UnknownToken()
+    if request.public_key.verified:
+        raise AlreadyVerified()
+    if request.is_expired:
+        raise ExpiredToken()
+    if proof_of_verification != request.expected:
+        raise WrongParameters()
+    request.public_key.verified = True
