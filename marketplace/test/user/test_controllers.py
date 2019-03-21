@@ -78,3 +78,28 @@ def test_generate_api_token(
         assert not new_token.is_expired, 'Wrong token created'
         with pytest.raises(UnknownUser):
             generate_api_token('1')
+
+
+def test_revoke_token(
+        flask_app: Flask,
+        user_generator: Iterator[Tuple[UserType, EmailAddressType]]):
+    with flask_app.app_context():
+        from flask import g
+        from hermes.user.controllers import generate_api_token, revoke_token
+
+        test_user, _ = next(user_generator)
+        # Setup user and email
+        g.db_session = flask_app.new_db_session_instance()
+        g.db_session.add(test_user)
+        g.db_session.commit()
+
+        new_token = generate_api_token(test_user)
+        revoke_token(test_user, new_token)
+
+        assert new_token.expired, 'Wrong token created'
+        assert new_token.is_expired, 'Wrong token created'
+
+        with pytest.raises(UnknownUser):
+            revoke_token('1', new_token)
+        with pytest.raises(UnknownToken):
+            revoke_token(test_user, '1')
