@@ -426,3 +426,108 @@ def list_keys(user: UserLikeObj) -> Iterable[Dict[str, str]]:
                 .query(PublicKey)
                 .join(User)
                 .filter_by(id=user.id)))
+
+
+def generate_email_verification_token(email: EmailAddress) -> EmailVerificationToken:
+    """Creates a new token for verifying an email.
+
+    If the email is already verified an exception will be thrown. If there are tokens
+    in the database that need to be expired, this method will do that. If there are
+    valid tokens available all except one will be revoked and no new tokens will be
+    created.
+
+    Args:
+        email (EmailAddress): the email model to be verified
+
+    Raises:
+        AlreadyVerified: when the email has already been verified.
+    """
+    if email.verified:
+        raise AlreadyVerified()
+    existing_email_tokens = (g.db_session
+                             .query(EmailVerificationToken)
+                             .filter_by(email_id=email.id, expired=False))  # type: Iterable[EmailVerificationToken]
+    valid_tokens = []
+    for token in existing_email_tokens:
+        if token.is_expired:
+            token.revoke()
+        else:
+            valid_tokens.append(token)
+    for token in valid_tokens[1:]:
+        token.revoke()
+    if valid_tokens:
+        return valid_tokens[0]
+    email_verification_token = EmailVerificationToken(
+        email=email,
+        owner=email.owner
+    )
+    email_verification_token.refresh()
+    g.db_session.add(email_verification_token)
+    return email_verification_token
+
+
+def generate_password_reset_token(user: User) -> PasswordResetToken:
+    """Creates a new password reset token changing a password.
+
+    If there is already a password reset token, it is revoked and a new
+    one is generated. A user with no password set can not get a password
+    reset token.
+
+    Args:
+        user (User): the user model for which to generate the reset token.
+
+    Raises:
+        NoSuchUser: when an invalid user is given.
+        UserHasNoPassword:
+
+    Returns:
+        PasswordResetToken: the password reset token model.
+    """
+    user = resolve_user(user)
+    if not user:
+        raise NoSuchUser()
+    if user.password is None:
+        raise UserHasNoPassword()
+    existing_reset_tokens = (g.db_session
+                             .query(PasswordResetToken)
+                             .join(User)
+                             .filter_by(id=user.id, expired=False))  # type: Iterable[EmailVerificationToken]
+    for token in existing_reset_tokens:
+        token.revoke()
+    password_reset_token = PasswordResetToken(owner=user).refresh()
+    g.db_session.add(password_reset_token)
+    return password_reset_token
+
+
+def generate_public_key_verification_request(
+        public_key: PublicKey
+) -> PublicKeyVerificationRequest:
+    """Creates a new request for verifying a public key.
+
+    If there is already a non-revoked public key request it will be reused
+    to prevent an attacker from generating a lot of slightly different
+    messages and trying to attack the system.
+
+    Args:
+        public_key (PublicKey): the public key model to be verified
+
+    Raises:
+        AlreadyVerified: when the public key has already been verified.
+        UnknownToken: can not find a request with such a token
+
+    """
+    if public_key.verified:
+        raise AlreadyVerified()
+    existing_public_key_verification_tokens = (g.db_session
+                                               .query(PublicKeyVerificationRequest)
+                                               .filter_by(public_key_id=public_key.id, expired=False))  # type: Iterable[PublicKeyVerificationRequest]
+    for token in existing_public_key_verification_tokens[1:]:
+        token.revoke()
+
+    public_key_verification_token = PublicKeyVerificationRequest(
+        public_key=public_key,
+        owner=public_key.owner,
+    )
+    public_key_verification_token.refresh()
+    g.db_session.add(public_key_verification_token)
+    return public_key_verification_token
