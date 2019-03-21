@@ -1,11 +1,33 @@
 from itertools import chain
 from typing import Dict, Iterable, Optional, Union
 
+from Crypto.PublicKey import RSA, ECC
+from Crypto.Hash import SHA3_512
 from flask import g
 from sqlalchemy import or_
 
-from hermes.exceptions import AlreadyRegistered, ForbiddenAction, UnknownUser, WrongParameters
-from hermes.user.models import APIToken, BaseToken, EmailAddress, PublicKey, SessionToken, User
+from hermes.exceptions import (AlreadyRegistered,
+                               AlreadyVerified,
+                               ExpiredToken,
+                               ForbiddenAction,
+                               NoSuchUser,
+                               NoPassword,
+                               UnknownToken,
+                               UnknownUser,
+                               UnsupportedPublicKeyType,
+                               UserHasNoPassword,
+                               WeakPassword,
+                               WrongParameters,
+                               )
+from hermes.user.models import (APIToken, BaseToken,
+                                EmailAddress,
+                                EmailVerificationToken,
+                                PasswordResetToken,
+                                PublicKey,
+                                PublicKeyVerificationRequest,
+                                SessionToken,
+                                User,
+                                )
 
 
 UserLikeObj = Optional[Union[str, User]]
