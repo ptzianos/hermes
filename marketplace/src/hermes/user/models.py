@@ -64,6 +64,8 @@ class PublicKey(current_app.Base):
     ]
 
     id = Column(Integer, primary_key=True)
+    uuid = Column(String, unique=True, nullable=False,
+                  default=partial(lambda: str(uuid4().hex)))
     value = Column(String, unique=True, nullable=False)
     type = Column(ChoiceType(PUBLIC_KEY_TYPES), nullable=False)
     size = Column(Integer, nullable=False)
@@ -109,9 +111,10 @@ class BaseToken:
             self.expired = True
             self.expiry = datetime.now()
 
-    def refresh(self) -> None:
+    def refresh(self) -> 'BaseToken':
         if not self.expired:
             self.expiry = datetime.now() + self.duration
+        return self
 
 
 class SessionToken(BaseToken, current_app.Base):
