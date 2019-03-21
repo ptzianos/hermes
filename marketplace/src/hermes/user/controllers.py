@@ -171,50 +171,79 @@ def register_user(email: Optional[str] = '',
                   password: Optional[str] = '',
                   name: Optional[str] = '',
                   fullname: Optional[str] = '',
-                  public_key: Optional[str] = '',
+                  public_key: str = '',
+                  public_key_type: str = 'ecdsa',
+                  public_key_bit_size: int = 1024,
                   admin: bool = False) -> User:
     """Creates a new user object.
 
-    If there is already a User with the same email, name, fullname or public key
-    an exception will be thrown.
+    If there is already a User with the same email, name, fullname or public
+    key an exception will be thrown.
 
     Args:
         email (Optional[str]): the email of the user.
         password (Optional[str]): the plaintext password of the user.
         name (Optional[str]): the username.
         fullname (Optional[str]): the fullname of the User.
-        public_key (Optional[str]): the public .
-        admin (bool): specifies whether or not the new user will be an
-            administrator.
+        public_key (str): the public .
+        public_key_type (str): the public .
+        public_key_bit_size (int): the public .
+        admin (bool): specifies whether or not the new user will be an admin.
+
+    Raises:
+        AlreadyRegistered: a user with the same name or email already exists.
+        UnsupportedPublicKeyType: when the key algorithm is unknown or unsupported.
+        WrongParameters: when a parameter is missing.
 
     Returns:
         User: a new instance of `hermes.user.models.User`.
 
-    Todo:
-        - add more checks for existence of duplicate user.
-        - implement public key only registration.
-        - change user email to be instance of EmailAddress model.
-        - add verification for emails and public keys.
-
     """
-    if not email or not name or not password:
+    if not public_key:
         raise WrongParameters()
-    # check if the public key is valid
+    name = name or hash_value(public_key)
+    if public_key_type == 'ecdsa' and not check_ecdsa_public_key(public_key, public_key_bit_size):
+        raise WrongParameters()
+    elif public_key_type == 'rsa' and not check_rsa_public_key(public_key, public_key_bit_size):
+        raise WrongParameters()
+    elif public_key_type not in ['ecdsa', 'rsa']:
+        raise UnsupportedPublicKeyType()
     db_session = g.db_session()
-    if (db_session
-            .query(User)
-            .filter(or_(User.email == email, User.name == name))
-            .first()):
+    if (resolve_user(email) or resolve_user(name) or resolve_user(fullname)
+       or resolve_user(public_key)):
         raise AlreadyRegistered()
     user = User(email=email,
                 name=name,
-                password=hash_password(password),
                 public_key=public_key,
                 fullname=fullname,
                 admin=admin)
+    if password:
+        check_password_strength(password)
+        user.password = hash_password(password)
     db_session.add(user)
-    db_session.commit()
-    return user
+    public_key_model = PublicKey(
+        owner=user,
+        type=public_key_type,
+        size=public_key_bit_size,
+    )
+    public_key_verification_token = generate_public_key_verification_request(public_key_model)
+    db_session.add(public_key)
+    try:
+        db_session.commit()
+    except Exception as e:
+        raise AlreadyRegistered()
+    if email:
+        email_model = EmailAddress(
+            owner=user,
+            address=email,
+        )
+        db_session.add(email)
+        try:
+            db_session.commit()
+        except:
+            raise Exception('Duplicate email')
+        email_verification_token = generate_email_verification_token(email_model)
+    return user, email_verification_token, public_key_verification_token
 
 
 def deregister_user(user_uuid: str) -> None:
