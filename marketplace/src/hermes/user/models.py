@@ -170,8 +170,7 @@ class PasswordResetToken(BaseToken, current_app.Base):
 
     duration = PASSWORD_RESET_TOKEN_DURATION
 
-    user_id = Column(Integer, ForeignKey('users.id'))
-    user = relationship(User, primaryjoin=user_id == User.id)
+    used = Column(Boolean, default=False)
 
 
 class PublicKeyVerificationRequest(BaseToken, current_app.Base):
