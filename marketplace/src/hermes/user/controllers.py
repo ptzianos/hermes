@@ -52,15 +52,22 @@ def resolve_user(some_user: UserLikeObj) -> Optional[User]:
         raise Exception('not a user')
     if isinstance(some_user, User):
         return some_user
-    return (g.db_session
+    return ((g.db_session
             .query(User)
-            .filter(or_(User.name == some_user, User.uuid == some_user))
-            .first()) or \
-           (g.db_session
+            .filter(or_(User.name == some_user,
+                        User.fullname == some_user,
+                        User.uuid == some_user))
+            .first()) or
+            (g.db_session
             .query(User)
             .join(EmailAddress)
             .filter_by(address=some_user)
-            .first())
+            .first()) or
+            (g.db_session
+            .query(User)
+            .join(PublicKey)
+            .filter_by(value=some_user)
+            .first()))
 
 
 def resolve_token(some_token: TokenLikeObj) -> Optional[BaseToken]:
