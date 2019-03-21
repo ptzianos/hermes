@@ -330,11 +330,16 @@ def generate_api_token(user: UserLikeObj) -> APIToken:
     Args:
         user (UserLikeObj): a UserLikeObj instance that will be resolved.
 
+    Raises:
+        UnknownUser: when no user is
+
     Returns:
         APIToken: A new APIToken for the User.
 
     """
     user = resolve_user(user)
+    if not user:
+        raise UnknownUser()
     api_token = APIToken(owner=user)
     g.db_session.add(api_token)
     return api_token
