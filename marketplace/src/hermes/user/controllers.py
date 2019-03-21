@@ -308,12 +308,13 @@ def user_details(requesting_user: UserLikeObj, user: UserLikeObj) -> Dict[str, s
     Raises:
         ForbiddenAction: if the requesting user is not the one whose details
             are requested and he is also not an administrator.
+        UnknownUser: if any of the two user can not be found
 
     """
     requesting_user = resolve_user(requesting_user)
     user = resolve_user(user)
     if not user or not requesting_user:
-        raise WrongParameters()
+        raise UnknownUser()
     if user.uuid != requesting_user.uuid and not requesting_user.admin:
         raise ForbiddenAction()
     return {
