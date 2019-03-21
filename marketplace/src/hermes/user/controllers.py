@@ -97,6 +97,26 @@ def resolve_token(some_token: TokenLikeObj) -> Optional[BaseToken]:
             .first())
 
 
+def check_password_strength(password: str):
+    """Checks whether or not the password is strong enough
+
+    Args:
+        password (str): the password to check
+
+    Raises:
+        WeakPassword: when the password is too weak
+
+    Todo:
+        - Implement this
+
+    """
+    if not password:
+        raise NoPassword()
+    if len(password) < 4:
+        raise WeakPassword()
+    return password
+
+
 def hash_password(passwd: str) -> str:
     """Hash the password.
 
