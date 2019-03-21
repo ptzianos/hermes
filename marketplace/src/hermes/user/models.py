@@ -170,7 +170,14 @@ class PasswordResetToken(BaseToken, current_app.Base):
 
     duration = PASSWORD_RESET_TOKEN_DURATION
 
+    # This field is set to True when the reset token is used to
+    # change a password
     used = Column(Boolean, default=False)
+
+    @property
+    def is_expired(self) -> bool:
+        """A token is expired if the expiration date has passed or it has been used."""
+        return super().is_expired or self.used
 
 
 class PublicKeyVerificationRequest(BaseToken, current_app.Base):
