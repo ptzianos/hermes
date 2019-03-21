@@ -133,6 +133,40 @@ def hash_password(passwd: str) -> str:
     return passwd
 
 
+def hash_value(some_str: str) -> str:
+    """Hash a random string.
+
+    Should not be used for hashing passwords, but just for getting digests.
+
+    Args:
+        some_str (str): a string to be hashed
+
+    Returns:
+        str: the string in hashed form
+
+    """
+    return (SHA3_512.new()
+            .update(some_str.encode())
+            .digest()
+            .decode('ascii', errors='ignore'))
+
+
+def check_ecdsa_public_key(key: str, bit_num: int) -> bool:
+    """
+    Todo:
+        - Implement this
+    """
+    return True
+
+
+def check_rsa_public_key(key: str, bit_num: int) -> bool:
+    """
+    Todo:
+        - Implement this
+    """
+    return True
+
+
 def register_user(email: Optional[str] = '',
                   password: Optional[str] = '',
                   name: Optional[str] = '',
