@@ -39,7 +39,8 @@ def resolve_user(some_user: UserLikeObj) -> Optional[User]:
 
     Args:
         some_user (UserLikeObj): The User-like object which could be the user
-            UUID or the User object itself.
+            UUID, the User object itself, the user email or the user's public
+            key.
 
     Returns:
         User: the User object that is resolved.
