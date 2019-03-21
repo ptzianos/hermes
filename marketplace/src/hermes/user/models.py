@@ -188,6 +188,8 @@ class PublicKeyVerificationRequest(BaseToken, current_app.Base):
     public_key_id = Column(Integer, ForeignKey('public_keys.id'))
     public_key = relationship(PublicKey,
                               primaryjoin=public_key_id == PublicKey.id)
+    original_message = Column(String, nullable=False)
+    expected_hash = Column(String, nullable=False)
 
 
 class ProxySession(SessionMixin):
