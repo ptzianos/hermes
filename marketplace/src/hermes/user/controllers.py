@@ -83,7 +83,7 @@ def resolve_token(some_token: TokenLikeObj) -> Optional[BaseToken]:
     if some_token is None:
         return None
     if type(some_token) not in [str, APIToken, SessionToken]:
-        raise Exception('not a token')
+        raise UnknownToken()
     if isinstance(some_token, BaseToken):
         return some_token
     return (g.db_session
