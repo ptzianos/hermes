@@ -358,6 +358,12 @@ def revoke_token(user: UserLikeObj, token: TokenLikeObj) -> None:
             administrator.
 
     """
+    user = resolve_user(user)
+    if not user:
+        raise UnknownUser()
+    token = resolve_token(token)
+    if not token:
+        raise UnknownToken()
     if user.id != token.owner.id and not user.admin:
         raise ForbiddenAction()
     token.revoke()
