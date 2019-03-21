@@ -404,5 +404,25 @@ def exit_su(session: SessionToken) -> None:
     session.refresh()
 
 
-def list_keys(user: User) -> Iterable[PublicKey]:
-    pass
+def list_keys(user: UserLikeObj) -> Iterable[Dict[str, str]]:
+    """List all the public keys of the user.
+
+    The list returned will be a list of dictionaries with the uuid, a flag
+    to show whether or not its verified and the date when it was added to
+    the platform.
+    """
+    user = resolve_user(user)
+    if not user:
+        return {}
+
+    def to_json(public_key: PublicKey):
+        return {
+            "uuid": public_key.uuid,
+            "verified": public_key.verified,
+            "added_on": public_key.created_on,
+        }
+    return map(to_json,
+               (g.db_session
+                .query(PublicKey)
+                .join(User)
+                .filter_by(id=user.id)))
