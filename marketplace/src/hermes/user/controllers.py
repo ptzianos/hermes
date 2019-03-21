@@ -340,8 +340,9 @@ def generate_api_token(user: UserLikeObj) -> APIToken:
     user = resolve_user(user)
     if not user:
         raise UnknownUser()
-    api_token = APIToken(owner=user)
+    api_token = APIToken(owner=user).refresh()
     g.db_session.add(api_token)
+    g.db_session.commit()
     return api_token
 
 
