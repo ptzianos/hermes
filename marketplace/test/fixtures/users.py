@@ -7,7 +7,7 @@ from Crypto.PublicKey.RSA import RsaKey, generate as rsa_generate
 from Crypto.PublicKey.ECC import EccKey, generate as ecc_generate
 from flask import Flask
 
-from hermes.types import EmailAddressType, SessionTokenType, PublicKeyType, UserType
+from hermes.types import EmailAddressType, SessionTokenType, UserType
 from test.fixtures.seeds import *
 
 
@@ -69,11 +69,13 @@ def user_session_factory(flask_app: Flask) -> Callable[[UserType], SessionTokenT
 
 @pytest.fixture
 def random_email() -> Iterator[str]:
-    while True:
-        first_name = random.choice(first)
-        last_name = random.choice(last)
-        email_domain = random.choice(email)
-        yield f"{first_name}.{last_name}@{email_domain}"
+    def email_generator() -> Iterator[str]:
+        while True:
+            first_name = random.choice(first)
+            last_name = random.choice(last)
+            email_domain = random.choice(email)
+            yield f"{first_name}.{last_name}@{email_domain}"
+    return email_generator()
 
 
 @pytest.fixture
