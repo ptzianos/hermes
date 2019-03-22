@@ -198,7 +198,8 @@ def register_user(
     """
     if not public_key:
         raise WrongParameters()
-    name = name or hash_value(public_key)
+    name = name or email or hash_value(public_key)
+    fullname = fullname or name
     if (public_key_type == 'ecdsa'
             and not check_ecdsa_public_key(public_key)):
         raise WrongParameters()
@@ -230,7 +231,7 @@ def register_user(
 
     if email:
         email_model = EmailAddress(owner=user, address=email)
-        g.db_session.add(email)
+        g.db_session.add(email_model)
         email_verification_token = generate_email_verification_token(email_model)
     else:
         email_verification_token = None
@@ -462,7 +463,7 @@ def list_keys(user: UserLikeObj) -> List[Dict[str, str]]:
 
 
 def generate_email_verification_token(
-        email: EmailAddress
+    email: EmailAddress
 ) -> EmailVerificationToken:
     """Creates a new token for verifying an email.
 
