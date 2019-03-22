@@ -143,23 +143,25 @@ def hash_value(some_str: str) -> str:
     return (SHA3_512.new()
             .update(some_str.encode())
             .digest()
-            .decode('ascii', errors='ignore'))
+            .hex())
 
 
-def check_ecdsa_public_key(key: str, bit_num: int) -> bool:
-    """
-    Todo:
-        - Implement this
-    """
-    return True
+def check_ecdsa_public_key(key: str) -> bool:
+    """Parses a public ECDSA key and returns whether it's valid or not."""
+    try:
+        import_ecdsa_key(key)
+        return True
+    except (ValueError, IndexError, TypeError):
+        return False
 
 
-def check_rsa_public_key(key: str, bit_num: int) -> bool:
-    """
-    Todo:
-        - Implement this
-    """
-    return True
+def check_rsa_public_key(key: str) -> bool:
+    """Parses a public RSA key and returns whether it's valid or not."""
+    try:
+        import_rsa_key(key)
+        return True
+    except (ValueError, IndexError, TypeError):
+        return False
 
 
 def register_user(
