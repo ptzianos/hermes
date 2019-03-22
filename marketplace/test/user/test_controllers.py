@@ -6,8 +6,9 @@ import pytest
 from Crypto.PublicKey.RSA import RsaKey
 from flask import Flask
 
-from hermes.exceptions import (AlreadyRegistered, ForbiddenAction,
-                               UnknownToken, UnknownUser, WrongParameters)
+from hermes.exceptions import (AlreadyRegistered, AlreadyVerified,
+                               ForbiddenAction, UnknownToken,
+                               UnknownUser, WrongParameters)
 from hermes.types import EmailAddressType, SessionTokenType, UserType
 
 
@@ -256,3 +257,34 @@ def test_user_registration(
             register_user(email=email,
                           public_key=rsa_key_3.export_key().decode(),
                           public_key_type='rsa')
+
+
+def test_email_verification(
+        flask_app: Flask,
+        rsa_key_pair: Iterator[RsaKey],
+        random_email: Iterator[str]
+) -> None:
+    with flask_app.app_context():
+        from flask import g
+        from hermes.user.controllers import register_user, verify_email
+
+        email = next(random_email)
+        rsa_key = next(rsa_key_pair)
+
+        g.db_session = flask_app.new_db_session_instance()
+
+        new_user, email_verification, pk_verification_request = \
+            register_user(email=email,
+                          public_key=rsa_key.export_key().decode(),
+                          public_key_type='rsa')
+
+        with pytest.raises(UnknownUser):
+            verify_email('bla', email_verification.token)
+
+        with pytest.raises(UnknownToken):
+            verify_email(new_user, 'bla')
+
+        verify_email(new_user, email_verification.token)
+
+        with pytest.raises(AlreadyVerified):
+            verify_email(new_user, email_verification.token)
