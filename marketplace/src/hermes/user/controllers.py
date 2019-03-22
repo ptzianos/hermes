@@ -556,18 +556,30 @@ def generate_public_key_verification_request(
         AlreadyVerified: when the public key has already been verified.
         UnknownToken: can not find a request with such a token
 
+    Returns:
+        PublicKeyVerificationRequest
+
     """
     if public_key.verified:
         raise AlreadyVerified()
-    existing_public_key_verification_tokens = (g.db_session
-                                               .query(PublicKeyVerificationRequest)
-                                               .filter_by(public_key_id=public_key.id, expired=False))  # type: Iterable[PublicKeyVerificationRequest]
+    existing_public_key_verification_tokens: Iterable[PublicKeyVerificationRequest] = (
+        g.db_session
+         .query(PublicKeyVerificationRequest)
+         .filter_by(public_key_id=public_key.id, expired=False)
+    )
     for token in existing_public_key_verification_tokens[1:]:
         token.revoke()
 
+    message = PUBLIC_KEY_VERIFICATION_TEXT.format(
+        digest=public_key.uuid,
+        expiration_date=(datetime.now() +
+                         PUBLIC_KEY_VERIFICATION_REQUEST_DURATION)
+    )
     public_key_verification_token = PublicKeyVerificationRequest(
         public_key=public_key,
         owner=public_key.owner,
+        original_message=message,
+        message_hash=hash_value(message),
     )
     public_key_verification_token.refresh()
     g.db_session.add(public_key_verification_token)
