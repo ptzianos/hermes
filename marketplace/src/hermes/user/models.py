@@ -50,7 +50,7 @@ class EmailAddress(current_app.Base):
     verified = Column(Boolean, default=False)
     owner_id = Column(Integer, ForeignKey('users.id'))
     owner = relationship(User, primaryjoin=owner_id == User.id)
-    verified_on = Column(DateTime, nullable=False)
+    verified_on = Column(DateTime)
     created_on = Column(DateTime, nullable=False, default=datetime.now)
     last_modified_on = Column(DateTime, onupdate=datetime.now)
 
@@ -72,7 +72,7 @@ class PublicKey(current_app.Base):
     owner_id = Column(Integer, ForeignKey('users.id'))
     owner = relationship(User, primaryjoin=owner_id == User.id)
     created_on = Column(DateTime, nullable=False, default=datetime.now)
-    verified_on = Column(DateTime, nullable=True)
+    verified_on = Column(DateTime)
 
 
 class BaseToken:
