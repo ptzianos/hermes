@@ -6,7 +6,8 @@ import pytest
 from Crypto.PublicKey.RSA import RsaKey
 from flask import Flask
 
-from hermes.exceptions import ForbiddenAction, UnknownToken, UnknownUser
+from hermes.exceptions import (AlreadyRegistered, ForbiddenAction,
+                               UnknownToken, UnknownUser, WrongParameters)
 from hermes.types import EmailAddressType, SessionTokenType, UserType
 
 
@@ -166,7 +167,6 @@ def test_list_keys(
                 value=''.join([random.choice(ascii_letters) for _ in range(20)]),
                 owner=user,
                 type='rsa',
-                size=1024,
             )
             g.db_session.add(pk)
             g.db_session.commit()
@@ -189,9 +189,70 @@ def test_list_keys(
 
         assert len(pks_1) == 2, 'Wrong number of public keys returned'
         assert len(pks_2) == 1, 'Wrong number of public keys returned'
-        assert new_pk_1_1.uuid in list(map(lambda d: d['uuid'], pks_1)), 'Wrong pk uuid returned'
-        assert new_pk_1_2.uuid in list(map(lambda d: d['uuid'], pks_1)), 'Wrong pk uuid returned'
-        assert new_pk_2_1.uuid in list(map(lambda d: d['uuid'], pks_2)), 'Wrong pk uuid returned'
+        assert new_pk_1_1.uuid in list(map(lambda d: d['uuid'], pks_1)), \
+            'Wrong pk uuid returned'
+        assert new_pk_1_2.uuid in list(map(lambda d: d['uuid'], pks_1)), \
+            'Wrong pk uuid returned'
+        assert new_pk_2_1.uuid in list(map(lambda d: d['uuid'], pks_2)), \
+            'Wrong pk uuid returned'
 
         with pytest.raises(UnknownUser):
             list_keys('1')
+
+
+def test_user_registration(
+    flask_app: Flask,
+    rsa_key_pair: Iterator[RsaKey],
+    random_email: Iterator[str]
+) -> None:
+    with flask_app.app_context():
+        from flask import g
+        from hermes.user.controllers import register_user
+
+        email = next(random_email)
+        email_2 = next(random_email)
+        rsa_key = next(rsa_key_pair)
+        rsa_key_2 = next(rsa_key_pair)
+        rsa_key_3 = next(rsa_key_pair)
+
+        g.db_session = flask_app.new_db_session_instance()
+
+        new_user, _, pk_verification_request = \
+            register_user(public_key=rsa_key.export_key().decode(),
+                          public_key_type='rsa')
+
+        assert pk_verification_request.owner.id == new_user.id, \
+            'Wrong public key verification request'
+        assert pk_verification_request.public_key.value == rsa_key.export_key().decode(), \
+            'Wrong public key in the database'
+
+        with pytest.raises(AlreadyRegistered):
+            register_user(public_key=rsa_key.export_key().decode(),
+                          public_key_type='rsa')
+
+        with pytest.raises(WrongParameters):
+            register_user(public_key='dgf', public_key_type='rsa')
+
+        with pytest.raises(WrongParameters):
+            register_user()
+
+        new_user_2, email_verification, pk_verification_request_2 = \
+            register_user(email=email,
+                          public_key=rsa_key_2.export_key().decode(),
+                          public_key_type='rsa')
+
+        assert email_verification.owner.id == new_user_2.id, \
+            'Wrong user created'
+        assert pk_verification_request_2.owner.id == new_user_2.id, \
+            'Wrong user created'
+        assert new_user_2.name == email, 'Wrong name on user'
+
+        with pytest.raises(AlreadyRegistered):
+            register_user(email=email_2,
+                          public_key=rsa_key_2.export_key().decode(),
+                          public_key_type='rsa')
+
+        with pytest.raises(AlreadyRegistered):
+            register_user(email=email,
+                          public_key=rsa_key_3.export_key().decode(),
+                          public_key_type='rsa')
