@@ -1,14 +1,18 @@
 import random
+from datetime import datetime, timedelta
 from string import ascii_letters
 from typing import Callable, Iterator, Tuple
 
 import pytest
+from Crypto.Hash import SHA3_512
 from Crypto.PublicKey.RSA import RsaKey
+from Crypto.Signature.pkcs1_15 import new as new_pkcs115
 from flask import Flask
 
 from hermes.exceptions import (AlreadyRegistered, AlreadyVerified,
-                               ForbiddenAction, UnknownToken,
-                               UnknownUser, WrongParameters)
+                               ExpiredToken, ForbiddenAction,
+                               UnknownToken, UnknownUser,
+                               WrongParameters)
 from hermes.types import EmailAddressType, SessionTokenType, UserType
 
 
@@ -260,9 +264,9 @@ def test_user_registration(
 
 
 def test_email_verification(
-        flask_app: Flask,
-        rsa_key_pair: Iterator[RsaKey],
-        random_email: Iterator[str]
+    flask_app: Flask,
+    rsa_key_pair: Iterator[RsaKey],
+    random_email: Iterator[str]
 ) -> None:
     with flask_app.app_context():
         from flask import g
@@ -288,3 +292,48 @@ def test_email_verification(
 
         with pytest.raises(AlreadyVerified):
             verify_email(new_user, email_verification.token)
+
+
+def test_public_key_verification(
+    flask_app: Flask,
+    rsa_key_pair: Iterator[RsaKey],
+) -> None:
+    with flask_app.app_context():
+        from flask import g
+        from hermes.user.controllers import register_user, verify_public_key
+
+        rsa_key = next(rsa_key_pair)  # type: RsaKey
+
+        g.db_session = flask_app.new_db_session_instance()
+
+        new_user, _, pk_verification_request = \
+            register_user(public_key=rsa_key.export_key().decode(),
+                          public_key_type='rsa')
+
+        sig_scheme = new_pkcs115(rsa_key)
+        msg_hash = SHA3_512.new().update(pk_verification_request.original_message.encode())
+        hexed_sig = sig_scheme.sign(msg_hash).hex()
+
+        with pytest.raises(UnknownUser):
+            verify_public_key('bla', pk_verification_request.token, hexed_sig)
+
+        with pytest.raises(UnknownToken):
+            verify_public_key(new_user, 'bla', hexed_sig)
+
+        with pytest.raises(ValueError):
+            verify_public_key(new_user, pk_verification_request.token, 'aaaaaaaaaaa')
+
+        pk_verification_request.expiry = datetime.now() - timedelta(hours=1)
+        with pytest.raises(ExpiredToken):
+            verify_public_key(new_user, pk_verification_request.token, hexed_sig)
+
+        pk_verification_request.expiry = datetime.now() + timedelta(hours=1)
+        pk_verification_request.expired = False
+        verify_public_key(new_user, pk_verification_request.token, hexed_sig)
+
+        with pytest.raises(AlreadyVerified):
+            verify_public_key(new_user, pk_verification_request.token, hexed_sig)
+
+        assert pk_verification_request.public_key.verified, 'Public key not verified'
+        assert pk_verification_request.public_key.verified_on is not None, \
+            'Verification date not set'
