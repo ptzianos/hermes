@@ -1,3 +1,5 @@
+import random
+from string import ascii_letters
 from typing import Callable, Iterator, Tuple
 
 import pytest
@@ -146,3 +148,49 @@ def test_user_details(
         assert details['fullname'] == test_user_1.fullname, 'Wrong details'
         assert details['uuid'] == test_user_1.uuid, 'Wrong details'
         assert details['admin'] == str(test_user_1.admin), 'Wrong details'
+
+
+def test_list_keys(
+    flask_app: Flask,
+    user_generator: Iterator[Tuple[UserType, EmailAddressType]]
+) -> None:
+    with flask_app.app_context():
+        from flask import g
+        from hermes.user.controllers import list_keys
+        from hermes.user.models import PublicKey, User
+
+        def get_public_key(user: User) -> PublicKey:
+            pk = PublicKey(
+                verified=True,
+                value=''.join([random.choice(ascii_letters) for _ in range(20)]),
+                owner=user,
+                type='rsa',
+                size=1024,
+            )
+            g.db_session.add(pk)
+            g.db_session.commit()
+            return pk
+
+        test_user_1, _ = next(user_generator)
+        test_user_2, _ = next(user_generator)
+        # Setup user and email
+        g.db_session = flask_app.new_db_session_instance()
+        g.db_session.add(test_user_1)
+        g.db_session.add(test_user_2)
+        g.db_session.commit()
+
+        new_pk_1_1 = get_public_key(test_user_1)
+        new_pk_1_2 = get_public_key(test_user_1)
+        new_pk_2_1 = get_public_key(test_user_2)
+
+        pks_1 = list_keys(test_user_1)
+        pks_2 = list_keys(test_user_2)
+
+        assert len(pks_1) == 2, 'Wrong number of public keys returned'
+        assert len(pks_2) == 1, 'Wrong number of public keys returned'
+        assert new_pk_1_1.uuid in list(map(lambda d: d['uuid'], pks_1)), 'Wrong pk uuid returned'
+        assert new_pk_1_2.uuid in list(map(lambda d: d['uuid'], pks_1)), 'Wrong pk uuid returned'
+        assert new_pk_2_1.uuid in list(map(lambda d: d['uuid'], pks_2)), 'Wrong pk uuid returned'
+
+        with pytest.raises(UnknownUser):
+            list_keys('1')
