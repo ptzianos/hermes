@@ -5,7 +5,8 @@ from typing import Dict, Iterable, List, Optional, Tuple, Union
 
 from Crypto.PublicKey.RSA import import_key as import_rsa_key
 from Crypto.PublicKey.ECC import import_key as import_ecdsa_key
-from Crypto.Signature.pkcs1_15 import PKCS115_SigScheme
+from Crypto.Signature.pkcs1_15 import new as new_pkcs_115_scheme
+from Crypto.Signature.DSS import new as new_dss_sig_scheme
 from Crypto.Hash import SHA3_512
 from flask import g
 from sqlalchemy import or_
@@ -641,17 +642,18 @@ def reset_password(user: UserLikeObj,
 
 
 def verify_public_key(
-        user: User,
-        public_key_verification_token: PublicKeyVerificationRequest,
-        proof_of_verification: str
+    user: UserLikeObj,
+    public_key_verification_token: str,
+    proof_of_ownership: str
 ) -> None:
     """Validates a response to a public key verification request token.
 
     Raises:
-        UnknownUser
-        UnknownToken
-        ExpiredToken
-        AlreadyVerified
+        UnknownUser: when the user can not be located in the database.
+        UnknownToken: when the token can not be located in the database.
+        ExpiredToken: when the request has expired.
+        AlreadyVerified: when the public key has already been verified.
+        ValueError: when the signature is invalid.
 
     """
     user = resolve_user(user)
@@ -669,6 +671,17 @@ def verify_public_key(
         raise AlreadyVerified()
     if request.is_expired:
         raise ExpiredToken()
-    if proof_of_verification != request.expected:
-        raise WrongParameters()
+    msg_hash = SHA3_512.new().update(request.original_message.encode())
+    if request.public_key.type == 'rsa':
+        sig_scheme = new_pkcs_115_scheme(import_rsa_key(
+            request.public_key.value
+        ))
+        sig_scheme.verify(msg_hash, bytes.fromhex(proof_of_ownership))
+    elif request.public_key.type == 'ecdsa':
+        sig_scheme = new_dss_sig_scheme(import_ecdsa_key(
+            request.public_key.value
+        ), mode='fips-186-3')
+        sig_scheme.verify(msg_hash, bytes.fromhex(proof_of_ownership))
+
     request.public_key.verified = True
+    request.public_key.verified_on = datetime.now()
