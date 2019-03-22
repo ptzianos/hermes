@@ -80,11 +80,15 @@ def random_email() -> Iterator[str]:
 
 @pytest.fixture
 def rsa_key_pair() -> Iterator[RsaKey]:
-    while True:
-        yield rsa_generate(1024)
+    def rsa_key_pair_generator() -> Iterator[RsaKey]:
+        while True:
+            yield rsa_generate(1024)
+    return rsa_key_pair_generator()
 
 
 @pytest.fixture
 def ecdsa_key_pair() -> Iterator[EccKey]:
-    while True:
-        yield ecc_generate('secp256r1')
+    def ecdsa_key_pair_generator() -> Iterator[EccKey]:
+        while True:
+            yield ecc_generate('secp256r1')
+    return ecdsa_key_pair_generator()
