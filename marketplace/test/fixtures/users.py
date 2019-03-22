@@ -3,9 +3,11 @@ from datetime import datetime
 from typing import Callable, Iterator, Tuple
 
 import pytest
+from Crypto.PublicKey.RSA import RsaKey, generate as rsa_generate
+from Crypto.PublicKey.ECC import EccKey, generate as ecc_generate
 from flask import Flask
 
-from hermes.types import EmailAddressType, SessionTokenType, UserType
+from hermes.types import EmailAddressType, SessionTokenType, PublicKeyType, UserType
 from test.fixtures.seeds import *
 
 
@@ -32,7 +34,7 @@ def infinite_user_generator(
 
 
 @pytest.fixture
-def user_generator(flask_app: Flask) -> Iterator[Tuple[UserType, EmailAddressType]]:
+def user(flask_app: Flask) -> Iterator[Tuple[UserType, EmailAddressType]]:
     with flask_app.app_context():
         from hermes.user.models import EmailAddress, User
         return infinite_user_generator(user_model_factory=User,
@@ -41,7 +43,7 @@ def user_generator(flask_app: Flask) -> Iterator[Tuple[UserType, EmailAddressTyp
 
 
 @pytest.fixture
-def admin_user_generator(flask_app: Flask) -> Iterator[Tuple[UserType, EmailAddressType]]:
+def admin_user(flask_app: Flask) -> Iterator[Tuple[UserType, EmailAddressType]]:
     with flask_app.app_context():
         from hermes.user.models import EmailAddress, User
         return infinite_user_generator(user_model_factory=User,
@@ -66,8 +68,21 @@ def user_session_factory(flask_app: Flask) -> Callable[[UserType], SessionTokenT
 
 
 @pytest.fixture
-def random_email() -> str:
-    first_name = random.choice(first)
-    last_name = random.choice(last)
-    email_domain = random.choice(email)
-    return f"{first_name}.{last_name}@{email_domain}"
+def random_email() -> Iterator[str]:
+    while True:
+        first_name = random.choice(first)
+        last_name = random.choice(last)
+        email_domain = random.choice(email)
+        yield f"{first_name}.{last_name}@{email_domain}"
+
+
+@pytest.fixture
+def rsa_key_pair() -> Iterator[RsaKey]:
+    while True:
+        yield rsa_generate(1024)
+
+
+@pytest.fixture
+def ecdsa_key_pair() -> Iterator[EccKey]:
+    while True:
+        yield ecc_generate('secp256r1')

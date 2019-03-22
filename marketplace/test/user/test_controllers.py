@@ -3,6 +3,7 @@ from string import ascii_letters
 from typing import Callable, Iterator, Tuple
 
 import pytest
+from Crypto.PublicKey.RSA import RsaKey
 from flask import Flask
 
 from hermes.exceptions import ForbiddenAction, UnknownToken, UnknownUser
@@ -11,7 +12,7 @@ from hermes.types import EmailAddressType, SessionTokenType, UserType
 
 def test_resolve_user_helper(
     flask_app: Flask,
-    user_generator: Iterator[Tuple[UserType, EmailAddressType]],
+    user: Iterator[Tuple[UserType, EmailAddressType]],
 ) -> None:
     def assert_user(user, other_user):
         assert user.name == other_user.name, 'Wrong user resolved'
@@ -23,7 +24,7 @@ def test_resolve_user_helper(
         from hermes.user.controllers import resolve_user
 
         # Setup user and email
-        test_user, test_email = next(user_generator)
+        test_user, test_email = next(user)
         g.db_session = flask_app.new_db_session_instance()
         g.db_session.add(test_user)
         g.db_session.add(test_email)
@@ -40,14 +41,14 @@ def test_resolve_user_helper(
 
 def test_resolve_token_helper(
     flask_app: Flask,
-    user_generator: Iterator[UserType],
+    user: Iterator[UserType],
     user_session_factory: Callable[[UserType], SessionTokenType]
 ) -> None:
     with flask_app.app_context():
         from flask import g
         from hermes.user.controllers import resolve_token
 
-        test_user, _ = next(user_generator)
+        test_user, _ = next(user)
         test_session = user_session_factory(test_user)
         # Setup user and email
         g.db_session = flask_app.new_db_session_instance()
@@ -63,13 +64,13 @@ def test_resolve_token_helper(
 
 def test_generate_api_token(
     flask_app: Flask,
-    user_generator: Iterator[Tuple[UserType, EmailAddressType]]
+    user: Iterator[Tuple[UserType, EmailAddressType]]
 ) -> None:
     with flask_app.app_context():
         from flask import g
         from hermes.user.controllers import generate_api_token
 
-        test_user, _ = next(user_generator)
+        test_user, _ = next(user)
         # Setup user and email
         g.db_session = flask_app.new_db_session_instance()
         g.db_session.add(test_user)
@@ -85,13 +86,13 @@ def test_generate_api_token(
 
 def test_revoke_token(
     flask_app: Flask,
-    user_generator: Iterator[Tuple[UserType, EmailAddressType]]
+    user: Iterator[Tuple[UserType, EmailAddressType]]
 ) -> None:
     with flask_app.app_context():
         from flask import g
         from hermes.user.controllers import generate_api_token, revoke_token
 
-        test_user, _ = next(user_generator)
+        test_user, _ = next(user)
         # Setup user and email
         g.db_session = flask_app.new_db_session_instance()
         g.db_session.add(test_user)
@@ -111,16 +112,16 @@ def test_revoke_token(
 
 def test_user_details(
     flask_app: Flask,
-    user_generator: Iterator[Tuple[UserType, EmailAddressType]],
-    admin_user_generator: Iterator[Tuple[UserType, EmailAddressType]]
+    user: Iterator[Tuple[UserType, EmailAddressType]],
+    admin_user: Iterator[Tuple[UserType, EmailAddressType]]
 ) -> None:
     with flask_app.app_context():
         from flask import g
         from hermes.user.controllers import user_details
 
-        test_user_1, _ = next(user_generator)
-        test_user_2, _ = next(user_generator)
-        admin_user, _ = next(admin_user_generator)
+        test_user_1, _ = next(user)
+        test_user_2, _ = next(user)
+        admin_user, _ = next(admin_user)
 
         g.db_session = flask_app.new_db_session_instance()
         g.db_session.add(test_user_1)
@@ -152,7 +153,7 @@ def test_user_details(
 
 def test_list_keys(
     flask_app: Flask,
-    user_generator: Iterator[Tuple[UserType, EmailAddressType]]
+    user: Iterator[Tuple[UserType, EmailAddressType]]
 ) -> None:
     with flask_app.app_context():
         from flask import g
@@ -171,8 +172,8 @@ def test_list_keys(
             g.db_session.commit()
             return pk
 
-        test_user_1, _ = next(user_generator)
-        test_user_2, _ = next(user_generator)
+        test_user_1, _ = next(user)
+        test_user_2, _ = next(user)
         # Setup user and email
         g.db_session = flask_app.new_db_session_instance()
         g.db_session.add(test_user_1)
