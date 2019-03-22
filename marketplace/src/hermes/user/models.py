@@ -68,7 +68,6 @@ class PublicKey(current_app.Base):
                   default=partial(lambda: str(uuid4().hex)))
     value = Column(String, unique=True, nullable=False)
     type = Column(ChoiceType(PUBLIC_KEY_TYPES), nullable=False)
-    size = Column(Integer, nullable=False)
     verified = Column(Boolean, default=False)
     owner_id = Column(Integer, ForeignKey('users.id'))
     owner = relationship(User, primaryjoin=owner_id == User.id)
@@ -189,7 +188,7 @@ class PublicKeyVerificationRequest(BaseToken, current_app.Base):
     public_key = relationship(PublicKey,
                               primaryjoin=public_key_id == PublicKey.id)
     original_message = Column(String, nullable=False)
-    expected_hash = Column(String, nullable=False)
+    message_hash = Column(String, nullable=False)
 
 
 class ProxySession(SessionMixin):
