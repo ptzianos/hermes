@@ -1,5 +1,5 @@
 from itertools import chain
-from typing import Dict, Iterable, Optional, Union
+from typing import Dict, Iterable, List, Optional, Union
 
 from Crypto.PublicKey import RSA, ECC
 from Crypto.Hash import SHA3_512
@@ -417,7 +417,7 @@ def exit_su(session: SessionToken) -> None:
     session.refresh()
 
 
-def list_keys(user: UserLikeObj) -> Iterable[Dict[str, str]]:
+def list_keys(user: UserLikeObj) -> List[Dict[str, str]]:
     """List all the public keys of the user.
 
     The list returned will be a list of dictionaries with the uuid, a flag
@@ -426,7 +426,7 @@ def list_keys(user: UserLikeObj) -> Iterable[Dict[str, str]]:
     """
     user = resolve_user(user)
     if not user:
-        return {}
+        raise UnknownUser()
 
     def to_json(public_key: PublicKey):
         return {
@@ -434,11 +434,11 @@ def list_keys(user: UserLikeObj) -> Iterable[Dict[str, str]]:
             "verified": public_key.verified,
             "added_on": public_key.created_on,
         }
-    return map(to_json,
-               (g.db_session
-                .query(PublicKey)
-                .join(User)
-                .filter_by(id=user.id)))
+    return list(map(to_json,
+                    (g.db_session
+                     .query(PublicKey)
+                     .join(User)
+                     .filter_by(id=user.id))))
 
 
 def generate_email_verification_token(email: EmailAddress) -> EmailVerificationToken:
