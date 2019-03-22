@@ -261,12 +261,17 @@ def deregister_user(user_uuid: str) -> None:
     user = g.db_session.query(User).filter_by(uuid=user_uuid).first()
     if not user:
         raise UnknownUser()
-    for token in chain(g.db_session.query(APIToken).filter_by(owner=user, expired=False),
-                       g.db_session.query(SessionToken).filter_by(owner=user, expired=False)):
+    for token in chain(g.db_session.query(APIToken).filter_by(owner=user,
+                                                              expired=False),
+                       g.db_session.query(SessionToken).filter_by(owner=user,
+                                                                  expired=False)):
         token.revoke()
 
 
-def authenticate_user(email_or_username: Optional[str], password_plaintext: Optional[str]) -> User:
+def authenticate_user(
+    email_or_username: Optional[str],
+    password_plaintext: Optional[str]
+) -> User:
     """Authenticates a user based on their credentials.
 
     Args:
@@ -293,7 +298,10 @@ def authenticate_user(email_or_username: Optional[str], password_plaintext: Opti
     return user
 
 
-def user_details(requesting_user: UserLikeObj, user: UserLikeObj) -> Dict[str, str]:
+def user_details(
+    requesting_user: UserLikeObj,
+    user: UserLikeObj
+) -> Dict[str, str]:
     """Returns the details of a user.
 
     Args:
@@ -353,7 +361,7 @@ def revoke_token(user: UserLikeObj, token: TokenLikeObj) -> None:
         token (TokenLikeObj): A TokenLikeObj instance that will be resolved.
 
     Raises:
-        ForbiddenAction: when the user is neither the owner of the token and nor an
+        ForbiddenAction: when the user is neither the owner of the token nor an
             administrator.
 
     """
@@ -368,11 +376,15 @@ def revoke_token(user: UserLikeObj, token: TokenLikeObj) -> None:
     token.revoke()
 
 
-def su(user: UserLikeObj, user_to_su: UserLikeObj, session: Optional[SessionToken]) -> None:
+def su(
+    user: UserLikeObj,
+    user_to_su: UserLikeObj,
+    session: Optional[SessionToken]
+) -> None:
     """Modifies the session to impersonate a user.
 
-    This function is only available to administrator users who wish to impersonate
-    non-administrators.
+    This function is only available to administrator users who wish to
+    impersonate non-administrators.
 
     Args:
         user (UserLikeObj): A UserLikeObj that will be resolved.
@@ -380,7 +392,8 @@ def su(user: UserLikeObj, user_to_su: UserLikeObj, session: Optional[SessionToke
         session: The session to be modified.
 
     Raises:
-        ForbiddenAction: if the session is already an impersonating session or is expired.
+        ForbiddenAction: if the session is already an impersonating session
+            or is expired.
 
     """
     user = resolve_user(user)
@@ -405,7 +418,8 @@ def exit_su(session: SessionToken) -> None:
         session (SessionToken): the session to be modified.
 
     Raises:
-        ForbiddenAction: if the session is not an impersonating session or is None.
+        ForbiddenAction: if the session is not an impersonating session or
+            is None.
 
     """
     if session is None or not session.is_su_session:
@@ -421,6 +435,14 @@ def list_keys(user: UserLikeObj) -> List[Dict[str, str]]:
     The list returned will be a list of dictionaries with the uuid, a flag
     to show whether or not its verified and the date when it was added to
     the platform.
+
+    Args:
+        user (UserLikeObj): a user model, email, name or UUID.
+
+    Raises:
+        UnknownUser: when user matching any of the aforementioned criteria
+            cannot be located.
+
     """
     user = resolve_user(user)
     if not user:
@@ -439,25 +461,30 @@ def list_keys(user: UserLikeObj) -> List[Dict[str, str]]:
                      .filter_by(id=user.id))))
 
 
-def generate_email_verification_token(email: EmailAddress) -> EmailVerificationToken:
+def generate_email_verification_token(
+        email: EmailAddress
+) -> EmailVerificationToken:
     """Creates a new token for verifying an email.
 
-    If the email is already verified an exception will be thrown. If there are tokens
-    in the database that need to be expired, this method will do that. If there are
-    valid tokens available all except one will be revoked and no new tokens will be
-    created.
+    If the email is already verified an exception will be thrown. If there are
+    tokens in the database that need to be expired, this method will do that.
+    If there are valid tokens available all except one will be revoked and no
+    new tokens will be created.
 
     Args:
-        email (EmailAddress): the email model to be verified
+        email (EmailAddress): the email model to be verified.
 
     Raises:
         AlreadyVerified: when the email has already been verified.
+
     """
     if email.verified:
         raise AlreadyVerified()
-    existing_email_tokens = (g.db_session
-                             .query(EmailVerificationToken)
-                             .filter_by(email_id=email.id, expired=False))  # type: Iterable[EmailVerificationToken]
+    existing_email_tokens: Iterable[EmailVerificationToken] = (
+        g.db_session
+         .query(EmailVerificationToken)
+         .filter_by(email_id=email.id, expired=False)
+    )
     valid_tokens = []
     for token in existing_email_tokens:
         if token.is_expired:
@@ -493,16 +520,19 @@ def generate_password_reset_token(user: User) -> PasswordResetToken:
 
     Returns:
         PasswordResetToken: the password reset token model.
+
     """
     user = resolve_user(user)
     if not user:
         raise NoSuchUser()
     if user.password is None:
         raise UserHasNoPassword()
-    existing_reset_tokens = (g.db_session
-                             .query(PasswordResetToken)
-                             .join(User)
-                             .filter_by(id=user.id, expired=False))  # type: Iterable[EmailVerificationToken]
+    existing_reset_tokens: Iterable[EmailVerificationToken] = (
+        g.db_session
+         .query(PasswordResetToken)
+         .join(User)
+         .filter_by(id=user.id, expired=False)
+    )
     for token in existing_reset_tokens:
         token.revoke()
     password_reset_token = PasswordResetToken(owner=user).refresh()
@@ -511,7 +541,7 @@ def generate_password_reset_token(user: User) -> PasswordResetToken:
 
 
 def generate_public_key_verification_request(
-        public_key: PublicKey
+    public_key: PublicKey
 ) -> PublicKeyVerificationRequest:
     """Creates a new request for verifying a public key.
 
@@ -573,10 +603,12 @@ def reset_password(user: UserLikeObj,
         raise UnknownUser()
     if not new_password or not password_reset_token:
         raise WrongParameters()
-    password_reset_model = (g.db_session
-                            .query(PasswordResetToken)
-                            .filter_by(token=password_reset_token)
-                            .first())
+    password_reset_model: Optional[PasswordResetToken] = (
+        g.db_session
+         .query(PasswordResetToken)
+         .filter_by(token=password_reset_token)
+         .first()
+    )
     if not password_reset_model:
         raise UnknownToken()
 
@@ -586,7 +618,7 @@ def verify_public_key(
         public_key_verification_token: PublicKeyVerificationRequest,
         proof_of_verification: str
 ) -> None:
-    """Gets a public key verification request token and the hash of the message and verifies them.
+    """Validates a response to a public key verification request token.
 
     Raises:
         UnknownUser
@@ -598,9 +630,12 @@ def verify_public_key(
     user = resolve_user(user)
     if not user:
         raise UnknownUser()
-    request = (g.db_session
-               .query(PublicKeyVerificationRequest)
-               .filter_by(token=public_key_verification_token).first())  # type: Optional[PublicKeyVerificationRequest]
+    request: Optional[PublicKeyVerificationRequest] = (
+        g.db_session
+         .query(PublicKeyVerificationRequest)
+         .filter_by(token=public_key_verification_token)
+         .first()
+    )
     if not request or request.owner.id != user.id:
         raise UnknownToken()
     if request.public_key.verified:
