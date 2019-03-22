@@ -1,37 +1,32 @@
+from datetime import datetime
 from itertools import chain
+from logging import getLogger
 from typing import Dict, Iterable, List, Optional, Tuple, Union
 
-from Crypto.PublicKey import RSA, ECC
+from Crypto.PublicKey.RSA import import_key as import_rsa_key
+from Crypto.PublicKey.ECC import import_key as import_ecdsa_key
+from Crypto.Signature.pkcs1_15 import PKCS115_SigScheme
 from Crypto.Hash import SHA3_512
 from flask import g
 from sqlalchemy import or_
 
-from hermes.exceptions import (AlreadyRegistered,
-                               AlreadyVerified,
-                               ExpiredToken,
-                               ForbiddenAction,
-                               NoSuchUser,
-                               NoPassword,
-                               UnknownToken,
-                               UnknownUser,
-                               UnsupportedPublicKeyType,
-                               UserHasNoPassword,
-                               WeakPassword,
-                               WrongParameters,
-                               )
-from hermes.user.models import (APIToken, BaseToken,
-                                EmailAddress,
-                                EmailVerificationToken,
-                                PasswordResetToken,
-                                PublicKey,
-                                PublicKeyVerificationRequest,
-                                SessionToken,
-                                User,
-                                )
+from hermes.config import (PUBLIC_KEY_VERIFICATION_TEXT,
+                           PUBLIC_KEY_VERIFICATION_REQUEST_DURATION)
+from hermes.exceptions import (AlreadyRegistered, AlreadyVerified,
+                               ExpiredToken, ForbiddenAction, NoSuchUser,
+                               NoPassword, UnknownToken, UnknownUser,
+                               UnsupportedPublicKeyType, UserHasNoPassword,
+                               WeakPassword, WrongParameters, )
+from hermes.user.models import (APIToken, BaseToken, EmailAddress,
+                                EmailVerificationToken, PasswordResetToken,
+                                PublicKey, PublicKeyVerificationRequest,
+                                SessionToken, User, )
 
 
 UserLikeObj = Optional[Union[str, User]]
 TokenLikeObj = Optional[Union[str, APIToken, SessionToken]]
+
+log = getLogger(__name__)
 
 
 def resolve_user(some_user: UserLikeObj) -> Optional[User]:
@@ -174,9 +169,8 @@ def register_user(
     fullname: Optional[str] = '',
     public_key: str = '',
     public_key_type: str = 'ecdsa',
-    public_key_bit_size: int = 1024,
     admin: bool = False
-) -> Tuple[User, EmailVerificationToken, PublicKeyVerificationRequest]:
+) -> Tuple[User, Optional[EmailVerificationToken], PublicKeyVerificationRequest]:
     """Creates a new user object.
 
     If there is already a User with the same email, name, fullname or public
@@ -189,7 +183,6 @@ def register_user(
         fullname (Optional[str]): the fullname of the User.
         public_key (str): the public .
         public_key_type (str): the public .
-        public_key_bit_size (int): the public .
         admin (bool): specifies whether or not the new user will be an admin.
 
     Raises:
@@ -204,47 +197,48 @@ def register_user(
     if not public_key:
         raise WrongParameters()
     name = name or hash_value(public_key)
-    if public_key_type == 'ecdsa' and not check_ecdsa_public_key(public_key, public_key_bit_size):
+    if (public_key_type == 'ecdsa'
+            and not check_ecdsa_public_key(public_key)):
         raise WrongParameters()
-    elif public_key_type == 'rsa' and not check_rsa_public_key(public_key, public_key_bit_size):
+    elif (public_key_type == 'rsa'
+            and not check_rsa_public_key(public_key)):
         raise WrongParameters()
     elif public_key_type not in ['ecdsa', 'rsa']:
         raise UnsupportedPublicKeyType()
-    db_session = g.db_session()
     if (resolve_user(email) or resolve_user(name) or resolve_user(fullname)
-       or resolve_user(public_key)):
+            or resolve_user(public_key)):
         raise AlreadyRegistered()
-    user = User(email=email,
-                name=name,
-                public_key=public_key,
-                fullname=fullname,
-                admin=admin)
+
+    # We need to either save all the objects together (User, PublicKey and maybe
+    # email) or we rollback all of them
+    g.db_session.begin_nested()
+
+    user = User(name=name, fullname=fullname, admin=admin)
     if password:
         check_password_strength(password)
         user.password = hash_password(password)
-    db_session.add(user)
-    public_key_model = PublicKey(
-        owner=user,
-        type=public_key_type,
-        size=public_key_bit_size,
-    )
-    public_key_verification_token = generate_public_key_verification_request(public_key_model)
-    db_session.add(public_key)
-    try:
-        db_session.commit()
-    except Exception as e:
-        raise AlreadyRegistered()
+    g.db_session.add(user)
+
+    public_key_model = PublicKey(owner=user, value=public_key,
+                                 type=public_key_type)
+    public_key_verification_token = generate_public_key_verification_request(
+        public_key_model)
+    user.public_key = public_key_model
+    g.db_session.add(public_key_model)
+
     if email:
-        email_model = EmailAddress(
-            owner=user,
-            address=email,
-        )
-        db_session.add(email)
-        try:
-            db_session.commit()
-        except:
-            raise Exception('Duplicate email')
+        email_model = EmailAddress(owner=user, address=email)
+        g.db_session.add(email)
         email_verification_token = generate_email_verification_token(email_model)
+    else:
+        email_verification_token = None
+
+    try:
+        g.db_session.commit()
+    except Exception as e:
+        log.error(repr(e))
+        raise WrongParameters()
+
     return user, email_verification_token, public_key_verification_token
 
 
