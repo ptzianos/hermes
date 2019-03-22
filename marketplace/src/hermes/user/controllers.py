@@ -1,5 +1,5 @@
 from itertools import chain
-from typing import Dict, Iterable, List, Optional, Union
+from typing import Dict, Iterable, List, Optional, Tuple, Union
 
 from Crypto.PublicKey import RSA, ECC
 from Crypto.Hash import SHA3_512
@@ -167,14 +167,16 @@ def check_rsa_public_key(key: str, bit_num: int) -> bool:
     return True
 
 
-def register_user(email: Optional[str] = '',
-                  password: Optional[str] = '',
-                  name: Optional[str] = '',
-                  fullname: Optional[str] = '',
-                  public_key: str = '',
-                  public_key_type: str = 'ecdsa',
-                  public_key_bit_size: int = 1024,
-                  admin: bool = False) -> User:
+def register_user(
+    email: Optional[str] = '',
+    password: Optional[str] = '',
+    name: Optional[str] = '',
+    fullname: Optional[str] = '',
+    public_key: str = '',
+    public_key_type: str = 'ecdsa',
+    public_key_bit_size: int = 1024,
+    admin: bool = False
+) -> Tuple[User, EmailVerificationToken, PublicKeyVerificationRequest]:
     """Creates a new user object.
 
     If there is already a User with the same email, name, fullname or public
