@@ -587,16 +587,30 @@ def generate_public_key_verification_request(
     return public_key_verification_token
 
 
-def verify_email(user: User, email_verification_token: str) -> None:
+def verify_email(user: UserLikeObj, email_verification_token: str) -> None:
+    """Get a token and perform verification of email address ownership.
+
+    Raises:
+        UnknownUser: when the user can not be located in the database
+        UnknownToken: when the token can be located in the database
+    """
     user = resolve_user(user)
     if not user:
         raise UnknownUser()
 
-    verification_token_model = (g.db_session
-                                .query(EmailVerificationToken)
-                                .filter_by(token=email_verification_token))
+    verification_token_model: EmailVerificationToken = (
+        g.db_session
+         .query(EmailVerificationToken)
+         .filter_by(token=email_verification_token)
+         .first()
+    )
     if not verification_token_model:
         raise UnknownToken()
+    if verification_token_model.email.verified:
+        raise AlreadyVerified()
+    verification_token_model.revoke()
+    verification_token_model.email.verified = True
+    verification_token_model.email.verified_on = datetime.now()
 
 
 def reset_password(user: UserLikeObj,
