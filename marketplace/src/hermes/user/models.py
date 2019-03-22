@@ -72,8 +72,8 @@ class PublicKey(current_app.Base):
     verified = Column(Boolean, default=False)
     owner_id = Column(Integer, ForeignKey('users.id'))
     owner = relationship(User, primaryjoin=owner_id == User.id)
-    created_on = Column(DateTime, nullable=False)
-    verified_on = Column(DateTime, nullable=False)
+    created_on = Column(DateTime, nullable=False, default=datetime.now)
+    verified_on = Column(DateTime, nullable=True)
 
 
 class BaseToken:
