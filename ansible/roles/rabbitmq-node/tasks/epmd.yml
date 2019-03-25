@@ -1,0 +1,8 @@
+---
+- name: Install Erlang
+  apt: 
+    pkg: [erlang-nox, ]               
+    state: present
+    force_apt_get: yes
+  ignore_errors: true
+

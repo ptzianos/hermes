@@ -1,0 +1,14 @@
+---
+rabbitmq_version: "3.7.13"
+rabbitmq_apt_get_version: "{{ rabbitmq_version }}-1"
+rabbitmq_keyserver_id: "0x6B73A36E6026DFCA"
+rabbitmq_users:
+  - name: user1
+    password: pass1
+rabbitmq_inactive_users: []
+rabbitmq_vhosts: []
+rabbitmq_deprecated_vhosts: []
+rabbitmq_vhost_admin_policy:
+  configure_priv: ".*"
+  write_priv: .*
+  read_priv: .*

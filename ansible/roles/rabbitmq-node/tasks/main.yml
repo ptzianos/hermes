@@ -1,0 +1,139 @@
+---
+- name: Update cache
+  apt:
+    update_cache: yes
+    force_apt_get: yes
+  tags:
+    - online
+
+- name: Ensure rabbitmq user is available
+  user:
+    name: rabbitmq
+    state: present
+
+- name: Add RabbitMQ keyserver
+  apt_key:
+    keyserver: hkps.pool.sks-keyservers.net
+    id: "{{ rabbitmq_keyserver_id }}"
+
+- name: Add trusted key of RabbitMQ repo
+  apt_key:
+    url: "https://github.com/rabbitmq/signing-keys/releases/download/2.0/rabbitmq-release-signing-key.asc"
+    state: present
+  tags:
+    - online
+
+- name: Get Ubuntu version
+  shell: "cat /etc/os-release | grep UBUNTU_CODENAME | sed 's/.*=//'"
+  args:
+    executable: /bin/bash
+  register: ubuntu_version
+
+- set_fact:
+    ubuntu_codename: "{{ ubuntu_version.stdout | replace('\n', '') | replace('\r', '') }}"
+
+- name: Add RabbitMQ official apt repository for latest Erlang
+  apt_repository:
+    repo: "deb https://dl.bintray.com/rabbitmq/debian {{ ubuntu_codename }}  erlang"
+    state: present
+
+- name: Add RabbitMQ official apt repository
+  apt_repository:
+    repo: "deb https://dl.bintray.com/rabbitmq/debian {{ ubuntu_codename }} main"
+    state: present
+
+- include_tasks: epmd.yml
+
+- name: Install RabbitMQ
+  apt:
+    pkg: ["rabbitmq-server={{ rabbitmq_apt_get_version }}", ]
+    state: present
+    force: yes
+    force_apt_get: yes
+  notify:
+    - restart rabbitmq
+
+- name: Wait for RabbitMQ to start
+  wait_for:
+    port: 5672
+    timeout: 60
+
+- name: Enable RabbitMQ plugins
+  rabbitmq_plugin:
+    names: rabbitmq_management,rabbitmq_tracing
+    state: enabled
+  notify:
+    - restart rabbitmq
+
+- name: Fix RabbitMQ vhosts
+  rabbitmq_vhost:
+    name: "{{ item }}"
+    state: present
+  with_items: "{{ rabbitmq_vhosts_dict | map(attribute='vhost') | list }}"
+  notify:
+    - restart rabbitmq
+
+- name: Register RabbitMQ admins
+  rabbitmq_user:
+    user: "{{ item.name }}"
+    password: "{{ item.password }}"
+    state: present
+    tags: administrator,management
+  when: item.admin | default(False)
+  with_items:
+    - "{{ rabbitmq_users }}"
+  notify:
+    - restart rabbitmq
+
+- set_fact:
+    admin_privileges: "{{ rabbitmq_vhosts_dict | map('combine', rabbitmq_vhost_admin_policy) | list }}"
+
+- name: Assign RabbitMQ admin privileges
+  rabbitmq_user:
+    user: "{{ item.name }}"
+    permissions: "{{ admin_privileges }}"
+  when: item.admin | default(False)
+  with_items:
+    - "{{ rabbitmq_users }}"
+  notify:
+    - restart rabbitmq
+
+- name: Ensure deprecated vhosts are removed from RabbitMQ
+  rabbitmq_vhost:
+    name: "{{ item }}"
+    state: absent
+  with_items:
+    - "{{ rabbitmq_deprecated_vhosts }}"
+  notify:
+    - restart rabbitmq
+
+- name: Add users to RabbitMQ
+  rabbitmq_user:
+    user: "{{ item.name }}"
+    password: "{{ item.password }}"
+    vhost: "{{ item.vhost }}"
+    configure_priv: .*
+    write_priv: .*
+    read_priv: .*
+    state: present
+    tags: []
+  when: not (item.admin | default(False))
+  with_items:
+    - "{{ rabbitmq_users }}"
+  notify:
+    - restart rabbitmq
+
+- name: Remove inactive RabbitMQ users
+  rabbitmq_user:
+    user: "{{ item }}"
+    state: absent
+  with_items:
+    - "{{ rabbitmq_inactive_users }}"
+  notify:
+    - restart rabbitmq
+
+- name: Install RabbitMQ management plugin
+  copy:
+    src: "management_plugin/{{ rabbitmq_version }}_rabbitmq_management_plugin"
+    dest: /usr/local/bin/rabbitmqadmin
+    mode: 0644
