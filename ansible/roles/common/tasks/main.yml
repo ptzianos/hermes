@@ -1,0 +1,82 @@
+---
+- name: Update apt cache
+  apt:
+    update_cache: yes
+    cache_valid_time: 3600
+    force_apt_get: yes
+
+- name: Install essential packages
+  apt:
+    pkg: [htop, vim, apt-transport-https, gnupg, debian-archive-keyring]
+    state: present
+    force_apt_get: yes
+
+- name: Manage SSH users
+  user:
+    name: "{{ item.name }}"
+    shell: /bin/bash
+    state: present
+    create_home: yes
+    remove: no
+  with_items: "{{ ssh_active_users }}"
+
+- name: Manage sudoers 
+  user:
+    name: "{{ item }}"
+    groups: ["{{ item }}", sudo, adm] 
+  with_items: "{{ sudoers }}"
+
+- name: Remove inactive users
+  user:
+    name: "{{ item }}"
+    remove: yes 
+  with_items: "{{ inactive_users }}"
+
+- name: Set authorized keys for active users
+  authorized_key:
+    user: '{{ item.name }}'
+    key: '{{ item.public_key }}'
+    state: present
+    exclusive: True
+  with_items: "{{ ssh_active_users }}"
+
+- name: Disable empty password login
+  lineinfile: dest=/etc/ssh/sshd_config regexp="^#?PermitEmptyPasswords" line="PermitEmptyPasswords no"
+  notify: restart sshd
+
+- name: Disable remote root login
+  lineinfile: dest=/etc/ssh/sshd_config regexp="^#?PermitRootLogin" line="PermitRootLogin no"
+  notify: restart sshd
+
+- name: Disable password login
+  lineinfile: dest=/etc/ssh/sshd_config regexp="^(#\s*)?PasswordAuthentication " line="PasswordAuthentication no"
+  notify: restart sshd
+
+- name: Remove default sudoers
+  file:
+    path: /etc/sudoers.d/90-cloud-init-users
+    state: absent
+  notify: restart sshd
+
+- name: Fix sudoers group configuration
+  copy:
+    dest: /etc/sudoers.d/sudoers-override
+    src: sudoers-override
+  notify: restart sshd
+
+- name: Fix env variables
+  lineinfile:
+    firstmatch: yes
+    create: yes
+    state: present
+    line: "export LC_ALL=C"
+    path: /root/.bashrc
+    insertafter: EOF
+  register: env_vars
+
+- name: Source the bashrc file
+  shell: source /root/.bashrc
+  args:
+    executable: /bin/bash
+  when: env_vars.changed
+
