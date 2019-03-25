@@ -1,0 +1,5 @@
+---
+- name: Common operations such as setting up SSH keys and simple security configurations
+  hosts: all
+  roles:
+    - common

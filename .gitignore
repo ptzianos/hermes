@@ -1,5 +1,5 @@
 # Ansible production inventory
-./ansible/production
+ansible/production
 
 # Python/pylint/flake8 stuff
 **/.coverage
