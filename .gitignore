@@ -12,6 +12,7 @@ ansible/production
 
 # Gradle
 **/.gradle
+lib/
 
 # IntelliJ
 **/.idea
