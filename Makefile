@@ -12,3 +12,15 @@ debug-market:
 
 test-market:
 	cd marketplace && poetry run pytest -s
+
+test-market:
+	cd marketplace && poetry run pytest -s
+
+test-cov-market:
+	cd marketplace && poetry run pytest --cov=hermes test/
+
+lint-market:
+	printf "\n===============================\nRunning pylint...\n===============================\n\n"
+	pylint marketplace/src/hermes
+	printf "\n\n\n===============================\nRunning flake8...\n===============================\n"
+	flake8 marketplace/src/hermes
