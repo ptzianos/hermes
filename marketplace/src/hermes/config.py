@@ -26,3 +26,11 @@ If you have not yourself requested this key to be verified, please do not sign t
 
 Expires on: {expiration_date}
 """
+
+RABBITMQ_USER = "user"
+RABBITMQ_PASSWORD = "password"
+RABBITMQ_CELERY_VHOST = "celery"
+RABBITMQ_AD_VHOST = "vhost"
+RABBITMQ_HOST = "localhost"
+RABBITMQ_AMQP_PORT = 5672
+RABBITMQ_HTTP_PORT = 15672
