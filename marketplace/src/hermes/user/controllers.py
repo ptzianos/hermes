@@ -271,13 +271,17 @@ def deregister_user(user_uuid: str) -> None:
 
 def authenticate_user(
     email_or_username: Optional[str],
-    password_plaintext: Optional[str]
+    password_plaintext: Optional[str],
+    proof_of_ownership_request: Optional[str],
+    proof_of_ownership: Optional[str],
 ) -> User:
     """Authenticates a user based on their username/password.
 
     Args:
         email_or_username (Optional[str]): name of the user to authenticate.
         password_plaintext (Optional[str]): password in plaintext form.
+        proof_of_ownership_request (Optional[str]): password in plaintext form.
+        proof_of_ownership (Optional[str]): password in plaintext form.
 
     Returns:
         User: the ``hermes.user.models.User`` that was authenticated.
@@ -286,15 +290,13 @@ def authenticate_user(
         UnknownUser: raised if user doesn't exist or password doesn't match.
 
     """
-    if not email_or_username or not password_plaintext:
-        raise WrongParameters()
-    user = (g.db_session
-            .query(User)
-            .filter(or_(name=email_or_username, email=email_or_username))
-            .first())
-    if not user:
-        raise UnknownUser()
-    if not user.password == hash_password(password_plaintext):
+    if email_or_username and password_plaintext:
+        user = verify_username_and_pass(email_or_username, password_plaintext)
+    elif proof_of_ownership and proof_of_ownership_request:
+        public_key = verify_public_key(proof_of_ownership_request,
+                                       proof_of_ownership)
+        user = public_key.owner
+    else:
         raise WrongParameters()
     return user
 
@@ -701,34 +703,35 @@ def reset_password(user: UserLikeObj,
         raise UnknownToken()
 
 
+def verify_username_and_pass(email_or_username: str, password_plaintext: str) -> User:
+    """Checks whether or not the email/password matches is valid."""
+    user = resolve_user(email_or_username)
+    if not user:
+        raise UnknownUser()
+    if not user.password == hash_password(password_plaintext):
+        raise WrongParameters()
+    return user
+
+
 def verify_public_key(
-    user: UserLikeObj,
     public_key_verification_token: str,
     proof_of_ownership: str
-) -> None:
+) -> PublicKey:
     """Validates a response to a public key verification request token.
 
     Raises:
-        UnknownUser: when the user can not be located in the database.
         UnknownToken: when the token can not be located in the database.
         ExpiredToken: when the request has expired.
         AlreadyVerified: when the public key has already been verified.
         ValueError: when the signature is invalid.
 
     """
-    user = resolve_user(user)
-    if not user:
-        raise UnknownUser()
     request: Optional[PublicKeyVerificationRequest] = (
         g.db_session
          .query(PublicKeyVerificationRequest)
          .filter_by(token=public_key_verification_token)
          .first()
     )
-    if not request or request.owner.id != user.id:
-        raise UnknownToken()
-    if request.public_key.verified:
-        raise AlreadyVerified()
     if request.is_expired:
         raise ExpiredToken()
     msg_hash = SHA3_512.new().update(request.original_message.encode())
@@ -744,6 +747,7 @@ def verify_public_key(
         sig_scheme.verify(msg_hash, bytes.fromhex(proof_of_ownership))
 
     request.revoke()
+    return request.public_key
 
 
 def list_active_api_token() -> List[APIToken]:
