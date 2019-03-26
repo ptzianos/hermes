@@ -1,0 +1,18 @@
+version: 3.7
+
+services:
+  api:
+    image: hermes-api:latest
+    ports:
+      - 8000
+
+  celery:
+    image: hermes-api:latest
+
+  rabbitmq:
+    image: rabbitmq:3.7.13
+    env:
+      RABBITMQ_DEFAULT_USER: user
+      RABBITMQ_DEFAULT_PASS: password
+    ports:
+      - 5672
