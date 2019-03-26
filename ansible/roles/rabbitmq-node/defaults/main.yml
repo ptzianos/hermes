@@ -9,6 +9,6 @@ rabbitmq_inactive_users: []
 rabbitmq_vhosts: []
 rabbitmq_deprecated_vhosts: []
 rabbitmq_vhost_admin_policy:
-  configure_priv: ".*"
+  configure_priv: .*
   write_priv: .*
   read_priv: .*
