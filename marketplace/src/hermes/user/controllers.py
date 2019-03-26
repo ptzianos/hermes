@@ -274,7 +274,7 @@ def authenticate_user(
     email_or_username: Optional[str],
     password_plaintext: Optional[str]
 ) -> User:
-    """Authenticates a user based on their credentials.
+    """Authenticates a user based on their username/password.
 
     Args:
         email_or_username (Optional[str]): name of the user to authenticate.
@@ -744,8 +744,7 @@ def verify_public_key(
         ), mode='fips-186-3')
         sig_scheme.verify(msg_hash, bytes.fromhex(proof_of_ownership))
 
-    request.public_key.verified = True
-    request.public_key.verified_on = datetime.now()
+    request.revoke()
 
 
 def list_active_api_token() -> List[APIToken]:
