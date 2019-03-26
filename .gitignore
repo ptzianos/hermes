@@ -16,6 +16,7 @@ ansible/reclass-config.yml
 # Gradle
 **/.gradle
 lib/
+android-client/gradle/wrapper/gradle-wrapper.jar
 
 # IntelliJ
 **/.idea
