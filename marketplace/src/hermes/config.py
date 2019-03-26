@@ -1,4 +1,5 @@
 from datetime import timedelta
+from functools import partial
 
 SESSION_DURATION = timedelta(days=1)
 API_TOKEN_DURATION = timedelta(days=30)
@@ -34,3 +35,5 @@ RABBITMQ_AD_VHOST = "vhost"
 RABBITMQ_HOST = "localhost"
 RABBITMQ_AMQP_PORT = 5672
 RABBITMQ_HTTP_PORT = 15672
+RABBITMQ_HTTP_ADDR = f"http://{RABBITMQ_HOST}:{RABBITMQ_HTTP_PORT}"
+RABBITMQ_HTTP_API = partial("{addr}/api/{endpoint}".format, addr=RABBITMQ_HTTP_ADDR)
