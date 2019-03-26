@@ -1,0 +1,8 @@
+FROM poetry:latest
+
+COPY . /hermes
+WORKDIR /hermes
+
+RUN poetry install
+
+ENTRYPOINT poetry run "src/hermes/cli --host=127.0.0.1 --port=8000 run --dev"
