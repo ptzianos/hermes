@@ -685,3 +685,8 @@ def verify_public_key(
 
     request.public_key.verified = True
     request.public_key.verified_on = datetime.now()
+
+
+def list_active_api_token() -> List[APIToken]:
+    """Return all non-expired tokens"""
+    return g.db_session.query(APIToken).filter_by(expired=False)
