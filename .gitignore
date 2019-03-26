@@ -3,6 +3,7 @@ ansible/production
 
 # Ansible reclass stuff
 ansible/reclass-config.yml
+ansible/inventory/**/*.yml
 
 # Python/pylint/flake8 stuff
 **/.coverage
