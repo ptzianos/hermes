@@ -3,10 +3,10 @@ from itertools import chain
 from logging import getLogger
 from typing import Dict, Iterable, List, Optional, Tuple, Union
 
-from Crypto.PublicKey.RSA import import_key as import_rsa_key
 from Crypto.PublicKey.ECC import import_key as import_ecdsa_key
-from Crypto.Signature.pkcs1_15 import new as new_pkcs_115_scheme
+from Crypto.PublicKey.RSA import import_key as import_rsa_key
 from Crypto.Signature.DSS import new as new_dss_sig_scheme
+from Crypto.Signature.pkcs1_15 import new as new_pkcs_115_scheme
 from Crypto.Hash import SHA3_512
 from flask import g
 from sqlalchemy import or_
