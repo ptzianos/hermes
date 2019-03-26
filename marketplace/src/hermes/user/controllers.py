@@ -459,8 +459,69 @@ def list_keys(user: UserLikeObj) -> List[Dict[str, str]]:
     return list(map(to_json,
                     (g.db_session
                      .query(PublicKey)
-                     .join(User)
-                     .filter_by(id=user.id))))
+                     .filter_by(owner_id=user.id))))
+
+
+def list_emails(user: UserLikeObj) -> List[Dict[str, str]]:
+    """List all the emails of the user.
+
+    The list returned will be a list of the email addresses with the uuid,
+    a flag to show whether or not its verified and the date when it was
+    added to the platform.
+
+    Args:
+        user (UserLikeObj): a user model, email, name or UUID.
+
+    Raises:
+        UnknownUser: when user matching any of the aforementioned criteria
+            cannot be located.
+
+    """
+    user = resolve_user(user)
+    if not user:
+        raise UnknownUser()
+
+    def to_json(email: EmailAddress):
+        return {
+            "uuid": email.uuid,
+            "address": email.address,
+            "verified": email.verified,
+            "added_on": email.created_on,
+        }
+    return list(map(to_json,
+                    (g.db_session
+                     .query(EmailAddress)
+                     .filter_by(owner_id=user.id))))
+
+
+def list_tokens(user: UserLikeObj) -> List[Dict[str, str]]:
+    """List all the API tokens of the user.
+
+    The list returned will be a list of dictionaries with the uuid, the date
+    when it was created and the date when it will expire.
+
+    Args:
+        user (UserLikeObj): a user model, email, name or UUID.
+
+    Raises:
+        UnknownUser: when user matching any of the aforementioned criteria
+            cannot be located.
+
+    """
+    user = resolve_user(user)
+    if not user:
+        raise UnknownUser()
+
+    def to_json(token: APIToken):
+        return {
+            "uuid": token.uuid,
+            "expires": token.expiry,
+            "created_on": token.created_on,
+        }
+    return list(map(to_json,
+                    (g.db_session
+                     .query(APIToken)
+                     .filter_by(owner_id=user.id))))
 
 
 def generate_email_verification_token(
