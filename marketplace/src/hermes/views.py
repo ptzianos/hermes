@@ -57,12 +57,20 @@ def index() -> ViewResponse:
 @post('/api/v1/users/register')
 def register() -> ViewResponse:
     try:
-        user = register_user(email=request.form.get('email'),
-                             password=request.form.get('password'),
-                             name=request.form.get('name'),
-                             fullname=request.form.get('fullname'),
-                             public_key=request.form.get('public_key'))
-        return make_json_response(uuid=user.uuid)
+        user, email_token, public_key_verification = (
+            register_user(email=request.form.get('email'),
+                          password=request.form.get('password'),
+                          name=request.form.get('name'),
+                          fullname=request.form.get('fullname'),
+                          public_key=request.form.get('public_key'))
+        )
+        return make_json_response(200, **{
+            "uuid": user.uuid,
+            "name": user.name,
+            "fullname": user.fullname,
+            "public_key_verification_token": public_key_verification.token,
+            "public_key_verification_message": public_key_verification.original_message
+        })
     except AlreadyRegistered:
         return make_response('already_registered', 400)
 
