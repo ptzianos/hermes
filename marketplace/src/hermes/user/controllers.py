@@ -642,7 +642,6 @@ def generate_public_key_verification_request(
         public_key=public_key,
         owner=public_key.owner,
         original_message=message,
-        message_hash=hash_value(message),
     )
     public_key_verification_token.refresh()
     g.db_session.add(public_key_verification_token)
