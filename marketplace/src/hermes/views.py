@@ -10,6 +10,7 @@ from hermes.user.controllers import (authenticate_user,
                                      generate_public_key_verification_request,
                                      list_emails,
                                      register_user,
+                                     resolve_user,
                                      revoke_token,
                                      su,
                                      user_details,
@@ -104,10 +105,30 @@ def get_emails(user_id: str):
     return make_response(200, list_emails(user_id))
 
 
-@get('/api/v1/users/<string:user_id>/emails/<string:email_id>')
+@get('/api/v1/users/<string:user_id>/emails/<string:email_id>/verify')
 def verify_email_view(user_id: str, email_id: str):
+    """Verify the email.
+
+    Contrary to normal situations this is a GET request instead of a POST
+    and this is so that the user can clink on a link in the email and that
+    link will be opened using the browser.
+    """
     try:
         verify_email(user_id, email_id, request.form.get('token'))
+        return make_response(200)
+    except UnknownUser:
+        return make_response(403)
+    except UnknownEmail:
+        return make_response(404)
+    except UnknownToken:
+        return make_response(400)
+
+
+@get('/api/v1/users/<string:user_id>/keys/<string:key_id>/message')
+def get_key_verification_message(user_id: str, key_id: str):
+    try:
+        resolve_user(user_id)
+        generate_public_key_verification_request(key_id)
         return make_response(200)
     except UnknownUser:
         return make_response(403)
@@ -130,7 +151,7 @@ def delete_email_view(user_id: str, email_id: str):
         return make_response(404)
 
 
-@get('/api/v1/users/keys/')
+@get('/api/v1/users/<string:user_id>/keys/')
 @authenticated_only
 def list_public_keys():
     """Returns a list of the user's public keys"""

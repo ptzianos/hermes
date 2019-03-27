@@ -604,7 +604,7 @@ def generate_password_reset_token(user: User) -> PasswordResetToken:
 
 
 def generate_public_key_verification_request(
-    public_key: PublicKey
+    public_key: Union[PublicKey, str]
 ) -> PublicKeyVerificationRequest:
     """Creates a new request for verifying a public key.
 
@@ -613,7 +613,8 @@ def generate_public_key_verification_request(
     messages and trying to attack the system.
 
     Args:
-        public_key (PublicKey): the public key model to be verified
+        public_key (Union[PublicKey, str]): the public key model to be
+            verified or the uuid of the public key
 
     Raises:
         AlreadyVerified: when the public key has already been verified.
@@ -625,11 +626,22 @@ def generate_public_key_verification_request(
     """
     if public_key.verified:
         raise AlreadyVerified()
-    existing_public_key_verification_tokens: Iterable[PublicKeyVerificationRequest] = (
-        g.db_session
-         .query(PublicKeyVerificationRequest)
-         .filter_by(public_key_id=public_key.id, expired=False)
-    )
+
+    if isinstance(public_key, PublicKey):
+        existing_public_key_verification_tokens: Iterable[PublicKeyVerificationRequest] = (
+            g.db_session
+             .query(PublicKeyVerificationRequest)
+             .filter_by(public_key_id=public_key.id,
+                        expired=False)
+        )
+    else:
+        existing_public_key_verification_tokens: Iterable[PublicKeyVerificationRequest] = (
+            g.db_session
+             .query(PublicKeyVerificationRequest)
+             .filter_by(expired=False)
+             .join(PublicKey)
+             .filter_by(uuid=public_key)
+        )
     for token in existing_public_key_verification_tokens[1:]:
         token.revoke()
 
