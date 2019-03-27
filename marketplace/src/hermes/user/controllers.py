@@ -213,9 +213,11 @@ def register_user(
     # email) or we rollback all of them
     g.db_session.begin_nested()
 
-    user = User(name=name, fullname=fullname, admin=admin,
-                password=hash_password(password))
-    check_password_strength(password)
+    user = User(name=name, fullname=fullname, admin=admin)
+    if password:
+        check_password_strength(password)
+        user.password = hash_password(password)
+
     g.db_session.add(user)
 
     public_key_model = PublicKey(owner=user, value=public_key,
