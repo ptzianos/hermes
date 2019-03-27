@@ -62,8 +62,10 @@ def test_resolve_token_helper(
         g.db_session.add(test_session)
         g.db_session.commit()
 
-        assert resolve_token(test_session).id == test_session.id, 'Wrong token resolved'
-        assert resolve_token(test_session.token).id == test_session.id, 'Wrong token resolved'
+        assert resolve_token(test_session).id == test_session.id, \
+            'Wrong token resolved'
+        assert resolve_token(test_session.token).id == test_session.id, \
+            'Wrong token resolved'
         with pytest.raises(UnknownToken):
             resolve_token(1)
 
@@ -283,15 +285,18 @@ def test_email_verification(
                           public_key_type='rsa')
 
         with pytest.raises(UnknownUser):
-            verify_email('bla', email_verification.token)
+            verify_email('bla', email_verification.email.uuid,
+                         email_verification.token)
 
         with pytest.raises(UnknownToken):
-            verify_email(new_user, 'bla')
+            verify_email(new_user, email_verification.email.uuid, 'bla')
 
-        verify_email(new_user, email_verification.token)
+        verify_email(new_user, email_verification.email.uuid,
+                     email_verification.token)
 
         with pytest.raises(AlreadyVerified):
-            verify_email(new_user, email_verification.token)
+            verify_email(new_user, email_verification.email.uuid,
+                         email_verification.token)
 
 
 def test_public_key_verification(
@@ -311,29 +316,69 @@ def test_public_key_verification(
                           public_key_type='rsa')
 
         sig_scheme = new_pkcs115(rsa_key)
-        msg_hash = SHA3_512.new().update(pk_verification_request.original_message.encode())
+        msg_hash = (SHA3_512
+                    .new()
+                    .update(pk_verification_request.original_message.encode()))
         hexed_sig = sig_scheme.sign(msg_hash).hex()
 
-        with pytest.raises(UnknownUser):
-            verify_public_key('bla', pk_verification_request.token, hexed_sig)
-
         with pytest.raises(UnknownToken):
-            verify_public_key(new_user, 'bla', hexed_sig)
+            verify_public_key('bla', hexed_sig)
 
         with pytest.raises(ValueError):
-            verify_public_key(new_user, pk_verification_request.token, 'aaaaaaaaaaa')
+            verify_public_key(pk_verification_request.token, 'aaaaaaaaaaa')
 
         pk_verification_request.expiry = datetime.now() - timedelta(hours=1)
         with pytest.raises(ExpiredToken):
-            verify_public_key(new_user, pk_verification_request.token, hexed_sig)
+            verify_public_key(pk_verification_request.token, hexed_sig)
 
         pk_verification_request.expiry = datetime.now() + timedelta(hours=1)
         pk_verification_request.expired = False
-        verify_public_key(new_user, pk_verification_request.token, hexed_sig)
+        verify_public_key(pk_verification_request.token, hexed_sig)
 
-        with pytest.raises(AlreadyVerified):
-            verify_public_key(new_user, pk_verification_request.token, hexed_sig)
 
-        assert pk_verification_request.public_key.verified, 'Public key not verified'
-        assert pk_verification_request.public_key.verified_on is not None, \
-            'Verification date not set'
+def test_user_authentication(
+    flask_app: Flask,
+    rsa_key_pair: Iterator[RsaKey],
+    random_email: Iterator[str]
+) -> None:
+    with flask_app.app_context():
+        from flask import g
+        from hermes.user.controllers import (authenticate_user, register_user,
+                                             verify_public_key)
+
+        email = next(random_email)
+        rsa_key = next(rsa_key_pair)
+        password = 'blaaa'
+
+        g.db_session = flask_app.new_db_session_instance()
+
+        new_user, email_verification_token, pk_verification_request = \
+            register_user(email=email, password=password,
+                          public_key=rsa_key.export_key().decode(),
+                          public_key_type='rsa')
+
+        sig_scheme = new_pkcs115(rsa_key)
+        msg_hash = (SHA3_512
+                    .new()
+                    .update(pk_verification_request.original_message.encode()))
+        hexed_sig = sig_scheme.sign(msg_hash).hex()
+
+        email_verification_token.email.verified = True
+        email_verification_token.revoke()
+
+        authenticate_user(email_or_username=email, password_plaintext=password)
+        authenticate_user(proof_of_ownership=hexed_sig,
+                          proof_of_ownership_request=pk_verification_request.token)
+
+        with pytest.raises(UnknownUser):
+            authenticate_user(email_or_username='b;a', password_plaintext=password)
+
+        with pytest.raises(WrongParameters):
+            authenticate_user(email_or_username=email, password_plaintext='_')
+
+        with pytest.raises(WrongParameters):
+            authenticate_user()
+
+        with pytest.raises(ExpiredToken):
+            authenticate_user(proof_of_ownership=hexed_sig,
+                              proof_of_ownership_request=pk_verification_request.token)
