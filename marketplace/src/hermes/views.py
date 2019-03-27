@@ -54,7 +54,7 @@ def index() -> ViewResponse:
     return 'Welcome to the Hermes Marketplace'
 
 
-@post('/api/v1/user/register')
+@post('/api/v1/users/register')
 def register() -> ViewResponse:
     try:
         user = register_user(email=request.form.get('email'),
@@ -67,19 +67,18 @@ def register() -> ViewResponse:
         return make_response('already_registered', 400)
 
 
-# TODO: Add endpoint for confirming email with a GET
-
-@post('/api/v1/user/deregister')
+@post('/api/v1/users/deregister')
 @unauthenticated_only
 def deregister() -> ViewResponse:
-    return 'Hello World!'
+    return make_response(501)
 
 
-@post('/api/v1/user/login')
+@post('/api/v1/users/login')
 @unauthenticated_only
 def login() -> ViewResponse:
     try:
-        user = authenticate_user(request.form['username'], request.form['password'])
+        user = authenticate_user(request.form['username'],
+                                 request.form['password'])
         session.owner = user
         session.refresh()
         return redirect(url_for(index))
@@ -94,14 +93,14 @@ def list_public_keys():
     return 'Not implemented yet'
 
 
-@post('/api/v1/user/logout')
+@post('/api/v1/users/logout')
 @authenticated_only
 def logout() -> ViewResponse:
     session.revoke()
     return make_response(200)
 
 
-@post('/api/v1/user/su/<string:user_id>')
+@post('/api/v1/users/<string:user_id>/su')
 @authenticated_only
 @admin_only
 def post_su(user_id: str) -> ViewResponse:
@@ -114,39 +113,40 @@ def post_su(user_id: str) -> ViewResponse:
         return make_response(403)
 
 
-@get('/api/v1/user/')
+@get('/api/v1/users/')
 @authenticated_only
 @admin_only
 def list_users() -> ViewResponse:
     return 'Hello World!'
 
 
-@get('/api/v1/user/me')
+@get('/api/v1/users/me')
 @authenticated_only
 def me() -> ViewResponse:
     return make_json_response(**user_details(requesting_user=session['owner'],
                                              user=session['owner']))
 
 
-@get('/api/v1/user/<string:user_id>')
+@get('/api/v1/users/<string:user_id>')
 @authenticated_only
 def get_user_details(user_id: str) -> ViewResponse:
     try:
-        return make_json_response(**user_details(requesting_user=session['owner'],
-                                                 user=user_id))
+        return make_json_response(**user_details(
+            requesting_user=session['owner'],
+            user=user_id)
+        )
     except ForbiddenAction:
         return make_response(403)
 
 
-@patch('/api/v1/user/<string:user_id>')
+@patch('/api/v1/users/<string:user_id>')
 @authenticated_only
 def patch_user(user_id: str) -> ViewResponse:
-    # TODO: implement this
-    return 'Hello World!'
+    return make_response(501)
 
 
-@post('/api/v1/user/token')
-def create_token() -> ViewResponse:
+@post('/api/v1/users/<string:user_id>/tokens/')
+def create_token(user_id: str) -> ViewResponse:
     if session.is_anonymous:
         try:
             user = authenticate_user(request.form.get('username'), request.form.get('password'))
@@ -160,36 +160,36 @@ def create_token() -> ViewResponse:
                               expiration_date=token.expiry)
 
 
-@delete('/api/v1/user/token/<string:token_id>')
+@delete('/api/v1/users/<string:user_id>/token/<string:token_id>')
 @authenticated_only
 def revoke_token(token_id: str) -> ViewResponse:
     revoke_token(session['owner'], token_id)
     return make_response(200)
 
 
-@get('/api/v1/ad/')
+@get('/api/v1/ads/')
 def list_ads() -> ViewResponse:
     return 'Hello World!'
 
 
-@post('/api/v1/ad/')
+@post('/api/v1/ads/')
 @authenticated_only
 def create_ad() -> ViewResponse:
     return 'Hello World!'
 
 
-@get('/api/v1/ad/<string:ad_id>')
+@get('/api/v1/ads/<string:ad_id>')
 def get_ad(ad_id: str) -> ViewResponse:
     return 'Hello World!'
 
 
-@patch('/api/v1/ad/<string:ad_id>')
+@patch('/api/v1/ads/<string:ad_id>')
 @authenticated_only
 def modify_ad(ad_id: str) -> ViewResponse:
     return 'Hello World!'
 
 
-@delete('/api/v1/ad/<string:ad_id>')
+@delete('/api/v1/ads/<string:ad_id>')
 @authenticated_only
 def delete_ad(ad_id: str) -> ViewResponse:
     return 'Hello World!'
