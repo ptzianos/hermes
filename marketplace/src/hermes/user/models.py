@@ -46,6 +46,8 @@ class EmailAddress(current_app.Base):
     __tablename__ = 'email_addresses'
 
     id = Column(Integer, primary_key=True)
+    uuid = Column(String, unique=True,
+                  default=partial(lambda: str(uuid4().hex)))
     address = Column(String, unique=True)
     verified = Column(Boolean, default=False)
     owner_id = Column(Integer, ForeignKey('users.id'))
