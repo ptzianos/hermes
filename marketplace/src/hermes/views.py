@@ -207,9 +207,16 @@ def create_token(user_id: str) -> ViewResponse:
 
 @delete('/api/v1/users/<string:user_id>/token/<string:token_id>')
 @authenticated_only
-def revoke_token(token_id: str) -> ViewResponse:
-    revoke_token(session['owner'], token_id)
-    return make_response(200)
+def revoke_token_view(user_id: str, token_id: str) -> ViewResponse:
+    if user_id != session.user.uuid and not session.user.admin:
+        return make_response('forbidden', 403)
+    try:
+        revoke_token(session['owner'], token_id)
+        return make_response(200)
+    except UnknownToken:
+        return make_response(404)
+    except ForbiddenAction:
+        return make_response(403)
 
 
 @get('/api/v1/ads/')
