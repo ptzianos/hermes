@@ -44,3 +44,7 @@ class NoPassword(Exception):
 
 class UnsupportedPublicKeyType(Exception):
     msg = 'unsupported_public_key_type'
+
+
+class UnknownEmail(Exception):
+    msg = 'unknown_email'
