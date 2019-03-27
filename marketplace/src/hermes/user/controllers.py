@@ -268,10 +268,10 @@ def deregister_user(user_uuid: str) -> None:
 
 
 def authenticate_user(
-    email_or_username: Optional[str],
-    password_plaintext: Optional[str],
-    proof_of_ownership_request: Optional[str],
-    proof_of_ownership: Optional[str],
+    email_or_username: Optional[str] = '',
+    password_plaintext: Optional[str] = '',
+    proof_of_ownership_request: Optional[str] = '',
+    proof_of_ownership: Optional[str] = '',
 ) -> User:
     """Authenticates a user based on their username/password.
 
