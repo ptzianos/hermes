@@ -86,7 +86,41 @@ def login() -> ViewResponse:
         return make_response('wrong credentials', 400)
 
 
-@get('/api/v1/user/key')
+@get('/api/v1/users/<string:user_id>/emails')
+@authenticated_only
+def get_emails(user_id: str):
+    if user_id != session.owner.id and not session.owner.is_admin:
+        return make_response(403)
+    return make_response(200, list_emails(user_id))
+
+
+@get('/api/v1/users/<string:user_id>/emails/<string:email_id>')
+def verify_email_view(user_id: str, email_id: str):
+    try:
+        verify_email(user_id, email_id, request.form.get('token'))
+        return make_response(200)
+    except UnknownUser:
+        return make_response(403)
+    except UnknownEmail:
+        return make_response(404)
+    except UnknownToken:
+        return make_response(400)
+
+
+@delete('/api/v1/users/<string:user_id>/emails/<string:email_id>')
+@authenticated_only
+def delete_email_view(user_id: str, email_id: str):
+    if user_id != session.owner.id and not session.owner.is_admin:
+        return make_response(403)
+    try:
+        # TODO: implement this
+        delete_email(email_id)
+        return make_response(200)
+    except UnknownEmail:
+        return make_response(404)
+
+
+@get('/api/v1/users/keys/')
 @authenticated_only
 def list_public_keys():
     """Returns a list of the user's public keys"""
