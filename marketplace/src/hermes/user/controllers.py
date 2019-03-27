@@ -673,7 +673,7 @@ def verify_email(
     )
     if not verification_token_model:
         raise UnknownToken()
-    if not verification_token_model.email_id != email_id:
+    if verification_token_model.email.uuid != email_id:
         raise UnknownEmail()
     if verification_token_model.email.verified:
         raise AlreadyVerified()
