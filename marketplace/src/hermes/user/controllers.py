@@ -288,6 +288,7 @@ def authenticate_user(
 
     Raises:
         UnknownUser: raised if user doesn't exist or password doesn't match.
+        WrongParameters: if one of the parameters is missing.
 
     """
     if email_or_username and password_plaintext:
