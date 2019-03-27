@@ -5,10 +5,17 @@ from flask import (Flask, make_response, redirect, request,
 # from flask.logging import create_logger
 
 from hermes.exceptions import *
-from hermes.user.controllers import (authenticate_user, deregister_user, exit_su,
-                                     generate_api_token, register_user, resolve_user,
-                                     revoke_token, su, user_details)
-from hermes.user.decorators import admin_only, authenticated_only, unauthenticated_only
+from hermes.user.controllers import (authenticate_user,
+                                     generate_api_token,
+                                     generate_public_key_verification_request,
+                                     list_emails,
+                                     register_user,
+                                     revoke_token,
+                                     su,
+                                     user_details,
+                                     verify_email,)
+from hermes.user.decorators import (admin_only, authenticated_only,
+                                    unauthenticated_only)
 from hermes.utils import make_json_response
 
 
@@ -23,7 +30,9 @@ def view_decorator_factory(http_method: str):
         raise Exception('Invalid http method')
 
     def rule_decorator(rule: str):
-        def view_decorator(func: Callable[[Any], Response]) -> Callable[[Any], Response]:
+        def view_decorator(
+                func: Callable[[Any], Response]
+        ) -> Callable[[Any], Response]:
             view_registry.append((http_method, func, rule))
             return func
         return view_decorator
@@ -31,8 +40,10 @@ def view_decorator_factory(http_method: str):
     return rule_decorator
 
 
-get, post, put, patch, delete = (view_decorator_factory('GET'), view_decorator_factory('POST'),
-                                 view_decorator_factory('PUT'), view_decorator_factory('PATCH'),
+get, post, put, patch, delete = (view_decorator_factory('GET'),
+                                 view_decorator_factory('POST'),
+                                 view_decorator_factory('PUT'),
+                                 view_decorator_factory('PATCH'),
                                  view_decorator_factory('DELETE'))
 
 
