@@ -171,6 +171,8 @@ def get_user_details(user_id: str) -> ViewResponse:
         )
     except ForbiddenAction:
         return make_response(403)
+    except UnknownUser:
+        return make_response(404)
 
 
 @patch('/api/v1/users/<string:user_id>')
