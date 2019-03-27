@@ -185,12 +185,21 @@ def patch_user(user_id: str) -> ViewResponse:
 def create_token(user_id: str) -> ViewResponse:
     if session.is_anonymous:
         try:
-            user = authenticate_user(request.form.get('username'), request.form.get('password'))
-            token = generate_api_token(user)
+            user = authenticate_user(
+                request.form.get('username'),
+                request.form.get('password'),
+                request.form.get('proof_of_ownership_request'),
+                request.form.get('proof_of_ownership'),
+            )
+            session.owner = user
+            session.refresh()
         except (UnknownUser, WrongParameters):
             return make_response('forbidden', 403)
-    else:
-        token = generate_api_token(session['owner'])
+
+    if user_id != session.user.uuid and not session.user.admin:
+        return make_response('forbidden', 403)
+
+    token = generate_api_token(session['owner'])
     return make_json_response(id=token.id,
                               token=token.token,
                               expiration_date=token.expiry)
