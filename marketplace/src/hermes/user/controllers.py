@@ -728,7 +728,6 @@ def verify_public_key(
     Raises:
         UnknownToken: when the token can not be located in the database.
         ExpiredToken: when the request has expired.
-        AlreadyVerified: when the public key has already been verified.
         ValueError: when the signature is invalid.
 
     """
@@ -738,6 +737,8 @@ def verify_public_key(
          .filter_by(token=public_key_verification_token)
          .first()
     )
+    if not request:
+        raise UnknownToken()
     if request.is_expired:
         raise ExpiredToken()
     msg_hash = SHA3_512.new().update(request.original_message.encode())
