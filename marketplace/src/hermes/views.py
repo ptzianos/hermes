@@ -128,8 +128,14 @@ def verify_email_view(user_id: str, email_id: str):
 def get_key_verification_message(user_id: str, key_id: str):
     try:
         resolve_user(user_id)
-        generate_public_key_verification_request(key_id)
-        return make_response(200)
+        public_key_verification_request = \
+            generate_public_key_verification_request(key_id)
+        return make_response(200, {
+            "public_key_verification_token":
+                public_key_verification_request.token,
+            "public_key_verification_message":
+                public_key_verification_request.original_message,
+        })
     except UnknownUser:
         return make_response(403)
     except UnknownEmail:
