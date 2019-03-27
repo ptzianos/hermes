@@ -13,11 +13,7 @@ from sqlalchemy import or_
 
 from hermes.config import (PUBLIC_KEY_VERIFICATION_TEXT,
                            PUBLIC_KEY_VERIFICATION_REQUEST_DURATION)
-from hermes.exceptions import (AlreadyRegistered, AlreadyVerified,
-                               ExpiredToken, ForbiddenAction, NoSuchUser,
-                               NoPassword, UnknownToken, UnknownUser,
-                               UnsupportedPublicKeyType, UserHasNoPassword,
-                               WeakPassword, WrongParameters, )
+from hermes.exceptions import *
 from hermes.user.models import (APIToken, BaseToken, EmailAddress,
                                 EmailVerificationToken, PasswordResetToken,
                                 PublicKey, PublicKeyVerificationRequest,
@@ -651,12 +647,17 @@ def generate_public_key_verification_request(
     return public_key_verification_token
 
 
-def verify_email(user: UserLikeObj, email_verification_token: str) -> None:
+def verify_email(
+    user: UserLikeObj,
+    email_id: str,
+    email_verification_token: str
+) -> None:
     """Get a token and perform verification of email address ownership.
 
     Raises:
-        UnknownUser: when the user can not be located in the database
-        UnknownToken: when the token can be located in the database
+        UnknownUser: when the user can not be located in the database.
+        UnknownToken: when the token can be located in the database.
+        UnknownEmail: the email id does not match the email that is verified.
     """
     user = resolve_user(user)
     if not user:
@@ -670,6 +671,8 @@ def verify_email(user: UserLikeObj, email_verification_token: str) -> None:
     )
     if not verification_token_model:
         raise UnknownToken()
+    if not verification_token_model.email_id != email_id:
+        raise UnknownEmail()
     if verification_token_model.email.verified:
         raise AlreadyVerified()
     verification_token_model.revoke()
