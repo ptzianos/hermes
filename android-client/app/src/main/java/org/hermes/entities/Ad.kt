@@ -17,7 +17,7 @@ import android.support.annotation.NonNull
     ]
 )
 data class Ad(
-    @PrimaryKey @ColumnInfo(name = "uid") var uid: Int,
+    @NonNull @PrimaryKey(autoGenerate = true) @ColumnInfo(name = "uid") var uid: Int,
     @NonNull @ColumnInfo(name = "uuid") var uuid: String,
     @NonNull @ColumnInfo(name = "network") var network: String,
     @NonNull @ColumnInfo(name = "currency") var currency: String,

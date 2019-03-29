@@ -10,7 +10,7 @@ import java.lang.StringBuilder
 
 @Entity(tableName = "events")
 data class Event(
-    @NonNull @PrimaryKey @ColumnInfo(name = "uid") var uid: Int,
+    @NonNull @PrimaryKey(autoGenerate = true) @ColumnInfo(name = "uid") var uid: Int,
     @ColumnInfo(name = "action") var action: String,
     @ColumnInfo(name = "resource") var resource: String,
     @ColumnInfo(name = "resource_id") var resourceId: Int?,

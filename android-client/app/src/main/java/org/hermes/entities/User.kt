@@ -18,7 +18,7 @@ import android.support.annotation.NonNull
     ]
 )
 data class User(
-    @PrimaryKey @ColumnInfo(name = "uid") var uid: Int,
+    @NonNull @PrimaryKey(autoGenerate = true) @ColumnInfo(name = "uid") var uid: Int,
     @NonNull @ColumnInfo(name = "uuid") var uuid: String,
     @ColumnInfo(name = "name") var name: String?,
     @ColumnInfo(name = "full_name") var fullName: String?,
