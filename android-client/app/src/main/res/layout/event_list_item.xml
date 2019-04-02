@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/eventListItemLayout">
+
+    <EditText
+            android:layout_width="49dp"
+            android:inputType="numberDecimal"
+            android:ems="10"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:id="@+id/eventId"
+            android:layout_height="90dp"/>
+
+    <TextView
+            android:text="TextView"
+            android:layout_width="79dp"
+            android:layout_height="45dp"
+            android:layout_toEndOf="@+id/eventId"
+            android:id="@+id/eventResource"
+            android:gravity="center_vertical"
+            android:layout_below="@+id/eventDate"/>
+
+    <TextView
+            android:text="TextView"
+            android:layout_width="77dp"
+            android:layout_height="45dp"
+            android:id="@+id/eventAction"
+            android:gravity="center_vertical"
+            android:layout_centerVertical="true"
+            android:layout_toStartOf="@+id/eventResourceId"/>
+
+    <EditText
+            android:layout_width="60dp"
+            android:layout_height="45dp"
+            android:inputType="numberSigned"
+            android:ems="10"
+            android:id="@+id/eventResourceId"
+            android:layout_centerVertical="true"
+            android:layout_alignEnd="@+id/eventDate"
+            android:layout_marginEnd="-1dp"/>
+
+    <EditText
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:inputType="date"
+            android:ems="10"
+            android:layout_alignParentTop="true"
+            android:id="@+id/eventDate"
+            android:layout_toEndOf="@+id/eventId"/>
+
+    <EditText
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:inputType="textPersonName"
+            android:text="Name"
+            android:ems="10"
+            android:layout_below="@+id/eventId"
+            android:layout_toEndOf="@+id/eventId"
+            android:id="@+id/eventExtraInfo"/>
+</RelativeLayout>
