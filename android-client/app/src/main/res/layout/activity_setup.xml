@@ -5,7 +5,8 @@
         xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".SetupActivity">
+        tools:context="org.hermes.activities.SetupActivity"
+        android:id="@+id/setup_layout">
 
     <Button
             android:text="@string/setupButtonText"
@@ -13,7 +14,7 @@
             android:layout_height="wrap_content"
             android:id="@+id/setup_button"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/setup_pin_input_verify"
+            app:layout_constraintTop_toBottomOf="@+id/setup_verify_pin_input"
             app:layout_constraintStart_toStartOf="parent"
             android:layout_marginStart="8dp"
             app:layout_constraintEnd_toEndOf="parent"
@@ -23,7 +24,7 @@
             android:text="TextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/textView"
+            android:id="@+id/setup_title"
             android:textAppearance="@style/TextAppearance.AppCompat.Title"
             app:layout_constraintEnd_toEndOf="parent"
             android:layout_marginEnd="8dp"
@@ -40,41 +41,51 @@
             android:inputType="numberPassword"
             android:ems="10"
             android:id="@+id/setup_pin_input"
-            app:layout_constraintStart_toStartOf="parent"
-            android:layout_marginStart="8dp"
-            android:layout_marginEnd="8dp"
+            android:layout_marginEnd="36dp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintTop_toBottomOf="@+id/setup_email_input"
-            app:layout_constraintBottom_toTopOf="@+id/setup_pin_input_verify"/>
+            app:layout_constraintTop_toBottomOf="@+id/setup_title"
+            app:layout_constraintBottom_toTopOf="@+id/setup_verify_pin_input"
+            android:layout_marginTop="8dp"/>
 
     <EditText
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:inputType="numberPassword"
             android:ems="10"
-            android:id="@+id/setup_pin_input_verify"
-            android:layout_marginEnd="8dp"
+            android:id="@+id/setup_verify_pin_input"
+            android:layout_marginEnd="36dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/setup_pin_input"
-            app:layout_constraintBottom_toTopOf="@+id/setup_button"
-            app:layout_constraintStart_toStartOf="parent"
-            android:layout_marginStart="8dp"/>
+            app:layout_constraintBottom_toTopOf="@+id/setup_button"/>
 
-    <EditText
-            android:layout_width="218dp"
-            android:layout_height="wrap_content"
-            android:inputType="textEmailAddress"
-            android:ems="10"
-            android:id="@+id/setup_email_input"
-            android:text="@string/emailSetupInput"
-            app:layout_constraintBottom_toTopOf="@+id/setup_pin_input"
-            android:selectAllOnFocus="true"
-            android:layout_marginTop="8dp"
-            app:layout_constraintTop_toBottomOf="@+id/textView"
-            app:layout_constraintEnd_toEndOf="parent"
+    <TextView
+            android:text="TextView"
+            android:layout_width="wrap_content"
+            android:layout_height="19dp"
+            android:id="@+id/pin_text"
+            tools:text="PIN:"
+            app:layout_constraintEnd_toStartOf="@+id/setup_pin_input"
             android:layout_marginEnd="8dp"
             app:layout_constraintStart_toStartOf="parent"
-            android:layout_marginStart="8dp"/>
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            app:layout_constraintTop_toBottomOf="@+id/setup_title"
+            android:layout_marginBottom="8dp"
+            app:layout_constraintBottom_toTopOf="@+id/setup_verify_pin_input"/>
+
+    <TextView
+            android:text="TextView"
+            android:layout_width="wrap_content"
+            android:layout_height="19dp"
+            android:id="@+id/verify_pin_text"
+            tools:text="Repeat PIN:"
+            app:layout_constraintEnd_toStartOf="@+id/setup_verify_pin_input"
+            android:layout_marginEnd="8dp"
+            app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            app:layout_constraintTop_toBottomOf="@+id/setup_pin_input"
+            android:layout_marginBottom="8dp"
+            app:layout_constraintBottom_toTopOf="@+id/setup_button"/>
 
 </android.support.constraint.ConstraintLayout>
