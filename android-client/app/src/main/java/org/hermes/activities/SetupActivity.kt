@@ -44,14 +44,20 @@ class SetupActivity : AppCompatActivity() {
         if (pinSetupInput.text.isNullOrBlank()) {
             errorsInForm = true
             pinSetupInput.error = "This is not supposed to be empty"
+        } else if (!pinSetupInput.text.map { c -> c.isDigit() }.reduce { b1, b2 -> b1 && b2 }) {
+            errorsInForm = true
+            pinSetupInput.error = "PIN must be all digits"
         }
         val pinSetupInputVerify = findViewById<EditText>(R.id.setup_verify_pin_input)
         if (pinSetupInputVerify.text.isNullOrBlank()) {
             errorsInForm = true
             pinSetupInputVerify.error = "This is not supposed to be empty"
+        } else if (!pinSetupInput.text.isNullOrBlank() && pinSetupInput.text.equals(pinSetupInputVerify.text)) {
+            errorsInForm = true
+            pinSetupInputVerify.error = "The two fields must be equal"
         }
-        if (errorsInForm) {
-            initForm()
+        if (!errorsInForm) {
+            // TODO: Save the new pin in the shared preferences
         }
     }
 }
