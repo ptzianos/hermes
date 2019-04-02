@@ -46,4 +46,8 @@ class Seed(val value: CharArray) {
     fun extractPrivateKey(): CharArray {
         return CharArray(0) { 'C' }
     }
+
+    override fun toString(): String {
+        return value.toString()
+    }
 }
