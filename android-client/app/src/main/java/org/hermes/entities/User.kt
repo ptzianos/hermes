@@ -1,9 +1,6 @@
 package org.hermes.entities
 
-import android.arch.persistence.room.ColumnInfo
-import android.arch.persistence.room.Entity
-import android.arch.persistence.room.ForeignKey
-import android.arch.persistence.room.PrimaryKey
+import android.arch.persistence.room.*
 import android.support.annotation.NonNull
 
 
@@ -12,10 +9,11 @@ import android.support.annotation.NonNull
     foreignKeys = [
         ForeignKey(
             entity = Marketplace::class,
-            parentColumns = arrayOf("uid"),
-            childColumns = arrayOf("market_id")
+            parentColumns = ["uid"],
+            childColumns = ["market_id"]
         )
-    ]
+    ],
+    indices = [Index(value=["market_id"], name="user_market_index")]
 )
 data class User(
     @NonNull @PrimaryKey(autoGenerate = true) @ColumnInfo(name = "uid") var uid: Int,
