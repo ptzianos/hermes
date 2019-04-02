@@ -3,26 +3,35 @@
           package="org.hermes.client">
 
     <application
+            android:name="org.hermes.activities.HermesClientApp"
             android:allowBackup="true"
             android:fullBackupContent="@xml/backup_rules"
             android:icon="@mipmap/ic_launcher"
+            android:installLocation="internalOnly"
             android:label="@string/app_name"
-            android:name=".HermesClientApp"
             android:roundIcon="@mipmap/ic_launcher_round"
             android:supportsRtl="true"
-            android:installLocation="internalOnly"
             android:theme="@style/AppTheme">
         <activity
-                android:name=".LoginActivity"
+                android:name="org.hermes.activities.LoginActivity"
                 android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
+
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
         <activity
-                android:name=".SetupActivity"
+                android:name="org.hermes.activities.SetupActivity"
                 android:label="@string/title_activity_setup">
+        </activity>
+        <activity
+                android:name="org.hermes.activities.EventLogActivity"
+                android:label="@string/event_log_activity">
+        </activity>
+        <activity
+                android:name="org.hermes.activities.EventActivity"
+                android:label="@string/title_activity_event">
         </activity>
     </application>
 
