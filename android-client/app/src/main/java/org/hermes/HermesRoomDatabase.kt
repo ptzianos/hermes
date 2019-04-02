@@ -3,6 +3,9 @@ package org.hermes
 import android.arch.persistence.room.Database
 import android.arch.persistence.room.RoomDatabase
 import android.arch.persistence.room.TypeConverters
+import android.arch.persistence.room.Room
+import android.content.Context
+
 import org.hermes.daos.AdDao
 import org.hermes.daos.EventDao
 import org.hermes.daos.MarketplaceDao
@@ -12,14 +15,12 @@ import org.hermes.entities.Event
 import org.hermes.entities.Marketplace
 import org.hermes.entities.User
 import org.hermes.utils.SQLiteTypeConverter
-import javax.inject.Singleton
-import android.arch.persistence.room.Room
-import android.content.Context
 
-@Singleton
+
 @Database(
     entities = [Ad::class, Event::class, Marketplace::class, User::class],
-    version = 1
+    version = 1,
+    exportSchema = true
 )
 @TypeConverters(SQLiteTypeConverter::class)
 abstract class HermesRoomDatabase : RoomDatabase() {
@@ -39,9 +40,10 @@ abstract class HermesRoomDatabase : RoomDatabase() {
             if (INSTANCE == null) {
                 synchronized(HermesRoomDatabase::class.java) {
                     if (INSTANCE == null) {
-                        INSTANCE = Room.databaseBuilder(context.getApplicationContext(),
-                                HermesRoomDatabase::class.java, "hermes_database")
-                                .build()
+                        INSTANCE = Room.databaseBuilder(context.applicationContext,
+                                                        HermesRoomDatabase::class.java,
+                                                        "hermes_database")
+                                       .build()
                     }
                 }
             }
