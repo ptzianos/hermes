@@ -1,4 +1,4 @@
-package org.hermes.client
+package org.hermes.activities
 
 import android.app.Application
 import com.squareup.leakcanary.LeakCanary
@@ -16,3 +16,13 @@ class HermesClientApp : Application() {
         // Probably put some leak canary calls over here
     }
 }
+
+//import android.util.Log;
+//
+//public class App extends Application {
+//    @Override
+//    public void onCreate() {
+//        super.onCreate();
+//        System.loadLibrary("dummy");
+//        Log.e("IOTA", "Library loaded.");
+//
