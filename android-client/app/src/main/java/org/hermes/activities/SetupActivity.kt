@@ -4,9 +4,12 @@ import android.os.Bundle
 import android.content.Context
 import android.content.Intent
 import android.support.v7.app.AppCompatActivity
+import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 
+import org.hermes.crypto.PasswordHasher
+import org.hermes.iota.Seed
 import org.hermes.R
 
 
@@ -38,6 +41,29 @@ class SetupActivity : AppCompatActivity() {
         setupButton.setOnClickListener { checkSetupForm() }
     }
 
+    private fun storePin(pin: String) {
+        Log.i(loggingTag, "Setting up newly created user's PIN")
+        val hashedPinKey = getString(R.string.auth_hashed_pin)
+        // TODO: this needs to be encrypted with the pin
+        val seedKey = getString(R.string.auth_seed)
+        val sharedPref = getSharedPreferences(getString(R.string.auth_preference_key), Context.MODE_PRIVATE)
+        val hashedPin = PasswordHasher.hashPassword(pin.toCharArray())
+        val seed = Seed.new()
+        val success = sharedPref.edit()
+            .putString(hashedPinKey, hashedPin.toString())
+            .putString(seedKey, seed.toString())
+            .commit()
+        if (!success) {
+            Log.e(loggingTag, "There was come error while trying to store the user's hashed pin")
+        } else {
+            Log.i(loggingTag, "Committed successfully the hashed pin and the seed of the user")
+        }
+    }
+
+    private fun goToEventPage() {
+        startActivity(Intent(this, EventActivity::class.java))
+    }
+
     private fun checkSetupForm() {
         var errorsInForm = false
         val pinSetupInput = findViewById<EditText>(R.id.setup_pin_input)
@@ -52,12 +78,13 @@ class SetupActivity : AppCompatActivity() {
         if (pinSetupInputVerify.text.isNullOrBlank()) {
             errorsInForm = true
             pinSetupInputVerify.error = "This is not supposed to be empty"
-        } else if (!pinSetupInput.text.isNullOrBlank() && pinSetupInput.text.equals(pinSetupInputVerify.text)) {
+        } else if (!pinSetupInput.text.isNullOrBlank() && pinSetupInput.toString().equals(pinSetupInputVerify.toString())) {
             errorsInForm = true
             pinSetupInputVerify.error = "The two fields must be equal"
         }
         if (!errorsInForm) {
-            // TODO: Save the new pin in the shared preferences
+            storePin(pinSetupInput.toString())
+            goToEventPage()
         }
     }
 }
