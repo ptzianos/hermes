@@ -29,3 +29,4 @@ android-client/gradle/wrapper/gradle-wrapper.jar
 # Android Client artifacts
 android-client/app/src/main/jniLibs/
 android-client/app/build/
+android-client/captures/
