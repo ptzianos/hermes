@@ -5,8 +5,7 @@
         xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context="org.hermes.activities.SetupActivity"
-        android:id="@+id/setup_layout">
+        tools:context="org.hermes.activities.SetupActivity">
 
     <Button
             android:text="@string/setupButtonText"
@@ -21,7 +20,7 @@
             android:layout_marginEnd="8dp"/>
 
     <TextView
-            android:text="TextView"
+            android:text="@string/app_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/setup_title"
@@ -59,7 +58,7 @@
             app:layout_constraintBottom_toTopOf="@+id/setup_button"/>
 
     <TextView
-            android:text="TextView"
+            android:text="PIN:"
             android:layout_width="wrap_content"
             android:layout_height="19dp"
             android:id="@+id/pin_text"
@@ -74,7 +73,7 @@
             app:layout_constraintBottom_toTopOf="@+id/setup_verify_pin_input"/>
 
     <TextView
-            android:text="TextView"
+            android:text="Repeat PIN:"
             android:layout_width="wrap_content"
             android:layout_height="19dp"
             android:id="@+id/verify_pin_text"
