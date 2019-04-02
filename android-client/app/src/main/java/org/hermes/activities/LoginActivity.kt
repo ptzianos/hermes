@@ -9,12 +9,16 @@ import android.widget.Button
 import android.widget.EditText
 
 import org.hermes.crypto.PasswordHasher
+import org.hermes.HermesRepository
+import org.hermes.iota.Seed
 import org.hermes.R
 
 /**
  * A login screen that offers to access the app via pin.
  */
 class LoginActivity : AppCompatActivity() {
+
+    var repository: HermesRepository? = null
 
     companion object {
         const val loggingTag = "LoginActivity"
@@ -26,6 +30,7 @@ class LoginActivity : AppCompatActivity() {
         val hashedPinKey = getString(R.string.auth_hashed_pin)
         val sharedPref = getSharedPreferences(getString(R.string.auth_hashed_pin), Context.MODE_PRIVATE)
         Log.d(loggingTag, "Creating activity")
+//        repository = HermesRepository.getInstance(application)
         if (sharedPref.getString(hashedPinKey, "").isNullOrBlank()) {
             Log.d(loggingTag, "Login activity redirecting to Setup activity")
             goToSetupPage()
@@ -72,7 +77,10 @@ class LoginActivity : AppCompatActivity() {
                         .toCharArray()
         )
         if ((storedHashedPin as String).toByteArray().contentEquals(pinFromForm.hash)) {
-            // TODO: Start session here
+            val seedKey = getString(R.string.auth_seed)
+            // TODO: This probably means that the application is in a corrupt state and the SetupActivity should be triggered
+            val seed = sharedPref.getString(seedKey, "") !!
+            repository?.handoverSeed(Seed(seed.toCharArray()))
         } else {
             showError()
         }
