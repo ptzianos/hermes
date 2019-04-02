@@ -7,8 +7,11 @@
     <string name="error_invalid_email">This pin is incorrect</string>
     <string name="error_field_required">This field is required</string>
     <string name="title_activity_setup">SetupActivity</string>
+    <string name="event_log_activity">EventLogActivity</string>
     <string name="setupButtonText">Setup</string>
     <string name="emailSetupInput">Your email</string>
     <string name="auth_preference_key">auth</string>
     <string name="auth_hashed_pin">hashed_pin</string>
+    <string name="title_activity_event">EventActivity</string>
+    <string name="action_settings">Settings</string>
 </resources>
