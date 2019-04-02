@@ -82,6 +82,8 @@ object BalancedTernary {
 
     /**
      * Convert a decimal integer to the balanced ternary system.
+     *
+     * TODO: Add tests for this
      */
     fun toTrinary(i: Int): TritArray {
         val isNegative = i < 0
@@ -98,6 +100,7 @@ object BalancedTernary {
             intermediate += TRYTES[lsd + 13].asTritArray() * Tryte.decimal10().asTritArray().toPowerOf(pow)
             pow += 1
         }
+        intermediate = intermediate.fill()
         return when {
             isNegative -> -intermediate
             else -> intermediate
@@ -316,6 +319,20 @@ class TritArray {
     }
 
     /**
+     * If length is less than 3 add a couple of 0's
+     */
+    fun fill(): TritArray {
+        if (size() < 3) {
+            var newTritArray = this.tritArray.clone()
+            while (newTritArray.size < 3) {
+                newTritArray = newTritArray.plus(Trit(0))
+            }
+            return TritArray(newTritArray)
+        }
+        return this
+    }
+
+    /**
      * Trim the trit array to a size that can be easily converted into trytes.
      *
      * Each trytes has three trits. If the array has a size large than three
@@ -425,7 +442,7 @@ class Tryte {
          * Return a random tryte.
          */
         fun random(): Tryte {
-            val randomLetter = SecureRandom().nextInt(BalancedTernary.TRYTES.size())
+            val randomLetter = SecureRandom().nextInt(BalancedTernary.TRYTE_ALPHABET.length)
             return Tryte(BalancedTernary.TRYTE_ALPHABET[randomLetter])
         }
 
