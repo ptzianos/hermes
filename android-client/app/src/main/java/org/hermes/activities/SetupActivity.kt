@@ -9,6 +9,7 @@ import android.widget.Button
 import android.widget.EditText
 
 import org.hermes.crypto.PasswordHasher
+import org.hermes.HermesRepository
 import org.hermes.iota.Seed
 import org.hermes.R
 
@@ -16,11 +17,13 @@ import org.hermes.R
 class SetupActivity : AppCompatActivity() {
 
     val loggingTag = "SetupActivity"
+    var repository: HermesRepository? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_setup)
         val sharedPref = getSharedPreferences(getString(R.string.auth_preference_key), Context.MODE_PRIVATE)
+        repository = HermesRepository.getInstance(application)
         if (sharedPref.contains("hashedPin")) {
             startActivity(Intent(this, LoginActivity::class.java))
         } else {
@@ -58,6 +61,7 @@ class SetupActivity : AppCompatActivity() {
         } else {
             Log.i(loggingTag, "Committed successfully the hashed pin and the seed of the user")
         }
+        repository?.handoverSeed(seed)
     }
 
     private fun goToEventPage() {
