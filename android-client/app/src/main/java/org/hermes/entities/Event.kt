@@ -10,13 +10,15 @@ import java.lang.StringBuilder
 
 @Entity(tableName = "events")
 data class Event(
-    @NonNull @PrimaryKey(autoGenerate = true) @ColumnInfo(name = "uid") var uid: Int,
     @ColumnInfo(name = "action") var action: String,
     @ColumnInfo(name = "resource") var resource: String,
-    @ColumnInfo(name = "resource_id") var resourceId: Int?,
+    @ColumnInfo(name = "resource_id") var resourceId: Int? = null,
     @ColumnInfo(name = "extra_info") var extraInfo: String?,
     @NonNull @ColumnInfo(name = "created_on") val createdOn: OffsetDateTime? = null
 ) {
+
+    @NonNull @PrimaryKey(autoGenerate = true) @ColumnInfo(name = "uid") var uid: Int = -1
+
     override fun toString(): String {
         val safeTs = if (createdOn == null) "" else SQLiteTypeConverter.fromOffsetDateTime(createdOn)
         return StringBuilder()

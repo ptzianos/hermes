@@ -7,6 +7,7 @@ import android.support.annotation.NonNull
 
 @Entity(tableName = "marketplaces")
 data class Marketplace(
-    @NonNull @PrimaryKey(autoGenerate = true) @ColumnInfo(name = "uid") var uid: Int,
     @NonNull @ColumnInfo(name = "host") var host: String
-)
+) {
+    @NonNull @PrimaryKey(autoGenerate = true) @ColumnInfo(name = "uid") var uid: Int = -1
+}

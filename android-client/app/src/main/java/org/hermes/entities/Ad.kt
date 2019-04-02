@@ -15,13 +15,14 @@ import android.support.annotation.NonNull
     indices = [Index(value=["market_id"], name="ad_market_index")]
 )
 data class Ad(
-    @NonNull @PrimaryKey(autoGenerate = true) @ColumnInfo(name = "uid") var uid: Int,
     @NonNull @ColumnInfo(name = "uuid") var uuid: String,
     @NonNull @ColumnInfo(name = "network") var network: String,
     @NonNull @ColumnInfo(name = "currency") var currency: String,
-    @ColumnInfo(name = "lower_left_x") var lowerLeftX: Int,
-    @ColumnInfo(name = "lower_left_y") var lowerLeftY: Int,
-    @ColumnInfo(name = "width") var width: Int,
-    @ColumnInfo(name = "height") var height: Int,
+    @ColumnInfo(name = "lower_left_x") var lowerLeftX: Int? = null,
+    @ColumnInfo(name = "lower_left_y") var lowerLeftY: Int? = null,
+    @ColumnInfo(name = "width") var width: Int? = null,
+    @ColumnInfo(name = "height") var height: Int? = null,
     @NonNull @ColumnInfo(name = "market_id") var marketId: Int
-)
+) {
+    @NonNull @PrimaryKey(autoGenerate = true) @ColumnInfo(name = "uid") var uid: Int = -1
+}

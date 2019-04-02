@@ -16,9 +16,10 @@ import android.support.annotation.NonNull
     indices = [Index(value=["market_id"], name="user_market_index")]
 )
 data class User(
-    @NonNull @PrimaryKey(autoGenerate = true) @ColumnInfo(name = "uid") var uid: Int,
     @NonNull @ColumnInfo(name = "uuid") var uuid: String,
-    @ColumnInfo(name = "name") var name: String?,
-    @ColumnInfo(name = "full_name") var fullName: String?,
+    @ColumnInfo(name = "name") var name: String? = null,
+    @ColumnInfo(name = "full_name") var fullName: String? = null,
     @NonNull @ColumnInfo(name = "market_id") var marketId: Int
-)
+) {
+    @NonNull @PrimaryKey(autoGenerate = true) @ColumnInfo(name = "uid") var uid: Int = -1
+}
