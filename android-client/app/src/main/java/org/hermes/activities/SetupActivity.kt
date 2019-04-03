@@ -1,8 +1,8 @@
 package org.hermes.activities
 
-import android.os.Bundle
 import android.content.Context
 import android.content.Intent
+import android.os.Bundle
 import android.util.Log
 import android.widget.Button
 import android.widget.EditText
@@ -16,14 +16,13 @@ import org.hermes.R
 
 class SetupActivity : AppCompatActivity() {
 
-    val loggingTag = "SetupActivity"
-    var repository: HermesRepository? = null
+    private val loggingTag = "SetupActivity"
+    private val repository by lazy { HermesRepository.getInstance(application) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_setup)
         val sharedPref = getSharedPreferences(getString(R.string.auth_preference_key), Context.MODE_PRIVATE)
-        repository = HermesRepository.getInstance(application)
         if (sharedPref.contains("hashedPin")) {
             startActivity(Intent(this, LoginActivity::class.java))
         } else {

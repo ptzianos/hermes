@@ -18,11 +18,8 @@ import org.hermes.R
  */
 class LoginActivity : AppCompatActivity() {
 
-    var repository: HermesRepository? = null
-
-    companion object {
-        const val loggingTag = "LoginActivity"
-    }
+    private val repository by lazy { HermesRepository.getInstance(application) }
+    private val loggingTag = "LoginActivity"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,7 +27,6 @@ class LoginActivity : AppCompatActivity() {
         val hashedPinKey = getString(R.string.auth_hashed_pin)
         val sharedPref = getSharedPreferences(getString(R.string.auth_hashed_pin), Context.MODE_PRIVATE)
         Log.d(loggingTag, "Creating activity")
-//        repository = HermesRepository.getInstance(application)
         if (sharedPref.getString(hashedPinKey, "").isNullOrBlank()) {
             Log.d(loggingTag, "Login activity redirecting to Setup activity")
             goToSetupPage()
@@ -80,7 +76,7 @@ class LoginActivity : AppCompatActivity() {
             val seedKey = getString(R.string.auth_seed)
             // TODO: This probably means that the application is in a corrupt state and the SetupActivity should be triggered
             val seed = sharedPref.getString(seedKey, "") !!
-            repository?.handoverSeed(Seed(seed.toCharArray()))
+            repository.handoverSeed(Seed(seed.toCharArray()))
         } else {
             showError()
         }

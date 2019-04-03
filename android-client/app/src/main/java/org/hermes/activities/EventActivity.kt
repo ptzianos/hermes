@@ -17,10 +17,7 @@ import org.hermes.viewmodels.EventViewModel
 
 class EventActivity : AppCompatActivity() {
 
-    companion object {
-        const val loggingTag = "EventLogActivity"
-    }
-
+    private val loggingTag = "EventLogActivity"
     private val repository by lazy { HermesRepository.getInstance(application) }
     private val mEventViewModel by lazy { ViewModelProviders.of(this).get(EventViewModel::class.java) }
 
@@ -34,12 +31,9 @@ class EventActivity : AppCompatActivity() {
 
         recyclerView.adapter = adapter
 
-        // Subscribe the adapter to the ViewModel, so the items in the adapter are refreshed
-        // when the list changes
         mEventViewModel.allEvents.observe(this, Observer<PagedList<Event>?> {
             Log.i(loggingTag,"Observed change of data")
             adapter.submitList(it)
-//            adapter.notifyDataSetChanged()
         })
     }
 }
