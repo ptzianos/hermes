@@ -1,14 +1,14 @@
 package org.hermes.activities
 
 import android.app.Application
-import com.squareup.leakcanary.LeakCanary
+//import com.squareup.leakcanary.LeakCanary
 
 class HermesClientApp : Application() {
     override fun onCreate() {
         super.onCreate()
-        if (!LeakCanary.isInAnalyzerProcess(this)) {
-            LeakCanary.install(this)
-        }
+//        if (!LeakCanary.isInAnalyzerProcess(this)) {
+//            LeakCanary.install(this)
+//        }
     }
 
     override fun onLowMemory() {

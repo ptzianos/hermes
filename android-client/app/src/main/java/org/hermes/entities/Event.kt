@@ -1,12 +1,13 @@
 package org.hermes.entities
 
-import android.arch.persistence.room.ColumnInfo
-import android.arch.persistence.room.Entity
-import android.arch.persistence.room.PrimaryKey
-import android.support.annotation.NonNull
+import androidx.annotation.NonNull
+import androidx.room.ColumnInfo
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+import java.lang.StringBuilder
+
 import org.hermes.utils.SQLiteTypeConverter
 import org.threeten.bp.OffsetDateTime
-import java.lang.StringBuilder
 
 @Entity(tableName = "events")
 data class Event(
@@ -31,5 +32,13 @@ data class Event(
                 .append(" : ")
                 .append(extraInfo ?: "")
                 .toString()
+    }
+    
+    override fun equals(other: Any?): Boolean {
+        if (other != null && other is Event)
+            return this.action == other.action && this.createdOn == other.createdOn &&
+                    this.resource == other.resource && this.resourceId == other.resourceId &&
+                    this.uid == other.uid
+        return false
     }
 }

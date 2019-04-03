@@ -1,7 +1,9 @@
 package org.hermes.daos
 
-import android.arch.lifecycle.LiveData
-import android.arch.persistence.room.*
+import androidx.lifecycle.LiveData
+import androidx.room.*
+import androidx.paging.DataSource
+
 import org.hermes.entities.Event
 import org.threeten.bp.OffsetDateTime
 
@@ -12,6 +14,9 @@ interface EventDao {
 
     @Query("SELECT * FROM events ORDER BY datetime(created_on)")
     fun getAllLive(): LiveData<List<Event>>
+
+    @Query("SELECT * FROM events ORDER BY datetime(created_on)")
+    fun getAllLivePaged(): DataSource.Factory<Int, Event>
 
     @Query("SELECT * FROM events WHERE uid == :eventId")
     fun findById(eventId: Int): Event

@@ -1,19 +1,18 @@
 package org.hermes.activities
 
-import android.arch.lifecycle.Observer
-import android.arch.lifecycle.ViewModelProviders
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
 import android.util.Log
+import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
+import androidx.paging.PagedList
+import androidx.recyclerview.widget.RecyclerView
 
 import org.hermes.adapters.EventRecyclerViewAdapter
-import org.hermes.entities.Event
 import org.hermes.HermesRepository
 import org.hermes.R
+import org.hermes.entities.Event
 import org.hermes.viewmodels.EventViewModel
-import java.util.*
 
 
 class EventActivity : AppCompatActivity() {
@@ -23,7 +22,7 @@ class EventActivity : AppCompatActivity() {
     }
 
     private val repository by lazy { HermesRepository.getInstance(application) }
-    private var mEventViewModel: EventViewModel? = null
+    private val mEventViewModel by lazy { ViewModelProviders.of(this).get(EventViewModel::class.java) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,22 +30,16 @@ class EventActivity : AppCompatActivity() {
 
         // TODO: Change the id to something more suitable
         val recyclerView: RecyclerView = findViewById(R.id.fragment)
-        val adapter = EventRecyclerViewAdapter(this)
+        val adapter = EventRecyclerViewAdapter()
+
         recyclerView.adapter = adapter
-        recyclerView.layoutManager = LinearLayoutManager(this)
 
-        // Get a new or existing ViewModel from the ViewModelProvider.
-        mEventViewModel = ViewModelProviders
-            .of(this)
-            .get(EventViewModel::class.java)
-
-        mEventViewModel?.getEvents()?.observe(this, Observer<List<Event>> {
-                Log.i(loggingTag, "onChanged called")
-                if (it == null) {
-                    adapter.setEvents(Collections.emptyList())
-                } else {
-                    adapter.setEvents(it)
-                }
+        // Subscribe the adapter to the ViewModel, so the items in the adapter are refreshed
+        // when the list changes
+        mEventViewModel.allEvents.observe(this, Observer<PagedList<Event>?> {
+            Log.i(loggingTag,"Observed change of data")
+            adapter.submitList(it)
+//            adapter.notifyDataSetChanged()
         })
     }
 }

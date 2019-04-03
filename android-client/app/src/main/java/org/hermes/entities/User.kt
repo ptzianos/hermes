@@ -1,7 +1,7 @@
 package org.hermes.entities
 
-import android.arch.persistence.room.*
-import android.support.annotation.NonNull
+import androidx.room.*
+import androidx.annotation.NonNull
 
 
 @Entity(

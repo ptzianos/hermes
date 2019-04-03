@@ -1,16 +1,13 @@
 package org.hermes
 
 import android.app.Application
-import android.arch.lifecycle.LiveData
 import kotlinx.coroutines.*
 
 import org.hermes.entities.Event
 import org.hermes.iota.Seed
 
 import kotlin.coroutines.EmptyCoroutineContext
-import android.arch.persistence.room.Room
-
-
+import androidx.room.Room
 
 
 class HermesRepository(application: Application) {
@@ -22,6 +19,8 @@ class HermesRepository(application: Application) {
                          .build()
     private var seed: Seed? = null
 
+    val eventDao = db.eventDao()
+
     companion object {
         // For Singleton instantiation
         @Volatile private var instance: HermesRepository? = null
@@ -30,10 +29,6 @@ class HermesRepository(application: Application) {
             instance ?: synchronized(this) {
                 instance ?: HermesRepository(application).also { instance = it }
             }
-    }
-
-    fun getEvents(): LiveData<List<Event>> {
-        return db.eventDao().getAllLive()
     }
 
     /**
