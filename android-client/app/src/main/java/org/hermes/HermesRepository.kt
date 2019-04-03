@@ -2,12 +2,10 @@ package org.hermes
 
 import android.app.Application
 import android.arch.lifecycle.LiveData
-import android.util.Log
 import kotlinx.coroutines.*
 
 import org.hermes.entities.Event
 import org.hermes.iota.Seed
-import java.lang.StringBuilder
 
 import kotlin.coroutines.EmptyCoroutineContext
 import android.arch.persistence.room.Room
