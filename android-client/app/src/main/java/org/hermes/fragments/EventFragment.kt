@@ -56,7 +56,7 @@ class EventFragment : Fragment() {
                     columnCount <= 1 -> LinearLayoutManager(context)
                     else -> GridLayoutManager(context, columnCount)
                 }
-                adapter = EventRecyclerViewAdapter(ArrayList(), listener)
+                adapter = EventRecyclerViewAdapter(context)
             }
         }
 
@@ -69,14 +69,14 @@ class EventFragment : Fragment() {
         viewModel = ViewModelProviders.of(this).get(EventViewModel::class.java)
     }
 
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-        if (context is EventFragment.OnListFragmentInteractionListener) {
-            listener = context
-        } else {
-            throw RuntimeException(context.toString() + " must implement OnListFragmentInteractionListener")
-        }
-    }
+//    override fun onAttach(context: Context) {
+//        super.onAttach(context)
+//        if (context is EventFragment.OnListFragmentInteractionListener) {
+//            listener = context
+//        } else {
+//            throw RuntimeException(context.toString() + " must implement OnListFragmentInteractionListener")
+//        }
+//    }
 
     override fun onDetach() {
         super.onDetach()
