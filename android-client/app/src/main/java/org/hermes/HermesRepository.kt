@@ -2,19 +2,27 @@ package org.hermes
 
 import android.app.Application
 import android.arch.lifecycle.LiveData
+import android.util.Log
 import kotlinx.coroutines.*
-import org.hermes.daos.EventDao
+
 import org.hermes.entities.Event
 import org.hermes.iota.Seed
+import java.lang.StringBuilder
 
 import kotlin.coroutines.EmptyCoroutineContext
+import android.arch.persistence.room.Room
+
+
 
 
 class HermesRepository(application: Application) {
 
-    val db: HermesRoomDatabase = HermesRoomDatabase.getDatabase(application)
-    val eventDao: EventDao = db.eventDao()
-    var seed: Seed? = null
+    private val loggingTag = "HermesRepository"
+
+    private val db = Room.databaseBuilder(application, HermesRoomDatabase::class.java, "my-room-database")
+                         .fallbackToDestructiveMigration()
+                         .build()
+    private var seed: Seed? = null
 
     companion object {
         // For Singleton instantiation
@@ -27,7 +35,7 @@ class HermesRepository(application: Application) {
     }
 
     fun getEvents(): LiveData<List<Event>> {
-        return eventDao.getAll()
+        return db.eventDao().getAllLive()
     }
 
     /**
