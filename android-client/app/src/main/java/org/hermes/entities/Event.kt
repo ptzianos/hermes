@@ -14,15 +14,14 @@ data class Event(
     @ColumnInfo(name = "resource") var resource: String,
     @ColumnInfo(name = "resource_id") var resourceId: Int? = null,
     @ColumnInfo(name = "extra_info") var extraInfo: String?,
-    @NonNull @ColumnInfo(name = "created_on") val createdOn: OffsetDateTime? = null
+    @NonNull @ColumnInfo(name = "created_on") val createdOn: OffsetDateTime = OffsetDateTime.now()
 ) {
 
     @NonNull @PrimaryKey(autoGenerate = true) @ColumnInfo(name = "uid") var uid: Int? = null
 
     override fun toString(): String {
-        val safeTs = if (createdOn == null) "" else SQLiteTypeConverter.fromOffsetDateTime(createdOn)
         return StringBuilder()
-                .append(safeTs)
+                .append(SQLiteTypeConverter.fromOffsetDateTime(createdOn))
                 .append(" : ")
                 .append(action)
                 .append(" : ")
