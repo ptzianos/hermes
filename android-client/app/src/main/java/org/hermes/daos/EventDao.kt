@@ -1,17 +1,17 @@
 package org.hermes.daos
 
 import android.arch.lifecycle.LiveData
-import android.arch.persistence.room.Dao
-import android.arch.persistence.room.Delete
-import android.arch.persistence.room.Insert
-import android.arch.persistence.room.Query
+import android.arch.persistence.room.*
 import org.hermes.entities.Event
 import org.threeten.bp.OffsetDateTime
 
 @Dao
 interface EventDao {
     @Query("SELECT * FROM events ORDER BY datetime(created_on)")
-    fun getAll(): LiveData<List<Event>>
+    fun getAll(): List<Event>
+
+    @Query("SELECT * FROM events ORDER BY datetime(created_on)")
+    fun getAllLive(): LiveData<List<Event>>
 
     @Query("SELECT * FROM events WHERE uid == :eventId")
     fun findById(eventId: Int): Event
@@ -43,8 +43,8 @@ interface EventDao {
                                             latestUId: Int = -1,
                                             limit: Int): LiveData<List<Event>>
 
-    @Insert
-    fun insertAll(vararg events: Event)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insertAll(vararg events: Event): List<Long>
 
     @Delete
     fun delete(event: Event)
