@@ -24,5 +24,5 @@ data class Ad(
     @ColumnInfo(name = "height") var height: Int? = null,
     @NonNull @ColumnInfo(name = "market_id") var marketId: Int
 ) {
-    @NonNull @PrimaryKey(autoGenerate = true) @ColumnInfo(name = "uid") var uid: Int = -1
+    @NonNull @PrimaryKey(autoGenerate = true) @ColumnInfo(name = "uid") var uid: Int? = null
 }

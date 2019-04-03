@@ -9,5 +9,5 @@ import android.support.annotation.NonNull
 data class Marketplace(
     @NonNull @ColumnInfo(name = "host") var host: String
 ) {
-    @NonNull @PrimaryKey(autoGenerate = true) @ColumnInfo(name = "uid") var uid: Int = -1
+    @NonNull @PrimaryKey(autoGenerate = true) @ColumnInfo(name = "uid") var uid: Int? = null
 }

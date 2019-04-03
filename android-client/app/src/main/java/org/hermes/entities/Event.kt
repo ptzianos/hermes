@@ -17,7 +17,7 @@ data class Event(
     @NonNull @ColumnInfo(name = "created_on") val createdOn: OffsetDateTime? = null
 ) {
 
-    @NonNull @PrimaryKey(autoGenerate = true) @ColumnInfo(name = "uid") var uid: Int = -1
+    @NonNull @PrimaryKey(autoGenerate = true) @ColumnInfo(name = "uid") var uid: Int? = null
 
     override fun toString(): String {
         val safeTs = if (createdOn == null) "" else SQLiteTypeConverter.fromOffsetDateTime(createdOn)
