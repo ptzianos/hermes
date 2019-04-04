@@ -3,23 +3,19 @@ package org.hermes
 import android.app.Application
 import android.content.Context
 import android.util.Log
-import androidx.room.Room
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlinx.coroutines.*
 
+import org.hermes.crypto.PasswordHasher
 import org.hermes.entities.Event
 import org.hermes.iota.Seed
-import org.hermes.R
-import org.hermes.crypto.PasswordHasher
 
 
 class HermesRepository(private val application: Application) {
 
     private val loggingTag = "HermesRepository"
 
-    private val db = Room.databaseBuilder(application, HermesRoomDatabase::class.java, "my-room-database")
-                         .fallbackToDestructiveMigration()
-                         .build()
+    private val db = HermesRoomDatabase.getDatabase(application)
     private var seed: Seed? = null
 
     private val sharedPref = application.getSharedPreferences(application.getString(R.string.auth_preference_key),
