@@ -49,14 +49,6 @@ class SetupActivity : AppCompatActivity() {
         setupButton.setOnClickListener { checkSetupForm() }
     }
 
-    private fun storePin(pin: String) {
-        if (!repository.generateCredentials(pin)) {
-            Log.e(loggingTag, "There was come error while trying to generate user's credentials")
-        } else {
-            Log.i(loggingTag, "Committed successfully the hashed pin and the seed of the user")
-        }
-    }
-
     private fun goToEventPage() {
         startActivity(Intent(this, EventActivity::class.java))
     }
@@ -79,8 +71,8 @@ class SetupActivity : AppCompatActivity() {
             errorsInForm = true
             pinSetupInputVerify.error = "The two fields must be equal"
         }
-        if (!errorsInForm) {
-            storePin(pinSetupInput.toString())
+        if (!errorsInForm && repository.generateCredentials(pinSetupInput.toString())) {
+            repository.unlockCredentials(pinSetupInput.toString())
             goToEventPage()
         }
     }

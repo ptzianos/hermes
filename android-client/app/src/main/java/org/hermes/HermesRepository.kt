@@ -1,13 +1,13 @@
 package org.hermes
 
-import android.app.Application
+import android.app.*
 import android.content.Context
+import android.content.Intent
 import android.util.Log
-import kotlin.coroutines.EmptyCoroutineContext
-import kotlinx.coroutines.*
+import java.security.KeyPair
+import java.security.PrivateKey
 
 import org.hermes.crypto.PasswordHasher
-import org.hermes.entities.Event
 import org.hermes.iota.Seed
 
 
@@ -15,8 +15,12 @@ class HermesRepository(private val application: Application) {
 
     private val loggingTag = "HermesRepository"
 
-    private val db = HermesRoomDatabase.getDatabase(application)
+    val db = HermesRoomDatabase.getDatabase(application)
     private var seed: Seed? = null
+    private var keypair: KeyPair? = null
+    private var unsealed: Boolean = false
+    private var ledgerService: LedgerService? = null
+    private var ledgerServiceRunning: Boolean = false
 
     private val sharedPref = application.getSharedPreferences(application.getString(R.string.auth_preference_key),
                                                               Context.MODE_PRIVATE)
@@ -32,23 +36,11 @@ class HermesRepository(private val application: Application) {
             }
     }
 
-    /**
-     * Insert some events in a background thread.
-     *
-     * Doing an insert in the UI thread would throw an exception.
-     */
-    fun insertEvent(vararg events: Event) {
-        CoroutineScope(Dispatchers.IO).launch(EmptyCoroutineContext, CoroutineStart.DEFAULT) {
-            db.eventDao().insertAll(*events)
-        }
-    }
-
     fun generateCredentials(pin: String): Boolean {
         val sharedPref = application.getSharedPreferences(application.getString(R.string.auth_preference_key),
                                                           Context.MODE_PRIVATE)
         val hashedPin = PasswordHasher.hashPassword(pin.toCharArray())
         val seed = Seed.new()
-        // TODO: this needs to be encrypted with the PIN
         val success = sharedPref.edit()
             .putString(application.getString(R.string.auth_hashed_pin), hashedPin.toString())
             .putString(application.getString(R.string.auth_seed), seed.toString())
@@ -88,10 +80,34 @@ class HermesRepository(private val application: Application) {
         return seedAvailable && hashedPinAvailable
     }
 
+    fun unsealed(): Boolean {
+        return unsealed
+    }
+
     /**
      * Decrypt the credentials using the user's PIN
      */
     fun unlockCredentials(pin: String) {
-        // TODO: Implement this
+        if (!unsealed) {
+            Log.i(loggingTag, "Unlocking credentials of the application")
+            startLedgerService()
+            unsealed = true
+            // TODO: Implement unsealing of encrypted credentials
+        }
+    }
+
+    /**
+     * Start the LedgerService if it's not running already
+     */
+    private fun startLedgerService() {
+        if (!ledgerServiceRunning) {
+            Log.i(loggingTag,"Ledger service is not running. Starting it now")
+            ledgerService = LedgerService()
+            val intent = Intent(application.applicationContext, LedgerService::class.java)
+            application.startForegroundService(intent)
+            ledgerServiceRunning = true
+        } else {
+            Log.i(loggingTag, "Ledger service is already running")
+        }
     }
 }
