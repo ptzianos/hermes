@@ -55,7 +55,9 @@ class Metric20(private val key: String,
     }
 
     fun toJsonString(): String {
-        fun mapToJson(mapping: Map<String, String>): String = mapping.map { "\"${it.key}\": \"${it.value}\"" }.joinToString()
+        fun mapToJson(mapping: Map<String, String>): String = mapping
+            .map { "\"${it.key}\": \"${it.value}\"" }
+            .joinToString()
 
         if (data.isEmpty()) {
             throw NoData()
