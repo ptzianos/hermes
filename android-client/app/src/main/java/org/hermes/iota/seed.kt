@@ -48,6 +48,6 @@ class Seed(val value: CharArray) {
     }
 
     override fun toString(): String {
-        return value.toString()
+        return value.joinToString(separator = "")
     }
 }
