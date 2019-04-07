@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import java.security.KeyPair
-import java.security.PrivateKey
 
 import org.hermes.crypto.PasswordHasher
 import org.hermes.iota.Seed
@@ -109,5 +108,9 @@ class HermesRepository(private val application: Application) {
         } else {
             Log.i(loggingTag, "Ledger service is already running")
         }
+    }
+
+    fun getSeed(): Seed? {
+        return seed
     }
 }
