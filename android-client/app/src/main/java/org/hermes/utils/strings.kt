@@ -40,3 +40,7 @@ fun String.splitInChunks(chunkSize: Int): Array<String> {
 fun String.toTrytes(): String {
     return TrytesConverter.asciiToTrytes(this)
 }
+
+fun String.stripPaddingOfTrytes(): String {
+    return this.trimEnd('9')
+}
