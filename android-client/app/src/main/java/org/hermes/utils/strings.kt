@@ -1,7 +1,9 @@
 package org.hermes.utils
 
+import jota.utils.TrytesConverter
+
 /**
- * Split a string into strings of maximum size equal to chunkSize
+ * Split a string into strings of maximum size equal to chunkSize.
  */
 fun String.splitInChunks(chunkSize: Int): Array<String> {
     if (this.isEmpty())
@@ -30,4 +32,11 @@ fun String.splitInChunks(chunkSize: Int): Array<String> {
     } while (chunk.isNotEmpty())
 
     return arr
+}
+
+/**
+ * Convert ASCII to trytes.
+ */
+fun String.toTrytes(): String {
+    return TrytesConverter.asciiToTrytes(this)
 }
