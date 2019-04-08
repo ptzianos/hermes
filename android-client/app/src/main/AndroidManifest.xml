@@ -4,6 +4,7 @@
           package="org.hermes">
 
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
             android:name="org.hermes.activities.HermesClientApp"
