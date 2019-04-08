@@ -11,12 +11,14 @@ import android.util.Log
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import java.security.SecureRandom
-import java.util.ArrayList
+import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.*
 
 import org.hermes.activities.LoginActivity
 import org.hermes.entities.Event
-import java.util.concurrent.TimeUnit
+import org.hermes.iota.Seed
+import org.hermes.ledgers.IOTAConnector
+import java.util.*
 
 
 class LedgerService : Service() {
@@ -46,20 +48,26 @@ class LedgerService : Service() {
     private val PRNG = SecureRandom.getInstanceStrong()
     private val channelId = PRNG.nextInt().toString()
     private var foregroundNotificationId: Int = 15970
+    private var iotaConnector: IOTAConnector? = null
 
     override fun onCreate() {
         createNotificationChannel()
-
-        Log.i(loggingTag, "Showing notification for Hermes service foregrounding")
-        startForeground(foregroundNotificationId, buildNotification())
     }
 
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
         Log.i(loggingTag, "Received start id $startId: $intent")
+        Log.i(loggingTag, "Showing notification for Hermes service foregrounding")
+        startForeground(foregroundNotificationId, buildNotification())
         try {
-            startRandomEventGenerator()
-        } catch (e: Exception) {
-            Log.e(loggingTag, "There was an exception while trying to start threads of ")
+            // Initialize connection
+            // TODO: This should be provided as configuration and not be hard-coded
+            iotaConnector = IOTAConnector(protocol = "https", uri = "nodes.thetangle.org",
+                port = "443", seed = repository.value.getSeed() as Seed, db = db.value
+            )
+            // Start coroutine to broadcast data
+            CoroutineScope(BACKGROUND.asCoroutineDispatcher()).launch { broadcastData() }
+        } catch (e: java.lang.Exception) {
+            stopSelf()
         }
         return START_STICKY
     }
@@ -136,12 +144,6 @@ class LedgerService : Service() {
             .build()
     }
 
-    private fun startRandomEventGenerator() {
-        CoroutineScope(BACKGROUND.asCoroutineDispatcher()).launch {
-           generateRandomEvents()
-        }
-    }
-
     private suspend fun generateRandomEvents() {
         for (i: Int in 0 until 100) {
             Log.i(loggingTag, "Generating event $i")
@@ -152,7 +154,17 @@ class LedgerService : Service() {
     }
 
     private suspend fun broadcastData() {
-
+        for (i: Int in 0 until 100) {
+            if (iotaConnector != null) {
+                Log.i(loggingTag, "Generating data sample $i")
+                iotaConnector?.sendData(
+                    Metric20("pavlos.android.random", Random().nextInt() % 30)
+                        .setData(Metric20.TagKey.MTYPE, "int")
+                        .setData(Metric20.TagKey.UNIT, "random_source"),
+                    blockUntilConfirmation = true, asyncConfirmation = true)
+            }
+            delay(5 * 1000)
+        }
     }
 
 }
