@@ -8,19 +8,18 @@
         tools:context="org.hermes.activities.SetupActivity">
 
     <Button
-            android:text="@string/setupButtonText"
+            android:text="@string/setup_button_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/setup_button"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/setup_verify_pin_input"
-            app:layout_constraintStart_toStartOf="parent"
-            android:layout_marginStart="8dp"
             app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginEnd="8dp"/>
+            android:layout_marginEnd="8dp" app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginStart="8dp"/>
 
     <TextView
-            android:text="@string/app_name"
+            android:text="@string/setup_form_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/setup_title"
@@ -32,7 +31,7 @@
             app:layout_constraintHorizontal_bias="0.501"
             app:layout_constraintTop_toTopOf="parent"
             android:layout_marginTop="36dp"
-            tools:text="@string/app_name"/>
+            tools:text="@string/setup_form_title"/>
 
     <EditText
             android:layout_width="wrap_content"
@@ -40,11 +39,11 @@
             android:inputType="numberPassword"
             android:ems="10"
             android:id="@+id/setup_pin_input"
-            android:layout_marginEnd="36dp"
-            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/setup_title"
             app:layout_constraintBottom_toTopOf="@+id/setup_verify_pin_input"
-            android:layout_marginTop="8dp"/>
+            android:layout_marginTop="8dp" android:hint="@string/set_pin" android:layout_marginStart="8dp"
+            app:layout_constraintStart_toStartOf="parent" android:layout_marginEnd="8dp"
+            app:layout_constraintEnd_toEndOf="parent"/>
 
     <EditText
             android:layout_width="wrap_content"
@@ -52,39 +51,9 @@
             android:inputType="numberPassword"
             android:ems="10"
             android:id="@+id/setup_verify_pin_input"
-            android:layout_marginEnd="36dp"
-            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/setup_pin_input"
-            app:layout_constraintBottom_toTopOf="@+id/setup_button"/>
-
-    <TextView
-            android:text="PIN:"
-            android:layout_width="wrap_content"
-            android:layout_height="19dp"
-            android:id="@+id/pin_text"
-            tools:text="PIN:"
-            app:layout_constraintEnd_toStartOf="@+id/setup_pin_input"
-            android:layout_marginEnd="8dp"
-            app:layout_constraintStart_toStartOf="parent"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
-            app:layout_constraintTop_toBottomOf="@+id/setup_title"
-            android:layout_marginBottom="8dp"
-            app:layout_constraintBottom_toTopOf="@+id/setup_verify_pin_input"/>
-
-    <TextView
-            android:text="Repeat PIN:"
-            android:layout_width="wrap_content"
-            android:layout_height="19dp"
-            android:id="@+id/verify_pin_text"
-            tools:text="Repeat PIN:"
-            app:layout_constraintEnd_toStartOf="@+id/setup_verify_pin_input"
-            android:layout_marginEnd="8dp"
-            app:layout_constraintStart_toStartOf="parent"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
-            app:layout_constraintTop_toBottomOf="@+id/setup_pin_input"
-            android:layout_marginBottom="8dp"
-            app:layout_constraintBottom_toTopOf="@+id/setup_button"/>
+            app:layout_constraintBottom_toTopOf="@+id/setup_button" android:hint="@string/reset_pin"
+            app:layout_constraintStart_toStartOf="parent" android:layout_marginStart="8dp"
+            app:layout_constraintEnd_toEndOf="parent" android:layout_marginEnd="8dp"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
