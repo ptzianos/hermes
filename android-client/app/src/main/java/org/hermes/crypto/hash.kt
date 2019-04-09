@@ -68,15 +68,6 @@ object PasswordHasher {
         return HashedPassword(hash = hash)
     }
 
-    fun isPasswordValid(password: CharArray): Boolean {
-        val storedHash = unPackHash("")
-        val (hashingAlgo, iterations, salt, _) = storedHash
-        if (hashingAlgo != CryptoAlgorithms.PBKDF2_HMC_SHA1) {
-            throw WrongHashingAlgoException()
-        }
-        return storedHash == hashPassword(password, salt = salt, iterations = iterations)
-    }
-
     fun bytesToHex(byteArray: ByteArray): String {
         return byteArray
                 .map { b: Byte -> String.format("%02X", b) }
