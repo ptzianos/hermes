@@ -4,6 +4,7 @@
     <!-- Strings related to login -->
     <string name="prompt_pin">Pin (123456)</string>
     <string name="action_sign_in">Sign in</string>
+    <string name="welcome">Welcome again</string>
     <string name="error_invalid_email">This pin is incorrect</string>
     <string name="error_field_required">This field is required</string>
     <string name="title_activity_setup">SetupActivity</string>
