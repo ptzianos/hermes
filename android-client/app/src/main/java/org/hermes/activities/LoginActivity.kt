@@ -38,7 +38,7 @@ class LoginActivity : AppCompatActivity() {
             viewModel.value.isFormValid.observe(this, Observer { valid ->
                 if (valid) {
                     login_pin_input.error = null
-                    repository.unsealed()
+                    repository.unlockCredentials(pinSetupInput.toString())
                     startActivity(Intent(this, EventActivity::class.java))
                 }
             })
