@@ -36,10 +36,10 @@ class HermesRepository(private val application: Application) {
     }
 
     fun generateCredentials(pin: String): Boolean {
-        val hashedPin = PasswordHasher.hashPassword(pin.toCharArray())
+        val hashedPin = PasswordHasher.hashPassword(pin.toCharArray()).toString()
         val seed = Seed.new()
         val success = sharedPref.edit()
-            .putString(application.getString(R.string.auth_hashed_pin), hashedPin.toString())
+            .putString(application.getString(R.string.auth_hashed_pin), hashedPin)
             .putString(application.getString(R.string.auth_seed), seed.toString())
             .commit()
         if (!success) {
@@ -59,7 +59,7 @@ class HermesRepository(private val application: Application) {
     fun checkPIN(pin: String): Boolean {
         val hashedPin = PasswordHasher.hashPassword(pin.toCharArray())
         val storedPin = sharedPref.getString(application.getString(R.string.auth_hashed_pin), "")
-        return storedPin != null && (storedPin as String).toByteArray().contentEquals(hashedPin.hash)
+        return storedPin == hashedPin.toString()
     }
 
     /**
