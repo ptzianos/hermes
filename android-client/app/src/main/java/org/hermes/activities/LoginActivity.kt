@@ -2,10 +2,7 @@ package org.hermes.activities
 
 import android.content.Intent
 import android.os.Bundle
-import android.text.Editable
-import android.text.TextWatcher
 import android.util.Log
-import android.widget.EditText
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
@@ -38,7 +35,7 @@ class LoginActivity : AppCompatActivity() {
             viewModel.value.isFormValid.observe(this, Observer { valid ->
                 if (valid) {
                     login_pin_input.error = null
-                    repository.unlockCredentials(pinSetupInput.toString())
+                    repository.unlockCredentials(login_pin_input.text.toString())
                     startActivity(Intent(this, EventActivity::class.java))
                 }
             })
