@@ -70,7 +70,7 @@ class SetupActivity : AppCompatActivity() {
             errorsInForm = true
             pinSetupInputVerify.error = "The two fields must be equal"
         }
-        if (!errorsInForm && repository.generateCredentials(pinSetupInput.toString())) {
+        if (!errorsInForm && repository.generateCredentials(pinSetupInput.text.toString())) {
             repository.unlockCredentials(pinSetupInput.toString())
             goToEventPage()
         }
