@@ -36,8 +36,6 @@ class HermesRepository(private val application: Application) {
     }
 
     fun generateCredentials(pin: String): Boolean {
-        val sharedPref = application.getSharedPreferences(application.getString(R.string.auth_preference_key),
-                                                          Context.MODE_PRIVATE)
         val hashedPin = PasswordHasher.hashPassword(pin.toCharArray())
         val seed = Seed.new()
         val success = sharedPref.edit()
@@ -69,14 +67,14 @@ class HermesRepository(private val application: Application) {
      * false otherwise.
      */
     fun credentialsSet(): Boolean {
-        val seedAvailable = sharedPref.getString(application.getString(R.string.auth_seed), "")
-                                      .isNullOrBlank()
-        val hashedPinAvailable = sharedPref.getString(application.getString(R.string.auth_hashed_pin), "")
-                                           .isNullOrBlank()
-        if (seedAvailable != hashedPinAvailable) {
+        val seedEmpty = sharedPref.getString(application.getString(R.string.auth_seed), "")
+                                  .isNullOrBlank()
+        val hashedPinEmpty = sharedPref.getString(application.getString(R.string.auth_hashed_pin), "")
+                                       .isNullOrBlank()
+        if (seedEmpty != hashedPinEmpty) {
             Log.e(loggingTag, "Application is in an incorrect state. Either seed or pin not available!")
         }
-        return seedAvailable && hashedPinAvailable
+        return !(seedEmpty && hashedPinEmpty)
     }
 
     fun unsealed(): Boolean {
