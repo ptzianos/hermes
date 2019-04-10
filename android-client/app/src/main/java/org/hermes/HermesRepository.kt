@@ -87,6 +87,10 @@ class HermesRepository(private val application: Application) {
     fun unlockCredentials(pin: String) {
         if (!unsealed) {
             Log.i(loggingTag, "Unlocking credentials of the application")
+            val seedString = sharedPref.getString(application.getString(R.string.auth_seed), seed.toString())
+            // TODO: notify the called that something failed over here
+            seedString ?: return
+            seed = Seed(seedString.toCharArray())
             startLedgerService()
             unsealed = true
             // TODO: Implement unsealing of encrypted credentials
