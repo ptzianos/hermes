@@ -1,54 +1,160 @@
 package org.hermes
 
 import android.app.*
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.os.Binder
+import android.content.ServiceConnection
 import android.os.Build
 import android.os.IBinder
-import android.os.Messenger
 import android.util.Log
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import java.security.SecureRandom
+import java.util.*
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.locks.ReentrantLock
 import java.util.concurrent.TimeUnit
+import kotlin.concurrent.withLock
 import kotlinx.coroutines.*
 
 import org.hermes.activities.LoginActivity
-import org.hermes.entities.Event
+import org.hermes.client.IHermesService
 import org.hermes.iota.Seed
 import org.hermes.ledgers.IOTAConnector
-import java.util.*
 
 
 class LedgerService : Service() {
 
-    enum class MessageType(val type: Int) {
-        REGISTER_CLIENT(1), UNREGISTER_CLIENT(2), SEND_SAMPLE(3)
+    enum class ClientError(val errorStr: String) {
+        NOT_REGISTERED("not_registered"),
+        ALREADY_REGISTERED("already_registered"),
+        NO_DATA_ID("no_data_id"),
+        NO_TYPE("no_type"),
+        NO_UNIT("no_unit"),
+        NO_UUID("no_uuid")
     }
 
-    /**
-     * Class for clients to access.  Because we know this service always
-     * runs in the same process as its clients, we don't need to deal with
-     * IPC.
-     */
-    inner class LocalBinder: Binder() {
-        fun getService(): LedgerService {
-            return this@LedgerService
+    data class Client(val dataId: String, val unit: String, val mtype: String, val what: String?, val device: String?) {
+        private var i = 0
+        private val lock = ReentrantLock()
+        // TODO: Make this configurable
+        private val sampleSize = 10
+        private var buffer = Array<Metric20?>(sampleSize) { null }
+
+        /**
+         * Put a new sample in the buffer.
+         * The buffer is a ring buffer so if the client exceeds the available number of
+         * samples, the oldest sample will be overwritten.
+         */
+        fun putSample(metric: Metric20) = lock.withLock {
+            i = (i + 1) % sampleSize
+            buffer[i] = metric
+        }
+
+        /**
+         * Return a clean buffer with all the samples
+         */
+        fun flushData(): Array<Metric20?> = lock.withLock {
+            val tempBuffer = Array<Metric20?>(sampleSize) { null }
+            for (j in 0 until sampleSize) {
+                tempBuffer[j] = buffer[(i + j) % sampleSize]
+                buffer[i] = null
+            }
+            return tempBuffer
         }
     }
 
+    private val binder = object : IHermesService.Stub() {
+
+        override fun register(dataId: String?, unit: String?, mtype: String?, what: String?, device: String?): String =
+            when {
+                dataId == null -> ClientError.NO_DATA_ID.errorStr
+                unit == null -> ClientError.NO_UNIT.errorStr
+                mtype == null -> ClientError.NO_TYPE.errorStr
+                clientRegistry.containsValue(Client(dataId, unit, mtype, what, device)) ->
+                    ClientError.ALREADY_REGISTERED.errorStr
+                else -> {
+                    val uuid = UUID.randomUUID().toString()
+                    clientRegistry[uuid] = Client(dataId, unit, mtype, what, device)
+                    uuid
+                }
+            }
+
+        override fun deregister(uuid: String?): String =
+            when (uuid) {
+                null -> ClientError.NO_UUID.errorStr
+                else -> {
+                    clientRegistry.remove(uuid)
+                    ""
+                }
+            }
+
+        override fun sendDataDouble(uuid: String?, value: Double, http_method: String?,
+                                    http_code: String?, result: String?, stat: String?, direction: String?,
+                                    file: String?, line: Int, env: String?): String =
+            when {
+                uuid == null -> ClientError.NO_UUID.errorStr
+                !clientRegistry.containsKey(uuid) -> ClientError.NOT_REGISTERED.errorStr
+                else -> {
+                    Log.d(loggingTag, "Got a new sample from client with uuid $uuid")
+                    // TODO: Add a check to ensure that the data are in the expected form
+                    val client = clientRegistry[uuid] as Client
+                    val newSample = Metric20(client.dataId, value)
+                        .setData(Metric20.TagKey.MTYPE, client.mtype)
+                        .setData(Metric20.TagKey.UNIT, client.unit)
+                    client.putSample(newSample)
+                    ""
+                }
+            }
+
+        override fun sendDataString(uuid: String?, value: String?, http_method: String?,
+                                    http_code: String?, result: String?, stat: String?, direction: String?,
+                                    file: String?, line: Int, env: String?): String  =
+            when {
+                uuid == null -> ClientError.NO_UUID.errorStr
+                !clientRegistry.containsKey(uuid) -> ClientError.NOT_REGISTERED.errorStr
+                else -> {
+                    Log.d(loggingTag, "Got a new sample from client with uuid $uuid")
+                    // TODO: Add a check to ensure that the data are in the expected form
+                    val client = clientRegistry[uuid] as Client
+                    val newSample = Metric20(client.dataId, value.toString())
+                        .setData(Metric20.TagKey.MTYPE, client.mtype)
+                        .setData(Metric20.TagKey.UNIT, client.unit)
+                    client.putSample(newSample)
+                    ""
+                }
+            }
+    }
+
+    var iHermesService: IHermesService? = null
+
+    val mConnectionToSelf = object : ServiceConnection {
+
+        override fun onServiceConnected(className: ComponentName, service: IBinder) {
+            iHermesService = IHermesService.Stub.asInterface(service)
+            Log.i(loggingTag,
+                "Connection has been established with self. Beginning data sampling from built-in sensors")
+            CoroutineScope(BACKGROUND.asCoroutineDispatcher()).launch { generateData() }
+        }
+
+        override fun onServiceDisconnected(className: ComponentName) {
+            Log.e(loggingTag, "Service has unexpectedly disconnected")
+            iHermesService = null
+        }
+    }
+
+
     private val loggingTag = "LedgerService"
+
     private val db: Lazy<HermesRoomDatabase> = lazy { HermesRoomDatabase.getDatabase(applicationContext) }
     private val repository = lazy { HermesRepository.getInstance(application) }
     private var mNotificationManager: NotificationManager? = null
-    private val mBinder: LocalBinder? = null
-    private var mClients = ArrayList<Messenger>()
-//    private val mMessenger = Messenger(IncomingHandler())
     private val PRNG = SecureRandom.getInstanceStrong()
     private val channelId = PRNG.nextInt().toString()
     private var foregroundNotificationId: Int = 15970
     private var iotaConnector: IOTAConnector? = null
+    private val clientRegistry = ConcurrentHashMap<String, Client>()
 
     override fun onCreate() {
         createNotificationChannel()
@@ -56,7 +162,7 @@ class LedgerService : Service() {
 
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
         Log.i(loggingTag, "Received start id $startId: $intent")
-        Log.i(loggingTag, "Showing notification for Hermes service foregrounding")
+        Log.d(loggingTag, "Showing notification for Hermes service foregrounding")
         startForeground(foregroundNotificationId, buildNotification())
         try {
             // Initialize connection
@@ -64,9 +170,16 @@ class LedgerService : Service() {
             iotaConnector = IOTAConnector(protocol = "https", uri = "nodes.thetangle.org",
                 port = "443", seed = repository.value.getSeed() as Seed, db = db.value
             )
-            // Start coroutine to broadcast data
+            // Start co-routine to broadcast data
             CoroutineScope(BACKGROUND.asCoroutineDispatcher()).launch { broadcastData() }
+            CoroutineScope(BACKGROUND.asCoroutineDispatcher()).launch {
+                Log.d(loggingTag, "Creating intent for Ledger service connection")
+                val iLedgerIntent = Intent(this@LedgerService, LedgerService::class.java)
+                iLedgerIntent.action = LedgerService::class.java.name
+                baseContext.bindService(iLedgerIntent, mConnectionToSelf, Context.BIND_AUTO_CREATE)
+            }
         } catch (e: java.lang.Exception) {
+            Log.e(loggingTag, "There was an exception while trying to start the service $e")
             stopSelf()
         }
         return START_STICKY
@@ -91,11 +204,7 @@ class LedgerService : Service() {
     }
 
     override fun onBind(intent: Intent?): IBinder? {
-//        bindService(Intent(Binding.this,
-//            MessengerService.class), mConnection, Context.BIND_AUTO_CREATE)
-//        mIsBound = true;
-//        mCallbackText.setText("Binding.");
-        return mBinder
+        return binder
     }
 
     /**
@@ -144,27 +253,43 @@ class LedgerService : Service() {
             .build()
     }
 
-    private suspend fun generateRandomEvents() {
-        for (i: Int in 0 until 100) {
-            Log.i(loggingTag, "Generating event $i")
-            val event = Event(action = "random", resource = "iota", extraInfo = "whatevs")
-            db.value.eventDao().insertAll(event)
-            delay(1000)
+    private suspend fun generateData() {
+        val uuid = iHermesService?.register("android.random", "int", "random_source", null, null)
+        if (uuid == null && uuid != ClientError.ALREADY_REGISTERED.errorStr
+            && uuid != ClientError.NO_DATA_ID.errorStr && uuid != ClientError.NO_TYPE.errorStr
+            && uuid != ClientError.NO_UNIT.errorStr)
+        {
+            Log.e(loggingTag, "There was an error while trying to connect to the service")
+            return
         }
-    }
-
-    private suspend fun broadcastData() {
-        for (i: Int in 0 until 100) {
-            if (iotaConnector != null) {
-                Log.i(loggingTag, "Generating data sample $i")
-                iotaConnector?.sendData(
-                    Metric20("pavlos.android.random", Random().nextInt() % 30)
-                        .setData(Metric20.TagKey.MTYPE, "int")
-                        .setData(Metric20.TagKey.UNIT, "random_source"),
-                    blockUntilConfirmation = true, asyncConfirmation = true)
-            }
+        Log.i(loggingTag, "Starting generating data with uuid $uuid")
+        for (i: Int in 0 until 10) {
+            Log.d(loggingTag, "Generating a data sample for the Hermes Service")
+            iHermesService?.sendDataDouble(uuid, (Random().nextInt() % 30).toDouble(), null, null,
+                null, null, null, null, -1, null)
             delay(5 * 1000)
         }
     }
 
+    private suspend fun broadcastData() {
+        while (true) {
+            Log.d(loggingTag, "Hermes service looking at the registered client data")
+            for ((uuid, client) in clientRegistry) {
+                Log.d(loggingTag, "Checking data of client with id $uuid")
+                val ar = client.flushData()
+                // TODO: get all the samples not just the first one
+                val sample = ar[0]
+                if (sample != null) {
+                    Log.d(loggingTag, "There is a sample to broadcast from client $uuid")
+                    if (iotaConnector != null) iotaConnector?.sendData(
+                        sample,
+                        blockUntilConfirmation = true,
+                        asyncConfirmation = true
+                    )
+                    else Log.d(loggingTag, "There is no connector to use to send the data")
+                }
+            }
+            delay(10 * 1000)
+        }
+    }
 }
