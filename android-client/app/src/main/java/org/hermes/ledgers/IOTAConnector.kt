@@ -13,11 +13,11 @@ import org.apache.commons.lang3.StringUtils
 import org.threeten.bp.OffsetDateTime
 
 import org.hermes.BACKGROUND
+import org.hermes.entities.Event
 import org.hermes.HermesRoomDatabase
 import org.hermes.iota.IOTA
 import org.hermes.iota.Seed
 import org.hermes.Metric20
-import org.hermes.entities.Event
 import org.hermes.utils.splitInChunks
 import org.hermes.utils.stripPaddingOfTrytes
 import org.hermes.utils.toTrytes
