@@ -10,11 +10,11 @@ import org.hermes.crypto.PasswordHasher
 import org.hermes.iota.Seed
 
 
-class HermesRepository(private val application: Application) {
+class HermesRepository(private val application: Application,
+                       val db: HermesRoomDatabase = HermesRoomDatabase.getDatabase(application)) {
 
     private val loggingTag = "HermesRepository"
 
-    val db = HermesRoomDatabase.getDatabase(application)
     private var seed: Seed? = null
     private var keypair: KeyPair? = null
     private var unsealed: Boolean = false
@@ -37,17 +37,14 @@ class HermesRepository(private val application: Application) {
 
     fun generateCredentials(pin: String): Boolean {
         val hashedPin = PasswordHasher.hashPassword(pin.toCharArray()).toString()
-        val seed = Seed.new()
+        seed = Seed.new()
         val success = sharedPref.edit()
             .putString(application.getString(R.string.auth_hashed_pin), hashedPin)
             .putString(application.getString(R.string.auth_seed), seed.toString())
             .commit()
-        if (!success) {
-            Log.e(loggingTag, "There was come error while trying to store the user's hashed pin")
-        } else {
-            Log.i(loggingTag, "Committed successfully the hashed pin and the seed of the user")
-        }
-        this.seed = seed
+        // TODO: Throw a more visible error over here
+        if (!success) Log.e(loggingTag, "There was some error while trying to store the user's hashed pin")
+        else Log.i(loggingTag, "Committed successfully the hashed pin and the seed of the user")
         return success
     }
 
