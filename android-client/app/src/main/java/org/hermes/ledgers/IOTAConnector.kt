@@ -39,12 +39,28 @@ class IOTAConnector(val protocol: String, val uri: String, val port: String, val
                 .port(port)
                 .build()
         } catch(e: Exception) {
-            Log.e(loggingTag, "There was an error while trying to initialize the connection: ${e}")
+            Log.e(loggingTag, "There was an error while trying to initialize the connection: $e")
             throw e
         }
     }
 
-    fun sendData(sample: Metric20, asyncConfirmation: Boolean, blockUntilConfirmation: Boolean) {
+    /**
+     * Convert the data into strings separated by `::`, then convert them into trytes
+     * and split into chunks of size equal to 2187.
+     */
+    private fun samplesToTrytes(vararg samples: Metric20): MutableList<String> {
+        if (samples.isEmpty())
+            throw Exception("No samples provided")
+        return samples
+            .map { it.toCarbon20String() }
+            .joinToString(separator = "::")
+            .toTrytes()
+            .splitInChunks(IOTA.Transaction.SIGNATURE_MESSAGE_FRAGMENT)
+            .map { StringUtils.rightPad(it, Constants.MESSAGE_LENGTH, '9') }
+            .toMutableList()
+    }
+
+    fun sendData(vararg samples: Metric20, asyncConfirmation: Boolean, blockUntilConfirmation: Boolean) {
         try {
             // Validate seed
             if (!InputValidator.isValidSeed(seed.toString())) {
@@ -53,6 +69,7 @@ class IOTAConnector(val protocol: String, val uri: String, val port: String, val
             }
 
             // TODO: Save the index of the previous transaction to reduce search time
+//            val newAddress = IotaAPIUtils.newAddress(seed, security, i, checksum, customCurl.clone())
             Log.i(loggingTag, "Getting address from Tangle")
             val address = api.getNextAvailableAddress(seed.toString(), 2, true).first()
             if (address == null) {
@@ -63,22 +80,18 @@ class IOTAConnector(val protocol: String, val uri: String, val port: String, val
             }
 
             val normalizedAddress = Checksum.removeChecksum(address)
+            Log.d(loggingTag, "Address that will be used for the next sample broadcast is $normalizedAddress")
             val depth = 3
             val minWeightMagnitude = 14
             val timestamp = OffsetDateTime.now().toEpochSecond()
 
-            val carbon20SignatureFragments = sample
-                .toCarbon20String()
-                .toTrytes()
-                .splitInChunks(IOTA.Transaction.SIGNATURE_MESSAGE_FRAGMENT)
-                .map { StringUtils.rightPad(it, Constants.MESSAGE_LENGTH, '9') }
+            val carbon20SignatureFragments = samplesToTrytes(*samples)
+            // Create empty transactions that will form the bundle. The number of transactions must be equal to the
+            // number of chunks returned by the samplesToTrytes method.
+            val carbon20Transactions = (0 until carbon20SignatureFragments.size)
+                .map{ Transaction(normalizedAddress, 0, EMPTY_TAG, timestamp) }
                 .toMutableList()
-
-            val carbon20Transactions = carbon20SignatureFragments
-                .map{
-                    Transaction(normalizedAddress, 0, EMPTY_TAG, timestamp)
-                }
-                .toMutableList()
+            Log.d(loggingTag, "Bundle will contain ${carbon20SignatureFragments.size} transactions")
 
             val bundle = Bundle(carbon20Transactions, carbon20Transactions.size).apply {
                 this.finalize(null)
@@ -99,12 +112,9 @@ class IOTAConnector(val protocol: String, val uri: String, val port: String, val
                 depth, minWeightMagnitude, null)
 
             if (asyncConfirmation) {
-                if (blockUntilConfirmation) {
-                    runBlocking { checkResultOfTransactions(trxs) }
-                } else {
-                    CoroutineScope(BACKGROUND.asCoroutineDispatcher())
-                        .launch { checkResultOfTransactions(trxs) }
-                }
+                if (blockUntilConfirmation) runBlocking { checkResultOfTransactions(trxs) }
+                else CoroutineScope(BACKGROUND.asCoroutineDispatcher())
+                    .launch { checkResultOfTransactions(trxs) }
             }
         } catch (e: Exception) {
             Log.e(loggingTag, "There was an error while trying to broadcast a sample to IOTA: $e")
