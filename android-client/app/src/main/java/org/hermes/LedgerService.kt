@@ -275,19 +275,13 @@ class LedgerService : Service() {
         while (true) {
             Log.d(loggingTag, "Hermes service looking at the registered client data")
             for ((uuid, client) in clientRegistry) {
-                Log.d(loggingTag, "Checking data of client with id $uuid")
-                val ar = client.flushData()
-                // TODO: get all the samples not just the first one
-                val sample = ar[0]
-                if (sample != null) {
-                    Log.d(loggingTag, "There is a sample to broadcast from client $uuid")
-                    if (iotaConnector != null) iotaConnector?.sendData(
-                        sample,
-                        blockUntilConfirmation = true,
-                        asyncConfirmation = true
-                    )
-                    else Log.d(loggingTag, "There is no connector to use to send the data")
-                }
+                Log.d(loggingTag, "Broadcasting data of client with id $uuid")
+                if (iotaConnector != null) iotaConnector?.sendData(
+                    *client.flushData(),
+                    blockUntilConfirmation = true,
+                    asyncConfirmation = true
+                )
+                else Log.d(loggingTag, "There is no connector to use to broadcast the data")
             }
             delay(10 * 1000)
         }

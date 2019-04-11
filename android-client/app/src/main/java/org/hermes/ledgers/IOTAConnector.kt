@@ -48,10 +48,11 @@ class IOTAConnector(val protocol: String, val uri: String, val port: String, val
      * Convert the data into strings separated by `::`, then convert them into trytes
      * and split into chunks of size equal to 2187.
      */
-    private fun samplesToTrytes(vararg samples: Metric20): MutableList<String> {
+    private fun samplesToTrytes(vararg samples: Metric20?): MutableList<String> {
         if (samples.isEmpty())
             throw Exception("No samples provided")
         return samples
+            .filterNotNull()
             .map { it.toCarbon20String() }
             .joinToString(separator = "::")
             .toTrytes()
@@ -60,7 +61,7 @@ class IOTAConnector(val protocol: String, val uri: String, val port: String, val
             .toMutableList()
     }
 
-    fun sendData(vararg samples: Metric20, asyncConfirmation: Boolean, blockUntilConfirmation: Boolean) {
+    fun sendData(vararg samples: Metric20?, asyncConfirmation: Boolean, blockUntilConfirmation: Boolean) {
         try {
             // Validate seed
             if (!InputValidator.isValidSeed(seed.toString())) {
