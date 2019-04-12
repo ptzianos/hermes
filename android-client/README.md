@@ -1,7 +1,9 @@
 ## Setup
 
 In order to build the application you need to have both Android SDK and NDK setup in your system. Go 
-[here](https://developer.android.com/ndk/guides/) for information about how to do that.
+[here](https://developer.android.com/ndk/guides/) for information about how to do that. Make sure you also
+have Gradle and Open JDK 8 installed. If you have multiple versions of OpenJDK installed there might be a 
+problem with the Dagger libraries.
 
 ### Android SDK
 
