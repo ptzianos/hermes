@@ -4,15 +4,17 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.paging.Config
 import androidx.paging.toLiveData
+import javax.inject.Inject
 
 import org.hermes.HermesRepository
 
 
 class EventViewModel(application: Application): AndroidViewModel(application) {
 
-    private val hermesRepository = HermesRepository(application)
+    @Inject
+    lateinit var hermesRepository: HermesRepository
 
-    val allEvents = hermesRepository.eventDao.getAllLivePaged().toLiveData(Config(
+    val allEvents = hermesRepository.db.eventDao().getAllLivePaged().toLiveData(Config(
         /**
          * A good page size is a value that fills at least a screen worth of content on a large
          * device so the User is unlikely to see a null item.

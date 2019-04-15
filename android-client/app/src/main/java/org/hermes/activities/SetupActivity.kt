@@ -5,6 +5,9 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
 import androidx.appcompat.app.AppCompatActivity
+import dagger.android.AndroidInjection
+import dagger.Module
+import javax.inject.Inject
 
 import org.hermes.HermesRepository
 import org.hermes.R
@@ -12,10 +15,16 @@ import org.hermes.R
 
 class SetupActivity : AppCompatActivity() {
 
+    @Module
+    abstract class DaggerModule
+
     private val loggingTag = "SetupActivity"
-    private val repository by lazy { HermesRepository.getInstance(application) }
+
+    @Inject
+    lateinit var repository: HermesRepository
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        AndroidInjection.inject(this)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_setup)
         if (repository.credentialsSet()) {

@@ -1,8 +1,6 @@
 package org.hermes
 
-import android.content.Context
 import androidx.room.Database
-import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 
@@ -28,27 +26,4 @@ abstract class HermesRoomDatabase : RoomDatabase() {
     abstract fun eventDao(): EventDao
     abstract fun marketplaceDao(): MarketplaceDao
     abstract fun userDao(): UserDao
-
-    companion object {
-        @Volatile
-        @JvmStatic
-        private var INSTANCE: HermesRoomDatabase? = null
-
-        // TODO: This needs to be injected using Dagger
-        @JvmStatic
-        fun getDatabase(applicationContext: Context): HermesRoomDatabase {
-            if (INSTANCE == null) {
-                synchronized(HermesRoomDatabase::class.java) {
-                    if (INSTANCE == null) {
-                        INSTANCE = Room.databaseBuilder(applicationContext,
-                                                        HermesRoomDatabase::class.java,
-                                                        "hermes_database")
-                                       .fallbackToDestructiveMigration()
-                                       .build()
-                    }
-                }
-            }
-            return INSTANCE as HermesRoomDatabase
-        }
-    }
 }

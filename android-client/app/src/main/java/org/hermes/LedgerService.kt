@@ -15,6 +15,7 @@ import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.locks.ReentrantLock
 import java.util.concurrent.TimeUnit
+import javax.inject.Inject
 import kotlin.concurrent.withLock
 import kotlinx.coroutines.*
 
@@ -147,14 +148,17 @@ class LedgerService : Service() {
 
     private val loggingTag = "LedgerService"
 
-    private val db: Lazy<HermesRoomDatabase> = lazy { HermesRoomDatabase.getDatabase(applicationContext) }
-    private val repository = lazy { HermesRepository.getInstance(application) }
     private var mNotificationManager: NotificationManager? = null
     private val PRNG = SecureRandom.getInstanceStrong()
     private val channelId = PRNG.nextInt().toString()
     private var foregroundNotificationId: Int = 15970
     private var iotaConnector: IOTAConnector? = null
     private val clientRegistry = ConcurrentHashMap<String, Client>()
+
+    @Inject
+    lateinit var db: HermesRoomDatabase
+    @Inject
+    lateinit var repository: HermesRepository
 
     override fun onCreate() {
         createNotificationChannel()
@@ -168,7 +172,7 @@ class LedgerService : Service() {
             // Initialize connection
             // TODO: This should be provided as configuration and not be hard-coded
             iotaConnector = IOTAConnector(protocol = "https", uri = "nodes.thetangle.org",
-                port = "443", seed = repository.value.getSeed() as Seed, db = db.value
+                port = "443", seed = repository.getSeed() as Seed, db = db
             )
             // Start co-routine to broadcast data
             CoroutineScope(BACKGROUND.asCoroutineDispatcher()).launch { broadcastData() }

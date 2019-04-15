@@ -9,7 +9,7 @@ import javax.inject.Inject
 import org.hermes.HermesRepository
 
 
-class LoginViewModel(application: Application): AndroidViewModel(application) {
+class SetupViewModel(application: Application): AndroidViewModel(application) {
 
     @Inject
     lateinit var hermesRepository: HermesRepository
@@ -22,6 +22,21 @@ class LoginViewModel(application: Application): AndroidViewModel(application) {
     var pin: String? = null
         set(value) {
             field = value
-            _isFormValid.postValue(value != null && !value.isBlank() && hermesRepository.checkPIN(value))
+            validateForm()
         }
+
+    var pinRepeat: String? = null
+        set(value) {
+            field = value
+            validateForm()
+        }
+
+    private fun validateForm() {
+        if (pin != null && pin == pinRepeat) {
+            // Add a check to ensure the length of the pin is not too small
+            _isFormValid.postValue(true)
+        } else {
+            _isFormValid.postValue(false)
+        }
+    }
 }

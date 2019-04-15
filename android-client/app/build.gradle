@@ -70,13 +70,17 @@ entangled repository is on branch: ${res.toString()}
 }
 
 dependencies {
+    // TODO: Split all the version numbers into the android-client/build.gradle
     api 'com.github.iotaledger:iota-java:1.0.0-beta3'
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation 'androidx.appcompat:appcompat:1.0.2'
     implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
+    implementation 'androidx.core:core-ktx:1.0.1'
     implementation "androidx.lifecycle:lifecycle-extensions:$rootProject.ext.archLifecycleVersion"
     implementation "androidx.paging:paging-runtime-ktx:2.1.0"
     implementation "androidx.room:room-runtime:${rootProject.ext.room_version}"
+    implementation "com.google.dagger:dagger:2.22.1"
+    implementation "com.google.dagger:dagger-android-support:2.22.1"
     implementation "com.squareup.moshi:moshi-kotlin:1.8.0"
     implementation 'com.squareup.retrofit2:retrofit:2.5.0'
     implementation "org.jetbrains.kotlin:kotlin-reflect:${rootProject.ext.kotlin_version}"
@@ -86,6 +90,10 @@ dependencies {
     implementation "org.slf4j:slf4j-simple:1.6.1"
     implementation 'org.threeten:threetenbp:1.3.8'
     kapt "androidx.room:room-compiler:${rootProject.ext.room_version}"
+    kapt "com.google.dagger:dagger-android-support:2.22.1"
+    kapt "com.google.dagger:dagger-android-processor:2.22.1"
+    kapt "com.google.dagger:dagger-compiler:2.22.1"
+    testImplementation "androidx.arch.core:core-testing:2.0.1"
     testImplementation "androidx.test.espresso:espresso-core:3.2.0-alpha03"
     testImplementation "androidx.test.ext:junit:1.1.0"
     testImplementation "androidx.test:runner:1.2.0-alpha03"

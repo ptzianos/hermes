@@ -6,6 +6,9 @@ import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import dagger.android.AndroidInjection
+import dagger.Module
+import javax.inject.Inject
 import kotlinx.android.synthetic.main.activity_login.*
 
 import org.hermes.HermesRepository
@@ -13,16 +16,24 @@ import org.hermes.R
 import org.hermes.utils.afterTextChanged
 import org.hermes.viewmodels.LoginViewModel
 
+
 /**
  * A login screen that offers to access the app via pin.
  */
-class LoginActivity : AppCompatActivity() {
+class LoginActivity: AppCompatActivity() {
 
-    private val repository by lazy { HermesRepository.getInstance(application) }
+    @Module
+    abstract class DaggerModule
+
     private val loggingTag = "LoginActivity"
-    private val viewModel: Lazy<LoginViewModel> = lazy { ViewModelProviders.of(this).get(LoginViewModel::class.java) }
+    private val viewModel: Lazy<LoginViewModel> = lazy { ViewModelProviders.of(this)
+        .get(LoginViewModel::class.java) }
+
+    @Inject
+    lateinit var repository: HermesRepository
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        AndroidInjection.inject(this)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
 

@@ -1,39 +1,26 @@
 package org.hermes
 
 import android.app.*
-import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.util.Log
 import java.security.KeyPair
+import javax.inject.Inject
 
 import org.hermes.crypto.PasswordHasher
 import org.hermes.iota.Seed
 
 
-class HermesRepository(private val application: Application,
-                       val db: HermesRoomDatabase = HermesRoomDatabase.getDatabase(application)) {
+class HermesRepository @Inject constructor(val application: Application,
+                                           val db: HermesRoomDatabase,
+                                           val sharedPref: SharedPreferences) {
 
     private val loggingTag = "HermesRepository"
 
     private var seed: Seed? = null
     private var keypair: KeyPair? = null
     private var unsealed: Boolean = false
-    private var ledgerService: LedgerService? = null
     private var ledgerServiceRunning: Boolean = false
-
-    private val sharedPref = application.getSharedPreferences(application.getString(R.string.auth_preference_key),
-                                                              Context.MODE_PRIVATE)
-
-    val eventDao = db.eventDao()
-
-    companion object {
-        @Volatile private var instance: HermesRepository? = null
-
-        fun getInstance(application: Application) =
-            instance ?: synchronized(this) {
-                instance ?: HermesRepository(application).also { instance = it }
-            }
-    }
 
     fun generateCredentials(pin: String): Boolean {
         val hashedPin = PasswordHasher.hashPassword(pin.toCharArray()).toString()
@@ -100,7 +87,6 @@ class HermesRepository(private val application: Application,
     private fun startLedgerService() {
         if (!ledgerServiceRunning) {
             Log.i(loggingTag,"Ledger service is not running. Starting it now")
-            ledgerService = LedgerService()
             val intent = Intent(application.applicationContext, LedgerService::class.java)
             application.startForegroundService(intent)
             ledgerServiceRunning = true
