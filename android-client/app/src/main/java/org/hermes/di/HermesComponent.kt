@@ -12,6 +12,8 @@ import javax.inject.Singleton
 import org.hermes.HermesClientApp
 import org.hermes.HermesRepository
 import org.hermes.HermesRoomDatabase
+import org.hermes.viewmodels.EventViewModel
+import org.hermes.viewmodels.LoginViewModel
 
 
 @Singleton
@@ -33,11 +35,18 @@ interface HermesComponent : AndroidInjector<HermesClientApp> {
 
     fun providesSharedPrefs(): SharedPreferences
 
+    fun providesLoginViewModel(): LoginViewModel
+
+    fun providesEventViewModel(): EventViewModel
+
     @Component.Builder
     interface Builder {
 
         @BindsInstance
         fun application(application: Application): Builder
+
+        @BindsInstance
+        fun app(hermesClientApp: HermesClientApp): Builder
 
         fun build(): HermesComponent
     }

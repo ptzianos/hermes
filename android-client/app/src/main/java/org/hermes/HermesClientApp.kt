@@ -5,24 +5,20 @@ import dagger.android.DaggerApplication
 //import com.squareup.leakcanary.LeakCanary
 
 import org.hermes.di.DaggerHermesComponent
-
-
+import org.hermes.di.HermesComponent
 
 
 class HermesClientApp : DaggerApplication() {
 
+    lateinit var daggerHermesComponent: HermesComponent
+
     override fun applicationInjector(): AndroidInjector<out DaggerApplication> {
-        return DaggerHermesComponent
+        daggerHermesComponent = DaggerHermesComponent
             .builder()
             .application(this)
+            .app(this)
             .build()
+        return daggerHermesComponent
     }
-
-//    override fun onCreate() {
-//        super.onCreate()
-//        if (!LeakCanary.isInAnalyzerProcess(this)) {
-//            LeakCanary.install(this)
-//        }
-//    }
 
 }

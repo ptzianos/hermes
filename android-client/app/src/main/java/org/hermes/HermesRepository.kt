@@ -6,11 +6,13 @@ import android.content.SharedPreferences
 import android.util.Log
 import java.security.KeyPair
 import javax.inject.Inject
+import javax.inject.Singleton
 
 import org.hermes.crypto.PasswordHasher
 import org.hermes.iota.Seed
 
 
+@Singleton
 class HermesRepository @Inject constructor(val application: Application,
                                            val db: HermesRoomDatabase,
                                            val sharedPref: SharedPreferences) {

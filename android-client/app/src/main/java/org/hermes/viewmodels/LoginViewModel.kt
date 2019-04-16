@@ -9,10 +9,9 @@ import javax.inject.Inject
 import org.hermes.HermesRepository
 
 
-class LoginViewModel(application: Application): AndroidViewModel(application) {
-
-    @Inject
-    lateinit var hermesRepository: HermesRepository
+class LoginViewModel @Inject constructor(application: Application,
+                                         private val hermesRepository: HermesRepository)
+    : AndroidViewModel(application) {
 
     private val _isFormValid = MutableLiveData<Boolean>()
 

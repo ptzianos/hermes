@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
 import androidx.paging.PagedList
 import androidx.recyclerview.widget.RecyclerView
 import dagger.Module
@@ -13,7 +12,7 @@ import javax.inject.Inject
 
 import org.hermes.adapters.EventRecyclerViewAdapter
 import org.hermes.entities.Event
-import org.hermes.HermesRepository
+import org.hermes.HermesClientApp
 import org.hermes.R
 import org.hermes.viewmodels.EventViewModel
 
@@ -23,14 +22,16 @@ class EventActivity : AppCompatActivity() {
     @Module
     abstract class DaggerModule
 
-    @Inject
-    lateinit var repository: HermesRepository
-
     private val loggingTag = "EventLogActivity"
-    private val mEventViewModel by lazy { ViewModelProviders.of(this).get(EventViewModel::class.java) }
+
+    lateinit var viewModel: EventViewModel
+
+    @Inject
+    lateinit var hermesApplication: HermesClientApp
 
     override fun onCreate(savedInstanceState: Bundle?) {
         AndroidInjection.inject(this)
+        viewModel = hermesApplication.daggerHermesComponent.providesEventViewModel()
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_event_list)
 
@@ -40,7 +41,7 @@ class EventActivity : AppCompatActivity() {
 
         recyclerView.adapter = adapter
 
-        mEventViewModel.allEvents.observe(this, Observer<PagedList<Event>?> {
+        viewModel.allEvents.observe(this, Observer<PagedList<Event>?> {
             Log.i(loggingTag,"Observed change of data")
             adapter.submitList(it)
         })

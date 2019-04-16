@@ -1,15 +1,16 @@
 package org.hermes.activities
 
+import android.app.Application
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
 import dagger.android.AndroidInjection
 import dagger.Module
 import javax.inject.Inject
 import kotlinx.android.synthetic.main.activity_login.*
+import org.hermes.HermesClientApp
 
 import org.hermes.HermesRepository
 import org.hermes.R
@@ -26,14 +27,18 @@ class LoginActivity: AppCompatActivity() {
     abstract class DaggerModule
 
     private val loggingTag = "LoginActivity"
-    private val viewModel: Lazy<LoginViewModel> = lazy { ViewModelProviders.of(this)
-        .get(LoginViewModel::class.java) }
+
+    lateinit var viewModel: LoginViewModel
 
     @Inject
     lateinit var repository: HermesRepository
 
+    @Inject
+    lateinit var hermesApplication: HermesClientApp
+
     override fun onCreate(savedInstanceState: Bundle?) {
         AndroidInjection.inject(this)
+        viewModel = hermesApplication.daggerHermesComponent.providesLoginViewModel()
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
 
@@ -42,8 +47,8 @@ class LoginActivity: AppCompatActivity() {
             goToSetupPage()
         } else {
             initForm()
-            login_pin_input.afterTextChanged { text -> viewModel.value.pin = text?.toString() ?: "" }
-            viewModel.value.isFormValid.observe(this, Observer { valid ->
+            login_pin_input.afterTextChanged { text -> viewModel.pin = text?.toString() ?: "" }
+            viewModel.isFormValid.observe(this, Observer { valid ->
                 if (valid) {
                     login_pin_input.error = null
                     repository.unlockCredentials(login_pin_input.text.toString())
@@ -64,7 +69,7 @@ class LoginActivity: AppCompatActivity() {
     }
 
     private fun initForm() {
-        viewModel.value.pin = null
+        viewModel.pin = null
         login_pin_input.text = null
         login_pin_input.requestFocus()
     }
