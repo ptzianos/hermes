@@ -1,81 +1,67 @@
 package org.hermes.fragments
 
-import androidx.lifecycle.ViewModelProviders
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import dagger.Module
+import dagger.android.support.AndroidSupportInjection
+import org.hermes.HermesClientApp
 
 import org.hermes.adapters.EventRecyclerViewAdapter
 import org.hermes.entities.Event
 import org.hermes.R
 import org.hermes.viewmodels.EventViewModel
+import javax.inject.Inject
 
 
 class EventFragment : Fragment() {
-    companion object {
-        const val ARG_COLUMN_COUNT = "column-count"
 
-        @JvmStatic
-        fun newInstance(columnCount: Int): EventFragment {
-            // Initialize the Fragment
-            val ef  = EventFragment()
-            // Create the Bundle and set the column count
-            val bundle = Bundle()
-            bundle.putInt(ARG_COLUMN_COUNT, columnCount)
-            // Pass the bundle to the Fragment
-            ef.arguments = bundle
-            return ef
-        }
-    }
+    @Module
+    abstract class DaggerModule
 
     private var columnCount = 1
-    private var viewModel: EventViewModel? = null
+
+    @Inject
+    lateinit var application: HermesClientApp
+
+    lateinit var viewModel: EventViewModel
+
     private var listener: EventFragment.OnListFragmentInteractionListener? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        arguments?.let {
-            columnCount = it.getInt(EventFragment.ARG_COLUMN_COUNT)
-        }
+        arguments?.let { columnCount = 1 }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        val view = inflater.inflate(R.layout.event_list_fragment, container, false)
-
-        // Set the adapter
-        if (view is RecyclerView) {
-            with(view) {
-                layoutManager = when {
-                    columnCount <= 1 -> LinearLayoutManager(context)
-                    else -> GridLayoutManager(context, columnCount)
-                }
-                adapter = EventRecyclerViewAdapter()
+        return (inflater.inflate(R.layout.event_list_fragment, container, false) as RecyclerView)
+            .let {
+                it.layoutManager = LinearLayoutManager(context)
+                it.adapter = EventRecyclerViewAdapter()
+                it
             }
-        }
-
-        return view
     }
 
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        viewModel = ViewModelProviders.of(this).get(EventViewModel::class.java)
+        viewModel = application.daggerHermesComponent.getEventViewModel()
     }
 
-//    override fun onAttach(context: Context) {
-//        super.onAttach(context)
+    override fun onAttach(context: Context) {
+        AndroidSupportInjection.inject(this)
+        super.onAttach(context)
 //        if (context is EventFragment.OnListFragmentInteractionListener) {
 //            listener = context
 //        } else {
 //            throw RuntimeException(context.toString() + " must implement OnListFragmentInteractionListener")
 //        }
-//    }
+    }
 
     override fun onDetach() {
         super.onDetach()

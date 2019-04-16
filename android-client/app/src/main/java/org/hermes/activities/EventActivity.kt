@@ -8,6 +8,7 @@ import androidx.paging.PagedList
 import androidx.recyclerview.widget.RecyclerView
 import dagger.Module
 import dagger.android.AndroidInjection
+import kotlinx.android.synthetic.main.activity_event_list.*
 import javax.inject.Inject
 
 import org.hermes.adapters.EventRecyclerViewAdapter

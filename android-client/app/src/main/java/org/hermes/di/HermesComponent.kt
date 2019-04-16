@@ -24,6 +24,7 @@ import org.hermes.viewmodels.LoginViewModel
     HermesModule::class,
     IOTAModule::class,
     ActivityBindingModule::class,
+    FragmentBindingModule::class,
     ServiceBindingModule::class
 ])
 interface HermesComponent : AndroidInjector<HermesClientApp> {
