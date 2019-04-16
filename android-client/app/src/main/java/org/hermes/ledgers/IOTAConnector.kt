@@ -121,6 +121,7 @@ class IOTAConnector(val seed: Seed, app: HermesClientApp) {
         val successfulTxs = api.findTransactionObjectsByAddresses(txsAddresses)
             .map { it.hash.isNotEmpty() }
 
+        // TODO: Check if list of transactions is empty or not. If empty wait and redo the API call.
         val allSuccess = successfulTxs.reduce { acc, next -> acc && next }
 
         val eventMessage = StringBuilder()
