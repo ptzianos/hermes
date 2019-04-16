@@ -12,6 +12,7 @@ import javax.inject.Singleton
 import org.hermes.HermesClientApp
 import org.hermes.HermesRepository
 import org.hermes.HermesRoomDatabase
+import org.hermes.ledgers.IOTAConnector
 import org.hermes.viewmodels.EventViewModel
 import org.hermes.viewmodels.LoginViewModel
 
@@ -21,6 +22,7 @@ import org.hermes.viewmodels.LoginViewModel
     AndroidInjectionModule::class,
     AndroidSupportInjectionModule::class,
     HermesModule::class,
+    IOTAModule::class,
     ActivityBindingModule::class
 ])
 interface HermesComponent : AndroidInjector<HermesClientApp> {
@@ -29,15 +31,17 @@ interface HermesComponent : AndroidInjector<HermesClientApp> {
 
     fun inject(repository: HermesRepository)
 
-    fun providesRoomInstance(): HermesRoomDatabase
+    fun inject(connector: IOTAConnector)
 
-    fun providesRepository(): HermesRepository
+    fun getRoomInstance(): HermesRoomDatabase
 
-    fun providesSharedPrefs(): SharedPreferences
+    fun getRepository(): HermesRepository
 
-    fun providesLoginViewModel(): LoginViewModel
+    fun getSharedPrefs(): SharedPreferences
 
-    fun providesEventViewModel(): EventViewModel
+    fun getLoginViewModel(): LoginViewModel
+
+    fun getEventViewModel(): EventViewModel
 
     @Component.Builder
     interface Builder {

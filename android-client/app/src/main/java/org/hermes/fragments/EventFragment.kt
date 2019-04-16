@@ -10,9 +10,9 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 
+import org.hermes.adapters.EventRecyclerViewAdapter
 import org.hermes.entities.Event
 import org.hermes.R
-import org.hermes.adapters.EventRecyclerViewAdapter
 import org.hermes.viewmodels.EventViewModel
 
 

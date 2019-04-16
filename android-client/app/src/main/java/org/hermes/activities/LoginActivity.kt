@@ -1,6 +1,5 @@
 package org.hermes.activities
 
-import android.app.Application
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -38,7 +37,7 @@ class LoginActivity: AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         AndroidInjection.inject(this)
-        viewModel = hermesApplication.daggerHermesComponent.providesLoginViewModel()
+        viewModel = hermesApplication.daggerHermesComponent.getLoginViewModel()
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
 

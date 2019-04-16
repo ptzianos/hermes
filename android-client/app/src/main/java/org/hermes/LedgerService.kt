@@ -10,6 +10,7 @@ import android.os.IBinder
 import android.util.Log
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
+import dagger.android.AndroidInjection
 import java.security.SecureRandom
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
@@ -157,10 +158,16 @@ class LedgerService : Service() {
 
     @Inject
     lateinit var db: HermesRoomDatabase
+
     @Inject
     lateinit var repository: HermesRepository
 
+    @Inject
+    lateinit var app: HermesClientApp
+
     override fun onCreate() {
+        AndroidInjection.inject(this)
+        super.onCreate()
         createNotificationChannel()
     }
 
@@ -171,9 +178,7 @@ class LedgerService : Service() {
         try {
             // Initialize connection
             // TODO: This should be provided as configuration and not be hard-coded
-            iotaConnector = IOTAConnector(protocol = "https", uri = "nodes.thetangle.org",
-                port = "443", seed = repository.getSeed() as Seed, db = db
-            )
+            iotaConnector = IOTAConnector(repository.getSeed() as Seed, app)
             // Start co-routine to broadcast data
             CoroutineScope(BACKGROUND.asCoroutineDispatcher()).launch { broadcastData() }
             CoroutineScope(BACKGROUND.asCoroutineDispatcher()).launch {

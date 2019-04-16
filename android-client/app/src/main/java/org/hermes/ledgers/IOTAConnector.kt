@@ -4,45 +4,37 @@ package org.hermes.ledgers
 import android.util.Log
 import java.lang.Exception
 import java.lang.StringBuilder
+import javax.inject.Inject
 import jota.IotaAPI
 import jota.model.Bundle
 import jota.model.Transaction
 import jota.utils.*
 import kotlinx.coroutines.*
 import org.apache.commons.lang3.StringUtils
+import org.hermes.*
 import org.threeten.bp.OffsetDateTime
 
-import org.hermes.BACKGROUND
 import org.hermes.entities.Event
-import org.hermes.HermesRoomDatabase
 import org.hermes.iota.IOTA
 import org.hermes.iota.Seed
-import org.hermes.Metric20
 import org.hermes.utils.splitInChunks
 import org.hermes.utils.stripPaddingOfTrytes
 import org.hermes.utils.toTrytes
 
 
-class IOTAConnector(val protocol: String, val uri: String, val port: String, val seed: Seed,
-                    val db: HermesRoomDatabase?) {
+class IOTAConnector(val seed: Seed, app: HermesClientApp) {
 
     val loggingTag: String = "IOTAConnector"
-    val api: IotaAPI
 
     val EMPTY_TAG = StringUtils.rightPad("", 27, "9")
 
-    init {
-        try {
-            api = IotaAPI.Builder()
-                .protocol(protocol)
-                .host(uri)
-                .port(port)
-                .build()
-        } catch(e: Exception) {
-            Log.e(loggingTag, "There was an error while trying to initialize the connection: $e")
-            throw e
-        }
-    }
+    @Inject
+    lateinit var api: IotaAPI
+
+    @Inject
+    lateinit var db: HermesRoomDatabase
+
+    init { app.daggerHermesComponent.inject(this) }
 
     /**
      * Convert the data into strings separated by `::`, then convert them into trytes
@@ -76,7 +68,7 @@ class IOTAConnector(val protocol: String, val uri: String, val port: String, val
             if (address == null) {
                 Log.e(loggingTag, "Could not get a new address for IOTA!")
                 val event = Event(action = "broadcast", resource = "iota", extraInfo = "Failed to get an address for IOTA")
-                db?.eventDao()?.insertAll(event)
+                db.eventDao().insertAll(event)
                 return
             }
 
@@ -106,7 +98,7 @@ class IOTAConnector(val protocol: String, val uri: String, val port: String, val
                 .toString()
 
             val event = Event(action = "broadcast", resource = "iota", extraInfo = eventMessage)
-            db?.eventDao()?.insertAll(event)
+            db.eventDao().insertAll(event)
 
             Log.i(loggingTag, eventMessage)
             val trxs: List<Transaction> = api.sendTrytes(trxTrytes.toTypedArray(),
@@ -139,7 +131,7 @@ class IOTAConnector(val protocol: String, val uri: String, val port: String, val
             .append("successful")
 
         val event = Event(action = "broadcast", resource = "iota", extraInfo = eventMessage.toString())
-        db?.eventDao()?.insertAll(event)
+        db.eventDao().insertAll(event)
 
         eventMessage
             .append(" with payload: ")

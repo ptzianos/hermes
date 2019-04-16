@@ -31,7 +31,7 @@ class EventActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         AndroidInjection.inject(this)
-        viewModel = hermesApplication.daggerHermesComponent.providesEventViewModel()
+        viewModel = hermesApplication.daggerHermesComponent.getEventViewModel()
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_event_list)
 
