@@ -10,6 +10,7 @@ import android.os.IBinder
 import android.util.Log
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
+import dagger.Module
 import dagger.android.AndroidInjection
 import java.security.SecureRandom
 import java.util.*
@@ -27,6 +28,9 @@ import org.hermes.ledgers.IOTAConnector
 
 
 class LedgerService : Service() {
+
+    @Module
+    abstract class DaggerModule
 
     enum class ClientError(val errorStr: String) {
         NOT_REGISTERED("not_registered"),
