@@ -1,62 +1,102 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/eventListItemLayout">
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                                                   xmlns:app="http://schemas.android.com/apk/res-auto"
+                                                   xmlns:tools="http://schemas.android.com/tools"
+                                                   android:layout_width="match_parent"
+                                                   android:layout_height="wrap_content"
+                                                   android:id="@+id/eventListItemLayout">
 
-    <EditText
+    <TextView
             android:layout_width="49dp"
             android:inputType="numberDecimal"
             android:ems="10"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentTop="true"
             android:id="@+id/eventId"
-            android:layout_height="90dp"/>
 
-    <TextView
-            android:text="TextView"
-            android:layout_width="79dp"
-            android:layout_height="45dp"
-            android:layout_toEndOf="@+id/eventId"
-            android:id="@+id/eventResource"
-            android:gravity="center_vertical"
-            android:layout_below="@+id/eventDate"/>
-
-    <TextView
-            android:text="TextView"
-            android:layout_width="77dp"
-            android:layout_height="45dp"
-            android:id="@+id/eventAction"
-            android:gravity="center_vertical"
-            android:layout_centerVertical="true"
-            android:layout_toStartOf="@+id/eventResourceId"/>
-
+            android:layout_height="41dp" android:clickable="false"
+            android:focusableInTouchMode="false" android:focusedByDefault="false" android:enabled="false"
+            android:cursorVisible="false"
+            app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toTopOf="parent"
+            android:textAlignment="center"
+            android:importantForAutofill="no" android:textSize="18sp"
+            android:textStyle="bold" tools:text="123" app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_marginBottom="8dp" app:layout_constraintVertical_bias="0.547"
+            android:textColor="@android:color/black"/>
     <EditText
-            android:layout_width="60dp"
-            android:layout_height="45dp"
+            android:layout_width="310dp"
+            android:layout_height="42dp"
+            android:inputType="date"
+            android:ems="10"
+            android:id="@+id/eventDate"
+            android:clickable="false"
+            android:cursorVisible="false" android:focusedByDefault="false" android:focusableInTouchMode="false"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginStart="8dp"
+            app:layout_constraintStart_toEndOf="@+id/eventId" android:layout_marginEnd="8dp"
+            app:layout_constraintEnd_toEndOf="parent" app:layout_constraintHorizontal_bias="0.0"
+            android:textSize="18sp" android:textAlignment="center"/>
+    <EditText
+            android:layout_width="53dp"
+            android:layout_height="wrap_content"
             android:inputType="numberSigned"
             android:ems="10"
             android:id="@+id/eventResourceId"
-            android:layout_centerVertical="true"
-            android:layout_alignEnd="@+id/eventDate"
-            android:layout_marginEnd="-1dp"/>
-
+            android:editable="false" android:cursorVisible="false"
+            android:clickable="false" android:focusableInTouchMode="false" android:focusedByDefault="false"
+            android:layout_marginTop="8dp"
+            app:layout_constraintTop_toBottomOf="@+id/eventDate"
+            app:layout_constraintStart_toEndOf="@+id/eventId" android:layout_marginBottom="8dp"
+            app:layout_constraintBottom_toTopOf="@+id/eventExtraInfo" android:layout_marginStart="8dp"
+            android:textAlignment="center"/>
+    <TextView
+            android:text="TextView"
+            android:layout_width="103dp"
+            android:layout_height="45dp"
+            android:id="@+id/eventResource"
+            android:gravity="center_vertical"
+            app:layout_constraintTop_toBottomOf="@+id/eventDate"
+            app:layout_constraintStart_toEndOf="@+id/eventResourceId"
+            android:layout_marginStart="8dp" android:textAlignment="center" android:textSize="18sp"
+            android:textColor="@android:color/black"/>
+    <TextView
+            android:text="TextView"
+            android:layout_width="114dp"
+            android:layout_height="45dp"
+            android:id="@+id/eventAction"
+            android:gravity="center_vertical"
+            app:layout_constraintTop_toTopOf="@+id/eventResource"
+            android:layout_marginTop="8dp"
+            android:layout_marginStart="8dp" app:layout_constraintStart_toEndOf="@+id/eventResource"
+            app:layout_constraintBottom_toTopOf="@+id/eventExtraInfo"
+            app:layout_constraintVertical_bias="1.0" android:textAlignment="center" android:textSize="18sp"
+            android:textColor="@android:color/black" android:layout_marginEnd="8dp"
+            app:layout_constraintEnd_toStartOf="@+id/eventArrow"/>
     <EditText
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:inputType="date"
-            android:ems="10"
-            android:layout_alignParentTop="true"
-            android:id="@+id/eventDate"
-            android:layout_toEndOf="@+id/eventId"/>
-
-    <EditText
-            android:layout_width="wrap_content"
+            android:layout_width="309dp"
             android:layout_height="wrap_content"
             android:inputType="textPersonName"
             android:text="Name"
             android:ems="10"
-            android:layout_below="@+id/eventId"
-            android:layout_toEndOf="@+id/eventId"
-            android:id="@+id/eventExtraInfo"/>
-</RelativeLayout>
+            android:id="@+id/eventExtraInfo" android:enabled="false" android:focusableInTouchMode="false"
+            android:focusedByDefault="false" android:cursorVisible="false"
+            android:layout_marginStart="8dp" app:layout_constraintTop_toBottomOf="@+id/eventResource"
+            android:layout_marginEnd="8dp" app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0" app:layout_constraintStart_toEndOf="@+id/eventId"
+            android:textColor="@android:color/black"/>
+    <ImageButton
+            android:layout_width="48dp"
+            android:layout_height="44dp" app:srcCompat="@drawable/arrow"
+            android:id="@+id/eventArrow" android:scaleType="fitXY"
+            android:background="@android:color/transparent"
+            app:layout_constraintEnd_toEndOf="parent" android:layout_marginEnd="4dp"
+            app:layout_constraintTop_toBottomOf="@+id/eventDate"
+            app:layout_constraintBottom_toTopOf="@+id/eventExtraInfo" android:contentDescription="TODO"/>
+    <View
+            android:id="@+id/divider2"
+            android:layout_width="395dp"
+            android:layout_height="12dp"
+            android:background="?android:attr/listDivider"
+            app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginStart="8dp" app:layout_constraintEnd_toEndOf="parent" android:layout_marginEnd="8dp"
+            app:layout_constraintTop_toBottomOf="@+id/eventExtraInfo"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

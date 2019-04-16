@@ -8,10 +8,9 @@ import androidx.paging.PagedList
 import androidx.recyclerview.widget.RecyclerView
 import dagger.Module
 import dagger.android.AndroidInjection
-import kotlinx.android.synthetic.main.activity_event_list.*
 import javax.inject.Inject
 
-import org.hermes.adapters.EventRecyclerViewAdapter
+import org.hermes.adapters.PagedEventViewAdapter
 import org.hermes.entities.Event
 import org.hermes.HermesClientApp
 import org.hermes.R
@@ -38,7 +37,7 @@ class EventActivity : AppCompatActivity() {
 
         // TODO: Change the id to something more suitable
         val recyclerView: RecyclerView = findViewById(R.id.fragment)
-        val adapter = EventRecyclerViewAdapter()
+        val adapter = PagedEventViewAdapter()
 
         recyclerView.adapter = adapter
 

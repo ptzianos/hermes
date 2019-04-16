@@ -5,7 +5,6 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.paging.PagedListAdapter
 import androidx.recyclerview.widget.DiffUtil
-import java.util.*
 
 import org.hermes.entities.Event
 import org.hermes.fragments.EventFragment.OnListFragmentInteractionListener
@@ -16,7 +15,7 @@ import org.hermes.viewholders.EventViewHolder
  * [RecyclerView.Adapter] that can display a [Event] and makes a call to the
  * specified [OnListFragmentInteractionListener].
  */
-class EventRecyclerViewAdapter: PagedListAdapter<Event, EventViewHolder>(diffCallback) {
+class PagedEventViewAdapter: PagedListAdapter<Event, EventViewHolder>(diffCallback) {
 
     companion object {
         private val diffCallback = object : DiffUtil.ItemCallback<Event>() {
@@ -26,7 +25,7 @@ class EventRecyclerViewAdapter: PagedListAdapter<Event, EventViewHolder>(diffCal
         }
     }
 
-    val loggingTag = "EventRecyclerViewAdapt"
+    val loggingTag = "PagedEventViewAdapter"
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): EventViewHolder {
         return EventViewHolder(LayoutInflater.from(parent.context)

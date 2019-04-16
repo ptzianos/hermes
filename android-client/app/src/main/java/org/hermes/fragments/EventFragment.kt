@@ -12,7 +12,7 @@ import dagger.Module
 import dagger.android.support.AndroidSupportInjection
 import org.hermes.HermesClientApp
 
-import org.hermes.adapters.EventRecyclerViewAdapter
+import org.hermes.adapters.PagedEventViewAdapter
 import org.hermes.entities.Event
 import org.hermes.R
 import org.hermes.viewmodels.EventViewModel
@@ -42,7 +42,7 @@ class EventFragment : Fragment() {
         return (inflater.inflate(R.layout.event_list_fragment, container, false) as RecyclerView)
             .let {
                 it.layoutManager = LinearLayoutManager(context)
-                it.adapter = EventRecyclerViewAdapter()
+                it.adapter = PagedEventViewAdapter()
                 it
             }
     }
