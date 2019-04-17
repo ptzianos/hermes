@@ -1,4 +1,4 @@
-package org.hermes.service
+package org.hermes
 
 import android.app.*
 import android.content.ComponentName
@@ -20,11 +20,11 @@ import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import kotlin.concurrent.withLock
 import kotlinx.coroutines.*
-import org.hermes.*
 
 import org.hermes.activities.LoginActivity
 import org.hermes.iota.Seed
 import org.hermes.ledgers.IOTAConnector
+import org.hermes.service.IHermesService
 
 
 class LedgerService : Service() {

@@ -2,7 +2,7 @@ package org.hermes.di
 
 import dagger.Module
 import dagger.android.ContributesAndroidInjector
-import org.hermes.service.LedgerService
+import org.hermes.LedgerService
 
 @Module
 abstract class ServiceBindingModule {

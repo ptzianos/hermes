@@ -1,5 +1,5 @@
 // IHermesService.aidl
-package org.hermes.service;
+package org.hermes;
 
 
 interface IHermesService {

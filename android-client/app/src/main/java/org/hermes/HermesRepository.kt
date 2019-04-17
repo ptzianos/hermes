@@ -11,7 +11,6 @@ import javax.inject.Singleton
 
 import org.hermes.crypto.PasswordHasher
 import org.hermes.iota.Seed
-import org.hermes.service.LedgerService
 
 
 @Singleton

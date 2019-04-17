@@ -1,4 +1,4 @@
-package org.hermes.service
+package org.hermes
 
 enum class ErrorCode(val errorStr: String) {
     NOT_REGISTERED("not_registered"),
