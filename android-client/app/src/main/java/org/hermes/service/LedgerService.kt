@@ -1,4 +1,4 @@
-package org.hermes
+package org.hermes.service
 
 import android.app.*
 import android.content.ComponentName
@@ -20,9 +20,9 @@ import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import kotlin.concurrent.withLock
 import kotlinx.coroutines.*
+import org.hermes.*
 
 import org.hermes.activities.LoginActivity
-import org.hermes.client.IHermesService
 import org.hermes.iota.Seed
 import org.hermes.ledgers.IOTAConnector
 
@@ -31,15 +31,6 @@ class LedgerService : Service() {
 
     @Module
     abstract class DaggerModule
-
-    enum class ClientError(val errorStr: String) {
-        NOT_REGISTERED("not_registered"),
-        ALREADY_REGISTERED("already_registered"),
-        NO_DATA_ID("no_data_id"),
-        NO_TYPE("no_type"),
-        NO_UNIT("no_unit"),
-        NO_UUID("no_uuid")
-    }
 
     data class Client(val dataId: String, val unit: String, val mtype: String, val what: String?, val device: String?) {
         private var i = 0
@@ -75,11 +66,11 @@ class LedgerService : Service() {
 
         override fun register(dataId: String?, unit: String?, mtype: String?, what: String?, device: String?): String =
             when {
-                dataId == null -> ClientError.NO_DATA_ID.errorStr
-                unit == null -> ClientError.NO_UNIT.errorStr
-                mtype == null -> ClientError.NO_TYPE.errorStr
+                dataId == null -> ErrorCode.NO_DATA_ID.errorStr
+                unit == null -> ErrorCode.NO_UNIT.errorStr
+                mtype == null -> ErrorCode.NO_TYPE.errorStr
                 clientRegistry.containsValue(Client(dataId, unit, mtype, what, device)) ->
-                    ClientError.ALREADY_REGISTERED.errorStr
+                    ErrorCode.ALREADY_REGISTERED.errorStr
                 else -> {
                     val uuid = UUID.randomUUID().toString()
                     clientRegistry[uuid] = Client(dataId, unit, mtype, what, device)
@@ -89,7 +80,7 @@ class LedgerService : Service() {
 
         override fun deregister(uuid: String?): String =
             when (uuid) {
-                null -> ClientError.NO_UUID.errorStr
+                null -> ErrorCode.NO_UUID.errorStr
                 else -> {
                     clientRegistry.remove(uuid)
                     ""
@@ -100,8 +91,8 @@ class LedgerService : Service() {
                                     http_code: String?, result: String?, stat: String?, direction: String?,
                                     file: String?, line: Int, env: String?): String =
             when {
-                uuid == null -> ClientError.NO_UUID.errorStr
-                !clientRegistry.containsKey(uuid) -> ClientError.NOT_REGISTERED.errorStr
+                uuid == null -> ErrorCode.NO_UUID.errorStr
+                !clientRegistry.containsKey(uuid) -> ErrorCode.NOT_REGISTERED.errorStr
                 else -> {
                     Log.d(loggingTag, "Got a new sample from client with uuid $uuid")
                     // TODO: Add a check to ensure that the data are in the expected form
@@ -118,8 +109,8 @@ class LedgerService : Service() {
                                     http_code: String?, result: String?, stat: String?, direction: String?,
                                     file: String?, line: Int, env: String?): String  =
             when {
-                uuid == null -> ClientError.NO_UUID.errorStr
-                !clientRegistry.containsKey(uuid) -> ClientError.NOT_REGISTERED.errorStr
+                uuid == null -> ErrorCode.NO_UUID.errorStr
+                !clientRegistry.containsKey(uuid) -> ErrorCode.NOT_REGISTERED.errorStr
                 else -> {
                     Log.d(loggingTag, "Got a new sample from client with uuid $uuid")
                     // TODO: Add a check to ensure that the data are in the expected form
@@ -268,9 +259,9 @@ class LedgerService : Service() {
 
     private suspend fun generateData() {
         val uuid = iHermesService?.register("android.random", "int", "random_source", null, null)
-        if (uuid == null && uuid != ClientError.ALREADY_REGISTERED.errorStr
-            && uuid != ClientError.NO_DATA_ID.errorStr && uuid != ClientError.NO_TYPE.errorStr
-            && uuid != ClientError.NO_UNIT.errorStr)
+        if (uuid == null && uuid != ErrorCode.ALREADY_REGISTERED.errorStr
+            && uuid != ErrorCode.NO_DATA_ID.errorStr && uuid != ErrorCode.NO_TYPE.errorStr
+            && uuid != ErrorCode.NO_UNIT.errorStr)
         {
             Log.e(loggingTag, "There was an error while trying to connect to the service")
             return

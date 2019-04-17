@@ -19,7 +19,7 @@
             android:theme="@style/AppTheme"
             tools:ignore="GoogleAppIndexingWarning">
         <service
-                android:name="org.hermes.LedgerService"
+                android:name="org.hermes.service.LedgerService"
                 android:enabled="true"
                 android:exported="true">
         </service>
