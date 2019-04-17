@@ -118,26 +118,33 @@ class IOTAConnector(val seed: Seed, app: HermesClientApp) {
         val txsAddresses = trxs.map { it.address }.toTypedArray()
         val txsAddressesStr = txsAddresses.joinToString()
 
-        val successfulTxs = api.findTransactionObjectsByAddresses(txsAddresses)
-            .map { it.hash.isNotEmpty() }
+        for (i in 0 until 3) {
+            delay(5 * 1000)
 
-        // TODO: Check if list of transactions is empty or not. If empty wait and redo the API call.
-        val allSuccess = successfulTxs.reduce { acc, next -> acc && next }
+            Log.d(loggingTag, "Starting IOTA API call $i/3 for addresses: $txsAddresses.")
 
+            val fetchedTxs = api.findTransactionObjectsByAddresses(txsAddresses)
+            val successfulTxs = fetchedTxs.filter { it.hash.isNotEmpty() }
+
+            if (successfulTxs.isNotEmpty()) {
+                val eventMessage = StringBuilder()
+                    .append("Broadcast was")
+                    .append("successful for bundle: ")
+                    .append(fetchedTxs.first().bundle)
+                    .append("and txs: ")
+                    .append(txsAddressesStr)
+
+                val event = Event(action = "broadcast", resource = "iota", extraInfo = eventMessage.toString())
+                db.eventDao().insertAll(event)
+                Log.i(loggingTag, eventMessage.toString())
+            }
+            Log.d(loggingTag, "IOTA API call $i/3 was unsuccessful for addresses: $txsAddresses")
+        }
         val eventMessage = StringBuilder()
-            .append("Sending of transactions with addresses: ")
+            .append("Broadcast was")
+            .append("unsuccessful for txs: ")
             .append(txsAddressesStr)
-            .append(" was ")
-            .append(if (allSuccess) "" else "un")
-            .append("successful")
-
-        val event = Event(action = "broadcast", resource = "iota", extraInfo = eventMessage.toString())
-        db.eventDao().insertAll(event)
-
-        eventMessage
-            .append(" with payload: ")
-            .append(trxs.map { it.signatureFragments.stripPaddingOfTrytes() }.joinToString())
-
         Log.i(loggingTag, eventMessage.toString())
+        Log.d(loggingTag, "There was some error while trying to get state of transactions: $trxs. Aborting")
     }
 }
