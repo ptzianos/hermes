@@ -1,6 +1,7 @@
 package org.hermes.ledgers
 
 
+import android.content.SharedPreferences
 import android.util.Log
 import java.lang.Exception
 import java.lang.StringBuilder
@@ -8,6 +9,8 @@ import javax.inject.Inject
 import jota.IotaAPI
 import jota.model.Bundle
 import jota.model.Transaction
+import jota.pow.Kerl
+import jota.pow.SpongeFactory
 import jota.utils.*
 import kotlinx.coroutines.*
 import org.apache.commons.lang3.StringUtils
@@ -20,6 +23,7 @@ import org.hermes.iota.Seed
 import org.hermes.utils.splitInChunks
 import org.hermes.utils.stripPaddingOfTrytes
 import org.hermes.utils.toTrytes
+import javax.inject.Named
 
 
 class IOTAConnector(val seed: Seed, app: HermesClientApp) {
@@ -33,6 +37,9 @@ class IOTAConnector(val seed: Seed, app: HermesClientApp) {
 
     @Inject
     lateinit var db: HermesRoomDatabase
+
+    @field:[Inject Named("iota")]
+    lateinit var prefs: SharedPreferences
 
     init { app.daggerHermesComponent.inject(this) }
 
@@ -62,17 +69,11 @@ class IOTAConnector(val seed: Seed, app: HermesClientApp) {
             }
 
             // TODO: Save the index of the previous transaction to reduce search time
-//            val newAddress = IotaAPIUtils.newAddress(seed, security, i, checksum, customCurl.clone())
-            Log.i(loggingTag, "Getting address from Tangle")
-            val address = api.getNextAvailableAddress(seed.toString(), 2, true).first()
-            if (address == null) {
-                Log.e(loggingTag, "Could not get a new address for IOTA!")
-                val event = Event(action = "broadcast", resource = "iota", extraInfo = "Failed to get an address for IOTA")
-                db.eventDao().insertAll(event)
-                return
-            }
-
-            val normalizedAddress = Checksum.removeChecksum(address)
+            val nextAddressIndex = prefs.getInt("latest_addr_index", 1000) + 1
+            Log.d(loggingTag, "Next IOTA address index to use is: $nextAddressIndex")
+            val normalizedAddress = IotaAPIUtils.newAddress(seed.toString(), Seed.DEFAULT_SEED_SECURITY,
+                nextAddressIndex, false, SpongeFactory.create(SpongeFactory.Mode.KERL))
+            prefs.edit().putInt("latest_addr_index", nextAddressIndex).apply()
             Log.d(loggingTag, "Address that will be used for the next sample broadcast is $normalizedAddress")
             val depth = 3
             val minWeightMagnitude = 14
@@ -137,6 +138,7 @@ class IOTAConnector(val seed: Seed, app: HermesClientApp) {
                 val event = Event(action = "broadcast", resource = "iota", extraInfo = eventMessage.toString())
                 db.eventDao().insertAll(event)
                 Log.i(loggingTag, eventMessage.toString())
+                return
             }
             Log.d(loggingTag, "IOTA API call $i/3 was unsuccessful for addresses: $txsAddresses")
         }

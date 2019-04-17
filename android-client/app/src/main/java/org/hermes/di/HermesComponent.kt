@@ -39,8 +39,6 @@ interface HermesComponent : AndroidInjector<HermesClientApp> {
 
     fun getRepository(): HermesRepository
 
-    fun getSharedPrefs(): SharedPreferences
-
     fun getLoginViewModel(): LoginViewModel
 
     fun getEventViewModel(): EventViewModel

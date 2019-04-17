@@ -17,7 +17,7 @@ class Seed(val value: CharArray) {
 
     companion object {
 
-        const val DEFAULT_SEED_SECURITY = 3
+        const val DEFAULT_SEED_SECURITY = 2
 
         const val MAX_SEED_LENGTH = 81
 

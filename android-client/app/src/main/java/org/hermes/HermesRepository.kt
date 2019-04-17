@@ -6,6 +6,7 @@ import android.content.SharedPreferences
 import android.util.Log
 import java.security.KeyPair
 import javax.inject.Inject
+import javax.inject.Named
 import javax.inject.Singleton
 
 import org.hermes.crypto.PasswordHasher
@@ -16,7 +17,7 @@ import org.hermes.service.LedgerService
 @Singleton
 class HermesRepository @Inject constructor(val application: Application,
                                            val db: HermesRoomDatabase,
-                                           val sharedPref: SharedPreferences) {
+                                           @param:Named("auth") val sharedPref: SharedPreferences) {
 
     private val loggingTag = "HermesRepository"
 
