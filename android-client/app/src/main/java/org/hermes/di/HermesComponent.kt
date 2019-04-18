@@ -1,7 +1,6 @@
 package org.hermes.di
 
 import android.app.Application
-import android.content.SharedPreferences
 import dagger.android.AndroidInjectionModule
 import dagger.android.AndroidInjector
 import dagger.android.support.AndroidSupportInjectionModule

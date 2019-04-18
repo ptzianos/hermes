@@ -24,7 +24,6 @@ import kotlinx.coroutines.*
 import org.hermes.activities.LoginActivity
 import org.hermes.iota.Seed
 import org.hermes.ledgers.IOTAConnector
-import org.hermes.service.IHermesService
 
 
 class LedgerService : Service() {
