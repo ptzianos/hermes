@@ -281,6 +281,7 @@ class LedgerService : Service() {
                 Log.d(loggingTag, "Broadcasting data of client with id $uuid")
                 if (iotaConnector != null) iotaConnector?.sendData(
                     *client.flushData(),
+                    clientUUID = uuid,
                     blockUntilConfirmation = true,
                     asyncConfirmation = true
                 )

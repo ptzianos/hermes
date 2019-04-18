@@ -6,24 +6,25 @@ import android.util.Log
 import java.lang.Exception
 import java.lang.StringBuilder
 import javax.inject.Inject
+import javax.inject.Named
 import jota.IotaAPI
 import jota.model.Bundle
 import jota.model.Transaction
-import jota.pow.Kerl
 import jota.pow.SpongeFactory
 import jota.utils.*
 import kotlinx.coroutines.*
 import org.apache.commons.lang3.StringUtils
-import org.hermes.*
 import org.threeten.bp.OffsetDateTime
 
+import org.hermes.BACKGROUND
+import org.hermes.HermesClientApp
+import org.hermes.HermesRoomDatabase
+import org.hermes.Metric20
 import org.hermes.entities.Event
 import org.hermes.iota.IOTA
 import org.hermes.iota.Seed
 import org.hermes.utils.splitInChunks
-import org.hermes.utils.stripPaddingOfTrytes
 import org.hermes.utils.toTrytes
-import javax.inject.Named
 
 
 class IOTAConnector(val seed: Seed, app: HermesClientApp) {
@@ -60,7 +61,8 @@ class IOTAConnector(val seed: Seed, app: HermesClientApp) {
             .toMutableList()
     }
 
-    fun sendData(vararg samples: Metric20?, asyncConfirmation: Boolean, blockUntilConfirmation: Boolean) {
+    fun sendData(vararg samples: Metric20?, clientUUID: String, asyncConfirmation: Boolean,
+                 blockUntilConfirmation: Boolean) {
         try {
             // Validate seed
             if (!InputValidator.isValidSeed(seed.toString())) {
@@ -70,11 +72,11 @@ class IOTAConnector(val seed: Seed, app: HermesClientApp) {
 
             // TODO: Save the index of the previous transaction to reduce search time
             val nextAddressIndex = prefs.getInt("latest_addr_index", 1000) + 1
-            Log.d(loggingTag, "Next IOTA address index to use is: $nextAddressIndex")
+            Log.d(loggingTag, "$clientUUID -- Next IOTA address index to use is: $nextAddressIndex")
             val normalizedAddress = IotaAPIUtils.newAddress(seed.toString(), Seed.DEFAULT_SEED_SECURITY,
                 nextAddressIndex, false, SpongeFactory.create(SpongeFactory.Mode.KERL))
             prefs.edit().putInt("latest_addr_index", nextAddressIndex).apply()
-            Log.d(loggingTag, "Address that will be used for the next sample broadcast is $normalizedAddress")
+            Log.d(loggingTag, "$clientUUID -- Address that will be used for the next sample broadcast is $normalizedAddress")
             val depth = 3
             val minWeightMagnitude = 14
             val timestamp = OffsetDateTime.now().toEpochSecond()
@@ -85,7 +87,7 @@ class IOTAConnector(val seed: Seed, app: HermesClientApp) {
             val carbon20Transactions = (0 until carbon20SignatureFragments.size)
                 .map{ Transaction(normalizedAddress, 0, EMPTY_TAG, timestamp) }
                 .toMutableList()
-            Log.d(loggingTag, "Bundle will contain ${carbon20SignatureFragments.size} transactions")
+            Log.d(loggingTag, "$clientUUID -- Bundle will contain ${carbon20SignatureFragments.size} transactions")
 
             val bundle = Bundle(carbon20Transactions, carbon20Transactions.size).apply {
                 this.finalize(null)
@@ -94,7 +96,7 @@ class IOTAConnector(val seed: Seed, app: HermesClientApp) {
             val trxTrytes = bundle.transactions.map { it.toTrytes() }.reversed()
 
             val eventMessage = StringBuilder()
-                .append("Broadcasting of transactions with addresses: ")
+                .append("$clientUUID -- Broadcasting of transactions with addresses: ")
                 .append(bundle.transactions.map { it.address }.toTypedArray().joinToString())
                 .toString()
 
@@ -106,30 +108,30 @@ class IOTAConnector(val seed: Seed, app: HermesClientApp) {
                 depth, minWeightMagnitude, null)
 
             if (asyncConfirmation) {
-                if (blockUntilConfirmation) runBlocking { checkResultOfTransactions(trxs) }
+                if (blockUntilConfirmation) runBlocking { checkResultOfTransactions(trxs, clientUUID) }
                 else CoroutineScope(BACKGROUND.asCoroutineDispatcher())
-                    .launch { checkResultOfTransactions(trxs) }
+                    .launch { checkResultOfTransactions(trxs, clientUUID) }
             }
         } catch (e: Exception) {
-            Log.e(loggingTag, "There was an error while trying to broadcast a sample to IOTA: $e")
+            Log.e(loggingTag, "$clientUUID -- There was an error while trying to broadcast a sample to IOTA: $e")
         }
     }
 
-    private suspend fun checkResultOfTransactions(trxs: List<Transaction>) {
+    private suspend fun checkResultOfTransactions(trxs: List<Transaction>, clientUUID: String) {
         val txsAddresses = trxs.map { it.address }.toTypedArray()
         val txsAddressesStr = txsAddresses.joinToString()
 
         for (i in 0 until 3) {
             delay(5 * 1000)
 
-            Log.d(loggingTag, "Starting IOTA API call $i/3 for addresses: $txsAddresses.")
+            Log.d(loggingTag, "$clientUUID -- Starting IOTA API call $i/3 for addresses: $txsAddresses.")
 
             val fetchedTxs = api.findTransactionObjectsByAddresses(txsAddresses)
             val successfulTxs = fetchedTxs.filter { it.hash.isNotEmpty() }
 
             if (successfulTxs.isNotEmpty()) {
                 val eventMessage = StringBuilder()
-                    .append("Broadcast was")
+                    .append("$clientUUID -- Broadcast was")
                     .append("successful for bundle: ")
                     .append(fetchedTxs.first().bundle)
                     .append("and txs: ")
@@ -140,13 +142,12 @@ class IOTAConnector(val seed: Seed, app: HermesClientApp) {
                 Log.i(loggingTag, eventMessage.toString())
                 return
             }
-            Log.d(loggingTag, "IOTA API call $i/3 was unsuccessful for addresses: $txsAddresses")
+            Log.d(loggingTag, "$clientUUID -- IOTA API call $i/3 was unsuccessful for addresses: $txsAddresses")
         }
         val eventMessage = StringBuilder()
-            .append("Broadcast was")
+            .append("$clientUUID -- Broadcast was")
             .append("unsuccessful for txs: ")
             .append(txsAddressesStr)
         Log.i(loggingTag, eventMessage.toString())
-        Log.d(loggingTag, "There was some error while trying to get state of transactions: $trxs. Aborting")
     }
 }
