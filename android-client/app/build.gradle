@@ -15,7 +15,7 @@ android {
         abortOnError false
     }
     defaultConfig {
-        applicationId "org.hermes.client"
+        applicationId "org.hermes"
         minSdkVersion 28
         targetSdkVersion 28
         versionCode 1
