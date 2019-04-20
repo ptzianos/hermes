@@ -54,7 +54,7 @@ class HermesRepository @Inject constructor(val application: Application,
             .generateKeyPair()
 
         // Generate a self-signed cert for the newly creaated key
-        val issuerString = "C=DE, O=datenkollektiv, OU=Planets Debug Certificate"
+        val issuerString = "C=DE, O=hermes"
         // Issues and subject will be the same because it's a self-signed certificate
         val issuer = X500Name(issuerString)
         val subject = X500Name(issuerString)
@@ -71,7 +71,8 @@ class HermesRepository @Inject constructor(val application: Application,
             .getCertificate(certHolder)
         certificate.verify(keypair.public)
 
-        ks.setKeyEntry(application.getString(R.string.auth_private_key), keypair.private, pin.toCharArray(),
+        // Unfortunately the Android Key Store does not allow a password to be used to encrypt the keypair
+        ks.setKeyEntry(application.getString(R.string.auth_private_key), keypair.private, null,
             arrayOf(certificate))
 
         return sharedPref.edit()
