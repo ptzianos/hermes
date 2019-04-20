@@ -49,11 +49,11 @@ class HermesRepository @Inject constructor(val application: Application,
         seed = Seed.new()
 
         // Generate the EC KeyPair
-        keypair = KeyPairGenerator.getInstance("EC").apply {
-            initialize(256, SecureRandom.getInstanceStrong()) }
+        keypair = KeyPairGenerator.getInstance("EC")
+            .apply { initialize(256, SecureRandom.getInstanceStrong()) }
             .generateKeyPair()
 
-        // Generate a self-signed cert for the newly creaated key
+        // Generate a self-signed cert for the newly created key
         val issuerString = "C=DE, O=hermes"
         // Issues and subject will be the same because it's a self-signed certificate
         val issuer = X500Name(issuerString)
@@ -63,8 +63,9 @@ class HermesRepository @Inject constructor(val application: Application,
         val notAfter = Date(System.currentTimeMillis() + (1000L * 24L * 60L * 60L * 1000L))
         val v3CertificateBuilder = JcaX509v3CertificateBuilder(issuer, serial, notBefore,
             notAfter, subject, keypair.public)
-        val certHolder = v3CertificateBuilder.build(JcaContentSignerBuilder("SHA512withECDSA" )
-            .setProvider( "AndroidOpenSSL" )
+        val certHolder = v3CertificateBuilder
+            .build(JcaContentSignerBuilder("SHA512withECDSA")
+            .setProvider("AndroidOpenSSL")
             .build(keypair.private))
         val certificate = JcaX509CertificateConverter()
             .setProvider("AndroidOpenSSL")
@@ -125,12 +126,10 @@ class HermesRepository @Inject constructor(val application: Application,
                 .toCharArray()
             )
 
-            val privateKey = ks.getKey(application.getString(R.string.auth_private_key),
-                pin.toCharArray()) as ECPrivateKey
-            val ecSpec = ECNamedCurveTable.getParameterSpec("secp256k1")
-            val Q = ecSpec.g.multiply((privateKey as org.bouncycastle.jce.interfaces.ECPrivateKey).d)
-            val ecPublicKeySpec = ECPublicKeySpec(Q, ecSpec)
-            val publicKey = KeyFactory.getInstance("EC").generatePublic(ecPublicKeySpec)
+            val privateKeyEntry =
+                ks.getEntry(application.getString(R.string.auth_private_key), null) as KeyStore.PrivateKeyEntry
+            val privateKey = privateKeyEntry.privateKey
+            val publicKey = privateKeyEntry.certificate.publicKey
             keypair = KeyPair(publicKey, privateKey)
 
             // TODO: Start the service only if it's not running
