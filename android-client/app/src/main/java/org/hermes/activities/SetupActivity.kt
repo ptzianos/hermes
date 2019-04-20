@@ -27,12 +27,7 @@ class SetupActivity : AppCompatActivity() {
         AndroidInjection.inject(this)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_setup)
-        if (repository.credentialsSet()) {
-            startActivity(Intent(this, LoginActivity::class.java))
-        } else {
-            initCallbacks()
-            initForm()
-        }
+        initCallbacks()
     }
 
     override fun onResume() {
@@ -40,7 +35,6 @@ class SetupActivity : AppCompatActivity() {
         if (repository.credentialsSet()) {
             startActivity(Intent(this, LoginActivity::class.java))
         } else {
-            initCallbacks()
             initForm()
         }
     }

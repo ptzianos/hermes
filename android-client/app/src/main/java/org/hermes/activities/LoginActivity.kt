@@ -40,21 +40,15 @@ class LoginActivity: AppCompatActivity() {
         viewModel = hermesApplication.daggerHermesComponent.getLoginViewModel()
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
-
-        if (!repository.credentialsSet()) {
-            Log.d(loggingTag, "Login activity redirecting to Setup activity")
-            goToSetupPage()
-        } else {
-            initForm()
-            login_pin_input.afterTextChanged { text -> viewModel.pin = text?.toString() ?: "" }
-            viewModel.isFormValid.observe(this, Observer { valid ->
-                if (valid) {
-                    login_pin_input.error = null
-                    repository.unlockCredentials(login_pin_input.text.toString())
-                    startActivity(Intent(this, EventActivity::class.java))
-                }
-            })
-        }
+        initForm()
+        login_pin_input.afterTextChanged { text -> viewModel.pin = text?.toString() ?: "" }
+        viewModel.isFormValid.observe(this, Observer { valid ->
+            if (valid) {
+                login_pin_input.error = null
+                repository.unlockCredentials(login_pin_input.text.toString())
+                startActivity(Intent(this, EventActivity::class.java))
+            }
+        })
     }
 
     override fun onResume() {
