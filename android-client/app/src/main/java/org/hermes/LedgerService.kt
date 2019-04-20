@@ -12,6 +12,7 @@ import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import dagger.Module
 import dagger.android.AndroidInjection
+import java.security.KeyPair
 import java.security.SecureRandom
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
@@ -92,6 +93,7 @@ class LedgerService : Service() {
             when {
                 uuid == null -> ErrorCode.NO_UUID.errorStr
                 !clientRegistry.containsKey(uuid) -> ErrorCode.NOT_REGISTERED.errorStr
+                !repository.unsealed() -> ErrorCode.SEALED.errorStr
                 else -> {
                     Log.d(loggingTag, "Got a new sample from client with uuid $uuid")
                     // TODO: Add a check to ensure that the data are in the expected form
@@ -110,6 +112,7 @@ class LedgerService : Service() {
             when {
                 uuid == null -> ErrorCode.NO_UUID.errorStr
                 !clientRegistry.containsKey(uuid) -> ErrorCode.NOT_REGISTERED.errorStr
+                !repository.unsealed() -> ErrorCode.SEALED.errorStr
                 else -> {
                     Log.d(loggingTag, "Got a new sample from client with uuid $uuid")
                     // TODO: Add a check to ensure that the data are in the expected form
@@ -125,7 +128,7 @@ class LedgerService : Service() {
 
     var iHermesService: IHermesService? = null
 
-    val mConnectionToSelf = object : ServiceConnection {
+    private val mConnectionToSelf = object : ServiceConnection {
 
         override fun onServiceConnected(className: ComponentName, service: IBinder) {
             iHermesService = IHermesService.Stub.asInterface(service)
@@ -144,10 +147,8 @@ class LedgerService : Service() {
     private val loggingTag = "LedgerService"
 
     private var mNotificationManager: NotificationManager? = null
-    private val PRNG = SecureRandom.getInstanceStrong()
-    private val channelId = PRNG.nextInt().toString()
+    private val channelId = SecureRandom.getInstanceStrong().nextInt().toString()
     private var foregroundNotificationId: Int = 15970
-    private var iotaConnector: IOTAConnector? = null
     private val clientRegistry = ConcurrentHashMap<String, Client>()
 
     @Inject
@@ -158,6 +159,10 @@ class LedgerService : Service() {
 
     @Inject
     lateinit var app: HermesClientApp
+
+    private val iotaConnector by lazy {
+        IOTAConnector(repository.getSeed() as Seed, repository.getKeyPair() as KeyPair, app)
+    }
 
     override fun onCreate() {
         AndroidInjection.inject(this)
@@ -170,9 +175,6 @@ class LedgerService : Service() {
         Log.d(loggingTag, "Showing notification for Hermes service foregrounding")
         startForeground(foregroundNotificationId, buildNotification())
         try {
-            // Initialize connection
-            // TODO: This should be provided as configuration and not be hard-coded
-            iotaConnector = IOTAConnector(repository.getSeed() as Seed, app)
             // Start co-routine to broadcast data
             CoroutineScope(BACKGROUND.asCoroutineDispatcher()).launch { broadcastData() }
             CoroutineScope(BACKGROUND.asCoroutineDispatcher()).launch {
@@ -189,7 +191,7 @@ class LedgerService : Service() {
     }
 
     override fun onDestroy() {
-        super.onDestroy();
+        super.onDestroy()
         Log.i(loggingTag, "Destroying Ledger Service")
         stopForeground(true)
 
@@ -246,8 +248,7 @@ class LedgerService : Service() {
 
         // Set the info for the views that show in the notification panel.
         return NotificationCompat.Builder(this, channelId)
-            .setSmallIcon(R.drawable.notification_tile_bg)
-            .setWhen(System.currentTimeMillis())  // the time stamp
+            .setWhen(System.currentTimeMillis())
             .setContentTitle(getText(R.string.remote_service_label))
             .setContentText(getText(R.string.remote_service_started))
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
@@ -279,13 +280,8 @@ class LedgerService : Service() {
             Log.d(loggingTag, "Hermes service looking at the registered client data")
             for ((uuid, client) in clientRegistry) {
                 Log.d(loggingTag, "Broadcasting data of client with id $uuid")
-                if (iotaConnector != null) iotaConnector?.sendData(
-                    *client.flushData(),
-                    clientUUID = uuid,
-                    blockUntilConfirmation = true,
-                    asyncConfirmation = true
-                )
-                else Log.d(loggingTag, "There is no connector to use to broadcast the data")
+                iotaConnector.sendData(*client.flushData(), clientUUID = uuid,
+                    blockUntilConfirmation = true, asyncConfirmation = true)
             }
             delay(10 * 1000)
         }

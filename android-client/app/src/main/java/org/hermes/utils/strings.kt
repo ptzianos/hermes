@@ -1,6 +1,12 @@
 package org.hermes.utils
 
+import android.util.Log
 import jota.utils.TrytesConverter
+import org.bouncycastle.util.encoders.Hex
+import java.lang.StringBuilder
+import java.security.NoSuchAlgorithmException
+import java.security.PrivateKey
+import java.security.Signature
 
 /**
  * Split a string into strings of maximum size equal to chunkSize.
@@ -43,4 +49,32 @@ fun String.toTrytes(): String {
 
 fun String.stripPaddingOfTrytes(): String {
     return this.trimEnd('9')
+}
+
+fun String.prepend(header: String): String {
+    return header + this
+}
+
+fun String.sign(header: String = "", privateKey: PrivateKey,
+                separator: String = ""): String {
+    return try {
+        StringBuilder()
+            .append(header)
+            .append(
+                Hex.toHexString(
+                    Signature.getInstance("SHA512withECDSA")
+                        .apply {
+                            this.initSign(privateKey)
+                            this.update(this@sign.toByteArray())
+                        }
+                        .sign()
+                )
+            )
+            .append(separator)
+            .append(this)
+            .toString()
+    } catch (e: Throwable) {
+        Log.e("String","Could not find algorithm to sign the message $e")
+        this
+    }
 }

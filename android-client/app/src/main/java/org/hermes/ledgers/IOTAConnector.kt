@@ -7,6 +7,7 @@ import java.lang.Exception
 import java.lang.StringBuilder
 import javax.inject.Inject
 import javax.inject.Named
+import java.security.KeyPair
 import jota.IotaAPI
 import jota.model.Bundle
 import jota.model.Transaction
@@ -23,11 +24,13 @@ import org.hermes.Metric20
 import org.hermes.entities.Event
 import org.hermes.iota.IOTA
 import org.hermes.iota.Seed
+import org.hermes.utils.prepend
+import org.hermes.utils.sign
 import org.hermes.utils.splitInChunks
 import org.hermes.utils.toTrytes
 
 
-class IOTAConnector(val seed: Seed, app: HermesClientApp) {
+class IOTAConnector(val seed: Seed, val keyPair: KeyPair, app: HermesClientApp) {
 
     val loggingTag: String = "IOTAConnector"
 
@@ -48,13 +51,20 @@ class IOTAConnector(val seed: Seed, app: HermesClientApp) {
      * Convert the data into strings separated by `::`, then convert them into trytes
      * and split into chunks of size equal to 2187.
      */
-    private fun samplesToTrytes(vararg samples: Metric20?): MutableList<String> {
+    private fun samplesToTrytes(vararg samples: Metric20?, clientUUID: String,
+                                header: String = ""): MutableList<String> {
         if (samples.isEmpty())
             throw Exception("No samples provided")
-        return samples
-            .filterNotNull()
-            .map { it.toCarbon20String() }
+
+        val clearTextPayload = samples
+            .mapNotNull { it?.toCarbon20String() }
             .joinToString(separator = "::")
+            .prepend(header)
+            .sign(header = "digest:", privateKey = keyPair.private, separator = "::")
+
+        Log.d(loggingTag, "$clientUUID -- Cleartext payload: $clearTextPayload")
+
+        return clearTextPayload
             .toTrytes()
             .splitInChunks(IOTA.Transaction.SIGNATURE_MESSAGE_FRAGMENT)
             .map { StringUtils.rightPad(it, Constants.MESSAGE_LENGTH, '9') }
@@ -70,22 +80,41 @@ class IOTAConnector(val seed: Seed, app: HermesClientApp) {
                 return
             }
 
-            // TODO: Save the index of the previous transaction to reduce search time
-            val nextAddressIndex = prefs.getInt("latest_addr_index", 1000) + 1
-            Log.d(loggingTag, "$clientUUID -- Next IOTA address index to use is: $nextAddressIndex")
-            val normalizedAddress = IotaAPIUtils.newAddress(seed.toString(), Seed.DEFAULT_SEED_SECURITY,
-                nextAddressIndex, false, SpongeFactory.create(SpongeFactory.Mode.KERL))
-            prefs.edit().putInt("latest_addr_index", nextAddressIndex).apply()
-            Log.d(loggingTag, "$clientUUID -- Address that will be used for the next sample broadcast is $normalizedAddress")
+            val newAddressIndex = prefs.getInt("latest_addr_index", 1000) + 1
+            val previousAddress = prefs.getString("latest_addr_used", "")
+            Log.d(loggingTag, "$clientUUID -- Next IOTA address index to use is: $newAddressIndex")
+            val newAddress = IotaAPIUtils.newAddress(seed.toString(), Seed.DEFAULT_SEED_SECURITY,
+                newAddressIndex, false, SpongeFactory.create(SpongeFactory.Mode.KERL))
+            val nextAddress = IotaAPIUtils.newAddress(seed.toString(), Seed.DEFAULT_SEED_SECURITY,
+                newAddressIndex + 1, false, SpongeFactory.create(SpongeFactory.Mode.KERL))
+
+            // TODO: This should be done only after the transactions have been committed to the ledger
+            prefs.edit()
+                .putInt("latest_addr_index", newAddressIndex)
+                .putString("latest_addr_used", newAddress)
+                .apply()
+
+            Log.d(loggingTag,
+                "$clientUUID -- Address that will be used for the next sample broadcast is $newAddress")
             val depth = 3
             val minWeightMagnitude = 14
             val timestamp = OffsetDateTime.now().toEpochSecond()
 
-            val carbon20SignatureFragments = samplesToTrytes(*samples)
+            // TODO: Add better support for multiplexing messages for many sensors streaming at the same time
+            val header = StringBuilder()
+                .append("next_address:")
+                .append(nextAddress)
+                .append("::")
+                .append("previous_address:")
+                .append(previousAddress)
+                .append("::")
+                .toString()
+
+            val carbon20SignatureFragments = samplesToTrytes(*samples, clientUUID = clientUUID, header = header)
             // Create empty transactions that will form the bundle. The number of transactions must be equal to the
             // number of chunks returned by the samplesToTrytes method.
             val carbon20Transactions = (0 until carbon20SignatureFragments.size)
-                .map{ Transaction(normalizedAddress, 0, EMPTY_TAG, timestamp) }
+                .map{ Transaction(newAddress, 0, EMPTY_TAG, timestamp) }
                 .toMutableList()
             Log.d(loggingTag, "$clientUUID -- Bundle will contain ${carbon20SignatureFragments.size} transactions")
 

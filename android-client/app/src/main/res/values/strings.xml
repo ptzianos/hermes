@@ -15,7 +15,7 @@
     <string name="auth_preference_key">auth</string>
     <string name="iota_preference_key">iota</string>
     <string name="auth_hashed_pin">hashed_pin</string>
-    <string name="auth_private_key">hashed_pin</string>
+    <string name="auth_private_key">private_key</string>
     <string name="auth_seed">seed</string>
     <string name="title_activity_event">Event Log</string>
     <string name="action_settings">Settings</string>

@@ -11,6 +11,7 @@ import javax.inject.Singleton
 
 import org.hermes.HermesRoomDatabase
 import org.hermes.R
+import java.security.KeyStore
 
 
 @Module
@@ -31,5 +32,11 @@ class HermesModule {
         return application.getSharedPreferences(
             application.getString(R.string.iota_preference_key),
             Context.MODE_PRIVATE)
+    }
+
+    @Provides @Singleton fun providesKeyStore(): KeyStore {
+        return KeyStore.getInstance("AndroidKeyStore").apply {
+            load(null)
+        }
     }
 }

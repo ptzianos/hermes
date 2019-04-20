@@ -4,10 +4,18 @@ import android.app.*
 import android.content.Intent
 import android.content.SharedPreferences
 import android.util.Log
-import java.security.KeyPair
+import java.security.*
+import java.security.interfaces.ECPrivateKey
+import java.util.*
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
+import org.bouncycastle.asn1.x500.X500Name
+import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter
+import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder
+import org.bouncycastle.jce.ECNamedCurveTable
+import org.bouncycastle.jce.spec.ECPublicKeySpec
+import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder
 
 import org.hermes.crypto.PasswordHasher
 import org.hermes.iota.Seed
@@ -16,26 +24,60 @@ import org.hermes.iota.Seed
 @Singleton
 class HermesRepository @Inject constructor(val application: Application,
                                            val db: HermesRoomDatabase,
-                                           @param:Named("auth") val sharedPref: SharedPreferences) {
+                                           @param:Named("auth") val sharedPref: SharedPreferences,
+                                           private val ks: KeyStore) {
 
     private val loggingTag = "HermesRepository"
 
-    private var seed: Seed? = null
-    private var keypair: KeyPair? = null
+    private lateinit var seed: Seed
+    private lateinit var keypair: KeyPair
+
     private var unsealed: Boolean = false
     private var ledgerServiceRunning: Boolean = false
 
+    /**
+     * This method produces a new set of credentials for the application and if there is
+     * already a set stored, they will be overwritten. A new random seed will be produced
+     * for use with the IOTA ledger and an EC keypair with 256 bits size. The user's pin
+     * will be stored in hashed form along with the rest of the credentials.
+     *
+     * TODO: Throw a clear error when the credentials cannot be stored.
+     */
     fun generateCredentials(pin: String): Boolean {
         val hashedPin = PasswordHasher.hashPassword(pin.toCharArray()).toString()
+
         seed = Seed.new()
-        val success = sharedPref.edit()
+
+        // Generate the EC KeyPair
+        keypair = KeyPairGenerator.getInstance("EC").apply {
+            initialize(256, SecureRandom.getInstanceStrong()) }
+            .generateKeyPair()
+
+        // Generate a self-signed cert for the newly creaated key
+        val issuerString = "C=DE, O=datenkollektiv, OU=Planets Debug Certificate"
+        // Issues and subject will be the same because it's a self-signed certificate
+        val issuer = X500Name(issuerString)
+        val subject = X500Name(issuerString)
+        val serial = SecureRandom.getInstanceStrong().nextLong().toBigInteger()
+        val notBefore = Date()
+        val notAfter = Date(System.currentTimeMillis() + (1000L * 24L * 60L * 60L * 1000L))
+        val v3CertificateBuilder = JcaX509v3CertificateBuilder(issuer, serial, notBefore,
+            notAfter, subject, keypair.public)
+        val certHolder = v3CertificateBuilder.build(JcaContentSignerBuilder("SHA512withECDSA" )
+            .setProvider( "AndroidOpenSSL" )
+            .build(keypair.private))
+        val certificate = JcaX509CertificateConverter()
+            .setProvider("AndroidOpenSSL")
+            .getCertificate(certHolder)
+        certificate.verify(keypair.public)
+
+        ks.setKeyEntry(application.getString(R.string.auth_private_key), keypair.private, pin.toCharArray(),
+            arrayOf(certificate))
+
+        return sharedPref.edit()
             .putString(application.getString(R.string.auth_hashed_pin), hashedPin)
             .putString(application.getString(R.string.auth_seed), seed.toString())
             .commit()
-        // TODO: Throw a more visible error over here
-        if (!success) Log.e(loggingTag, "There was some error while trying to store the user's hashed pin")
-        else Log.i(loggingTag, "Committed successfully the hashed pin and the seed of the user")
-        return success
     }
 
     /**
@@ -58,10 +100,12 @@ class HermesRepository @Inject constructor(val application: Application,
                                   .isNullOrBlank()
         val hashedPinEmpty = sharedPref.getString(application.getString(R.string.auth_hashed_pin), "")
                                        .isNullOrBlank()
-        if (seedEmpty != hashedPinEmpty) {
-            Log.e(loggingTag, "Application is in an incorrect state. Either seed or pin not available!")
+        val keypairEmpty = !ks.containsAlias(application.getString(R.string.auth_private_key))
+
+        if (seedEmpty != hashedPinEmpty || hashedPinEmpty != keypairEmpty) {
+            Log.e(loggingTag, "Application is in an incorrect state. Seed, keypair or pin not available!")
         }
-        return !(seedEmpty && hashedPinEmpty)
+        return !(seedEmpty || hashedPinEmpty || keypairEmpty)
     }
 
     fun unsealed(): Boolean {
@@ -74,13 +118,24 @@ class HermesRepository @Inject constructor(val application: Application,
     fun unlockCredentials(pin: String) {
         if (!unsealed) {
             Log.i(loggingTag, "Unlocking credentials of the application")
-            val seedString = sharedPref.getString(application.getString(R.string.auth_seed), seed.toString())
-            // TODO: notify the called that something failed over here
-            seedString ?: return
-            seed = Seed(seedString.toCharArray())
+
+            seed = Seed(
+                (sharedPref.getString(application.getString(R.string.auth_seed), "") as String)
+                .toCharArray()
+            )
+
+            val privateKey = ks.getKey(application.getString(R.string.auth_private_key),
+                pin.toCharArray()) as ECPrivateKey
+            val ecSpec = ECNamedCurveTable.getParameterSpec("secp256k1")
+            val Q = ecSpec.g.multiply((privateKey as org.bouncycastle.jce.interfaces.ECPrivateKey).d)
+            val ecPublicKeySpec = ECPublicKeySpec(Q, ecSpec)
+            val publicKey = KeyFactory.getInstance("EC").generatePublic(ecPublicKeySpec)
+            keypair = KeyPair(publicKey, privateKey)
+
+            // TODO: Start the service only if it's not running
             startLedgerService()
+
             unsealed = true
-            // TODO: Implement unsealing of encrypted credentials
         }
     }
 
@@ -100,5 +155,9 @@ class HermesRepository @Inject constructor(val application: Application,
 
     fun getSeed(): Seed? {
         return seed
+    }
+
+    fun getKeyPair(): KeyPair? {
+        return keypair
     }
 }
