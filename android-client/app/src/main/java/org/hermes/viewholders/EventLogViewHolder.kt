@@ -11,7 +11,7 @@ import org.hermes.R
 import org.hermes.entities.Event
 
 
-class EventViewHolder(parent : View) : ViewHolder(parent) {
+class EventLogViewHolder(parent : View) : ViewHolder(parent) {
 
     private val eventIdWidget: TextView = parent.findViewById(R.id.eventId)
     private val eventResource: TextView = parent.findViewById(R.id.eventResource)

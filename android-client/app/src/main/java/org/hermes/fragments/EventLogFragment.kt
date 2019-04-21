@@ -10,16 +10,16 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import dagger.Module
 import dagger.android.support.AndroidSupportInjection
-import org.hermes.HermesClientApp
-
-import org.hermes.adapters.PagedEventViewAdapter
-import org.hermes.entities.Event
-import org.hermes.R
-import org.hermes.viewmodels.EventViewModel
 import javax.inject.Inject
 
+import org.hermes.HermesClientApp
+import org.hermes.R
+import org.hermes.adapters.PagedEventViewAdapter
+import org.hermes.entities.Event
+import org.hermes.viewmodels.EventLogViewModel
 
-class EventFragment : Fragment() {
+
+class EventLogFragment : Fragment() {
 
     @Module
     abstract class DaggerModule
@@ -29,9 +29,9 @@ class EventFragment : Fragment() {
     @Inject
     lateinit var application: HermesClientApp
 
-    lateinit var viewModel: EventViewModel
+    lateinit var viewModel: EventLogViewModel
 
-    private var listener: EventFragment.OnListFragmentInteractionListener? = null
+    private var listener: EventLogFragment.OnListFragmentInteractionListener? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -50,7 +50,7 @@ class EventFragment : Fragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        viewModel = application.daggerHermesComponent.getEventViewModel()
+        viewModel = application.daggerHermesComponent.getEventLogViewModel()
     }
 
     override fun onAttach(context: Context) {

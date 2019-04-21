@@ -52,7 +52,7 @@ class SetupActivity : BaseActivity() {
     }
 
     private fun goToEventPage() {
-        startActivity(Intent(this, EventActivity::class.java))
+        startActivity(Intent(this, EventLogActivity::class.java))
     }
 
     private fun checkSetupForm() {

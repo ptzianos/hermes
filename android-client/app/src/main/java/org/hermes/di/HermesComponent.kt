@@ -13,7 +13,7 @@ import org.hermes.HermesLifeCycleObserver
 import org.hermes.HermesRepository
 import org.hermes.HermesRoomDatabase
 import org.hermes.ledgers.IOTAConnector
-import org.hermes.viewmodels.EventViewModel
+import org.hermes.viewmodels.EventLogViewModel
 import org.hermes.viewmodels.LoginViewModel
 
 
@@ -43,7 +43,7 @@ interface HermesComponent : AndroidInjector<HermesClientApp> {
 
     fun getLoginViewModel(): LoginViewModel
 
-    fun getEventViewModel(): EventViewModel
+    fun getEventLogViewModel(): EventLogViewModel
 
     fun getLifeCycleObserver(): HermesLifeCycleObserver
 

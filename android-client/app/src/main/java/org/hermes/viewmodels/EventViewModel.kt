@@ -9,8 +9,8 @@ import javax.inject.Inject
 import org.hermes.HermesRepository
 
 
-class EventViewModel @Inject constructor(application: Application,
-                                         hermesRepository: HermesRepository): AndroidViewModel(application) {
+class EventLogViewModel @Inject constructor(application: Application,
+                                            hermesRepository: HermesRepository): AndroidViewModel(application) {
 
     val allEvents = hermesRepository.db.eventDao().getAllLivePaged().toLiveData(Config(
         /**

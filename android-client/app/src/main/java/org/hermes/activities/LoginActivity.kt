@@ -41,7 +41,7 @@ class LoginActivity: BaseActivity() {
         viewModel.isFormValid.observe(this, Observer { valid ->
             if (valid) {
                 login_pin_input.error = null
-                startActivity(Intent(this, EventActivity::class.java))
+                startActivity(Intent(this, EventLogActivity::class.java))
             }
         })
     }

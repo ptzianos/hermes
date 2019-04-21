@@ -2,11 +2,12 @@ package org.hermes.di
 
 import dagger.Module
 import dagger.android.ContributesAndroidInjector
-import org.hermes.fragments.EventFragment
+
+import org.hermes.fragments.EventLogFragment
 
 
 @Module
 abstract class FragmentBindingModule {
-    @ContributesAndroidInjector(modules = [ EventFragment.DaggerModule::class ])
-    abstract fun eventFragment(): EventFragment
+    @ContributesAndroidInjector(modules = [ EventLogFragment.DaggerModule::class ])
+    abstract fun eventLogFragment(): EventLogFragment
 }

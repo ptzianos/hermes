@@ -14,7 +14,7 @@ import org.hermes.HermesClientApp
 import org.hermes.R
 import org.hermes.adapters.PagedEventViewAdapter
 import org.hermes.entities.Event
-import org.hermes.viewmodels.EventViewModel
+import org.hermes.viewmodels.EventLogViewModel
 
 
 class EventLogActivity : BaseActivity() {
@@ -24,14 +24,14 @@ class EventLogActivity : BaseActivity() {
 
     private val loggingTag = "EventLogActivity"
 
-    lateinit var viewModel: EventViewModel
+    lateinit var viewModel: EventLogViewModel
 
     @Inject
     lateinit var hermesApplication: HermesClientApp
 
     override fun onCreate(savedInstanceState: Bundle?) {
         AndroidInjection.inject(this)
-        viewModel = hermesApplication.daggerHermesComponent.getEventViewModel()
+        viewModel = hermesApplication.daggerHermesComponent.getEventLogViewModel()
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_event_list)
 
