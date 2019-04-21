@@ -2,7 +2,6 @@ package org.hermes.activities
 
 import android.os.Bundle
 import android.util.Log
-import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.paging.PagedList
 import androidx.recyclerview.widget.RecyclerView
@@ -10,14 +9,15 @@ import dagger.Module
 import dagger.android.AndroidInjection
 import javax.inject.Inject
 
-import org.hermes.adapters.PagedEventViewAdapter
-import org.hermes.entities.Event
+import org.hermes.BaseActivity
 import org.hermes.HermesClientApp
 import org.hermes.R
+import org.hermes.adapters.PagedEventViewAdapter
+import org.hermes.entities.Event
 import org.hermes.viewmodels.EventViewModel
 
 
-class EventActivity : AppCompatActivity() {
+class EventActivity : BaseActivity() {
 
     @Module
     abstract class DaggerModule

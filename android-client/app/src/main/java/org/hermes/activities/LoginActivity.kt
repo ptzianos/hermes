@@ -2,17 +2,13 @@ package org.hermes.activities
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
-import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
-import dagger.android.AndroidInjection
 import dagger.Module
+import dagger.android.AndroidInjection
 import javax.inject.Inject
 import kotlinx.android.synthetic.main.activity_login.*
-import org.hermes.HermesClientApp
 
-import org.hermes.HermesRepository
-import org.hermes.R
+import org.hermes.*
 import org.hermes.utils.afterTextChanged
 import org.hermes.viewmodels.LoginViewModel
 
@@ -20,7 +16,7 @@ import org.hermes.viewmodels.LoginViewModel
 /**
  * A login screen that offers to access the app via pin.
  */
-class LoginActivity: AppCompatActivity() {
+class LoginActivity: BaseActivity() {
 
     @Module
     abstract class DaggerModule
@@ -45,7 +41,6 @@ class LoginActivity: AppCompatActivity() {
         viewModel.isFormValid.observe(this, Observer { valid ->
             if (valid) {
                 login_pin_input.error = null
-                repository.unlockCredentials(login_pin_input.text.toString())
                 startActivity(Intent(this, EventActivity::class.java))
             }
         })
@@ -53,21 +48,12 @@ class LoginActivity: AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        if (!repository.credentialsSet()) {
-            Log.d(loggingTag, "Login activity redirecting to Setup activity")
-            goToSetupPage()
-        } else {
-            initForm()
-        }
+        initForm()
     }
 
     private fun initForm() {
         viewModel.pin = null
         login_pin_input.text = null
         login_pin_input.requestFocus()
-    }
-
-    private fun goToSetupPage() {
-        startActivity(Intent(this, SetupActivity::class.java))
     }
 }

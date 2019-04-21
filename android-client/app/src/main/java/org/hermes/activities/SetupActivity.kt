@@ -4,16 +4,16 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
-import androidx.appcompat.app.AppCompatActivity
 import dagger.android.AndroidInjection
 import dagger.Module
 import javax.inject.Inject
 
+import org.hermes.BaseActivity
 import org.hermes.HermesRepository
 import org.hermes.R
 
 
-class SetupActivity : AppCompatActivity() {
+class SetupActivity : BaseActivity() {
 
     @Module
     abstract class DaggerModule
@@ -74,7 +74,7 @@ class SetupActivity : AppCompatActivity() {
             pinSetupInputVerify.error = "The two fields must be equal"
         }
         if (!errorsInForm && repository.generateCredentials(pinSetupInput.text.toString())) {
-            repository.unlockCredentials(pinSetupInput.toString())
+            repository.unseal(pinSetupInput.toString())
             goToEventPage()
         }
     }

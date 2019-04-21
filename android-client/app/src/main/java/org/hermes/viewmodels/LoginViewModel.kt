@@ -21,6 +21,6 @@ class LoginViewModel @Inject constructor(application: Application,
     var pin: String? = null
         set(value) {
             field = value
-            _isFormValid.postValue(value != null && !value.isBlank() && hermesRepository.checkPIN(value))
+            _isFormValid.postValue(value != null && !value.isBlank() && hermesRepository.unseal(value))
         }
 }

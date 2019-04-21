@@ -5,7 +5,6 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.util.Log
 import java.security.*
-import java.security.interfaces.ECPrivateKey
 import java.util.*
 import javax.inject.Inject
 import javax.inject.Named
@@ -13,8 +12,6 @@ import javax.inject.Singleton
 import org.bouncycastle.asn1.x500.X500Name
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter
 import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder
-import org.bouncycastle.jce.ECNamedCurveTable
-import org.bouncycastle.jce.spec.ECPublicKeySpec
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder
 
 import org.hermes.crypto.PasswordHasher
@@ -33,6 +30,7 @@ class HermesRepository @Inject constructor(val application: Application,
     private lateinit var keypair: KeyPair
 
     private var unsealed: Boolean = false
+    private var credentialsLoaded: Boolean = true
     private var ledgerServiceRunning: Boolean = false
 
     /**
@@ -87,10 +85,21 @@ class HermesRepository @Inject constructor(val application: Application,
      * It does not check if there is a stored hash to compare against. The caller of the function
      * must perform these checks.
      */
-    fun checkPIN(pin: String): Boolean {
+    fun unseal(pin: String): Boolean {
         val hashedPin = PasswordHasher.hashPassword(pin.toCharArray())
         val storedPin = sharedPref.getString(application.getString(R.string.auth_hashed_pin), "")
-        return storedPin == hashedPin.toString()
+        if (storedPin == hashedPin.toString()) {
+            if (!credentialsLoaded) {
+                loadCredentials()
+            }
+            unsealed = true
+            return true
+        }
+        return false
+    }
+
+    fun seal() {
+        unsealed = false
     }
 
     /**
@@ -117,26 +126,24 @@ class HermesRepository @Inject constructor(val application: Application,
     /**
      * Decrypt the credentials using the user's PIN
      */
-    fun unlockCredentials(pin: String) {
-        if (!unsealed) {
-            Log.i(loggingTag, "Unlocking credentials of the application")
+    private fun loadCredentials() {
+        Log.i(loggingTag, "Unlocking credentials of the application")
 
-            seed = Seed(
-                (sharedPref.getString(application.getString(R.string.auth_seed), "") as String)
-                .toCharArray()
-            )
+        seed = Seed(
+            (sharedPref.getString(application.getString(R.string.auth_seed), "") as String)
+            .toCharArray()
+        )
 
-            val privateKeyEntry =
-                ks.getEntry(application.getString(R.string.auth_private_key), null) as KeyStore.PrivateKeyEntry
-            val privateKey = privateKeyEntry.privateKey
-            val publicKey = privateKeyEntry.certificate.publicKey
-            keypair = KeyPair(publicKey, privateKey)
+        val privateKeyEntry =
+            ks.getEntry(application.getString(R.string.auth_private_key), null) as KeyStore.PrivateKeyEntry
+        val privateKey = privateKeyEntry.privateKey
+        val publicKey = privateKeyEntry.certificate.publicKey
+        keypair = KeyPair(publicKey, privateKey)
 
-            // TODO: Start the service only if it's not running
-            startLedgerService()
+        // TODO: Start the service only if it's not running
+        startLedgerService()
 
-            unsealed = true
-        }
+        credentialsLoaded = true
     }
 
     /**

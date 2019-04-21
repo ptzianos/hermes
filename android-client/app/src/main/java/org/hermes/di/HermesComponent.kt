@@ -9,6 +9,7 @@ import dagger.Component
 import javax.inject.Singleton
 
 import org.hermes.HermesClientApp
+import org.hermes.HermesLifeCycleObserver
 import org.hermes.HermesRepository
 import org.hermes.HermesRoomDatabase
 import org.hermes.ledgers.IOTAConnector
@@ -34,6 +35,8 @@ interface HermesComponent : AndroidInjector<HermesClientApp> {
 
     fun inject(connector: IOTAConnector)
 
+    fun inject(observer: HermesLifeCycleObserver)
+
     fun getRoomInstance(): HermesRoomDatabase
 
     fun getRepository(): HermesRepository
@@ -41,6 +44,8 @@ interface HermesComponent : AndroidInjector<HermesClientApp> {
     fun getLoginViewModel(): LoginViewModel
 
     fun getEventViewModel(): EventViewModel
+
+    fun getLifeCycleObserver(): HermesLifeCycleObserver
 
     @Component.Builder
     interface Builder {
