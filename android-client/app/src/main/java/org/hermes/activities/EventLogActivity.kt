@@ -17,7 +17,7 @@ import org.hermes.entities.Event
 import org.hermes.viewmodels.EventViewModel
 
 
-class EventActivity : BaseActivity() {
+class EventLogActivity : BaseActivity() {
 
     @Module
     abstract class DaggerModule

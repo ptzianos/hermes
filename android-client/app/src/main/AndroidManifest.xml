@@ -36,7 +36,7 @@
                 android:label="@string/title_activity_setup">
         </activity>
         <activity
-                android:name="org.hermes.activities.EventActivity"
+                android:name="org.hermes.activities.EventLogActivity"
                 android:label="@string/title_activity_event">
         </activity>
     </application>

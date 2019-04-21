@@ -3,10 +3,11 @@ package org.hermes
 import android.content.Intent
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
-import org.hermes.activities.LoginActivity
-import org.hermes.activities.SetupActivity
 import javax.inject.Inject
 import javax.inject.Singleton
+
+import org.hermes.activities.LoginActivity
+import org.hermes.activities.SetupActivity
 
 
 @Singleton
