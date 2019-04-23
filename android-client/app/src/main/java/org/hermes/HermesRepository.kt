@@ -4,6 +4,9 @@ import android.app.*
 import android.content.Intent
 import android.content.SharedPreferences
 import android.util.Log
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.asCoroutineDispatcher
+import kotlinx.coroutines.launch
 import java.security.*
 import java.util.*
 import javax.inject.Inject
@@ -15,6 +18,7 @@ import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder
 
 import org.hermes.crypto.PasswordHasher
+import org.hermes.entities.Event
 import org.hermes.iota.Seed
 
 
@@ -100,6 +104,12 @@ class HermesRepository @Inject constructor(val application: Application,
 
     fun seal() {
         unsealed = false
+    }
+
+    fun fetchEvent(id: Int, callback: (event: Event) -> Unit) {
+        CoroutineScope(BACKGROUND.asCoroutineDispatcher()).launch {
+            callback(db.eventDao().findById(id))
+        }
     }
 
     /**
