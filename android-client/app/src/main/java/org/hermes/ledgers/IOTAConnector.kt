@@ -153,7 +153,7 @@ class IOTAConnector(val seed: Seed, val keyPair: KeyPair, app: HermesClientApp) 
         for (i in 0 until 3) {
             delay(5 * 1000)
 
-            Log.d(loggingTag, "$clientUUID -- Starting IOTA API call $i/3 for addresses: $txsAddresses.")
+            Log.d(loggingTag, "$clientUUID -- Starting IOTA API call $i/3 for addresses: $txsAddressesStr.")
 
             val fetchedTxs = api.findTransactionObjectsByAddresses(txsAddresses)
             val successfulTxs = fetchedTxs.filter { it.hash.isNotEmpty() }
