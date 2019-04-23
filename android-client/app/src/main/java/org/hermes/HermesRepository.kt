@@ -34,7 +34,7 @@ class HermesRepository @Inject constructor(val application: Application,
     private lateinit var keypair: KeyPair
 
     private var unsealed: Boolean = false
-    private var credentialsLoaded: Boolean = true
+    private var credentialsLoaded: Boolean = false
     private var ledgerServiceRunning: Boolean = false
 
     /**
