@@ -160,13 +160,12 @@ class IOTAConnector(val seed: Seed, val keyPair: KeyPair, app: HermesClientApp) 
 
             if (successfulTxs.isNotEmpty()) {
                 val eventMessage = StringBuilder()
-                    .append("$clientUUID -- Broadcast was")
-                    .append("successful for bundle: ")
+                    .append("$clientUUID -- Broadcast was successful for bundle: ")
                     .append(fetchedTxs.first().bundle)
-                    .append("and txs: ")
+                    .append(" and txs: ")
                     .append(txsAddressesStr)
 
-                val event = Event(action = "broadcast", resource = "iota", extraInfo = eventMessage.toString())
+                val event = Event(action = "confirm attach", resource = "iota", extraInfo = eventMessage.toString())
                 db.eventDao().insertAll(event)
                 Log.i(loggingTag, eventMessage.toString())
                 return
@@ -174,8 +173,7 @@ class IOTAConnector(val seed: Seed, val keyPair: KeyPair, app: HermesClientApp) 
             Log.d(loggingTag, "$clientUUID -- IOTA API call $i/3 was unsuccessful for addresses: $txsAddresses")
         }
         val eventMessage = StringBuilder()
-            .append("$clientUUID -- Broadcast was")
-            .append("unsuccessful for txs: ")
+            .append("$clientUUID -- Broadcast was unsuccessful for txs: ")
             .append(txsAddressesStr)
         Log.i(loggingTag, eventMessage.toString())
     }
