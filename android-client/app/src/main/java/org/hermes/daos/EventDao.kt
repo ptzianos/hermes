@@ -3,9 +3,9 @@ package org.hermes.daos
 import androidx.lifecycle.LiveData
 import androidx.room.*
 import androidx.paging.DataSource
+import org.threeten.bp.OffsetDateTime
 
 import org.hermes.entities.Event
-import org.threeten.bp.OffsetDateTime
 
 @Dao
 interface EventDao {
