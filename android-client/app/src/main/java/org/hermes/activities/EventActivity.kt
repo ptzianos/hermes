@@ -14,6 +14,7 @@ import org.hermes.HermesRepository
 import org.hermes.R
 import org.hermes.entities.Event
 import org.threeten.bp.format.DateTimeFormatter
+import java.util.regex.Pattern
 
 
 class EventActivity : BaseActivity() {
@@ -64,6 +65,33 @@ class EventActivity : BaseActivity() {
         eventResourceId.setText((event.resourceId ?: -1).toString())
         eventAction.text = event.action
         eventDate.setText(event.createdOn.format(DateTimeFormatter.RFC_1123_DATE_TIME))
-        eventExtraInfo.setText(event.extraInfo)
+        eventExtraInfo.setText(processText(event))
+    }
+
+    private fun processText(event: Event): String {
+        if (event.resource == "iota" && event.action == "broadcast") {
+            val transactionBroadcastMsgStrRegex = "([0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12})\\s--\\s.*([9A-Z]{81})"
+            val transactionAndBundleMsgStrRegex =
+                "([0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12})\\s--\\s.*([9A-Z]{81})\\s.*([9A-Z]{81})"
+            val transactionBroadcastMsgRegex = Regex(transactionBroadcastMsgStrRegex)
+            val transactionAndBundleMsgRegex = Regex(transactionAndBundleMsgStrRegex)
+            val isTransactionBroadcastMessage = event.extraInfo?.matches(transactionBroadcastMsgRegex) ?: false
+            val isBundleConfirmationMessage = event.extraInfo?.matches(transactionAndBundleMsgRegex) ?: false
+            if (isTransactionBroadcastMessage) {
+                val pattern = Pattern.compile(transactionBroadcastMsgStrRegex)
+                val match = pattern.matcher(event.extraInfo ?: "")
+                if (match.find())
+                    return "Sensor UUID: ${match.group(1)}\n" +
+                            "https://thetangle.org/address/${match.group(3)}"
+            } else if (isBundleConfirmationMessage) {
+                val pattern = Pattern.compile(transactionBroadcastMsgStrRegex)
+                val match = pattern.matcher(event.extraInfo ?: "")
+                if (match.find())
+                    return "Sensor UUID: ${match.group(1)}" +
+                            "\nhttps://thetangle.org/bundle/${match.group(3)}" +
+                            "\nhttps://thetangle.org/address/${match.group(4)}"
+            }
+        }
+        return event.extraInfo ?: ""
     }
 }
