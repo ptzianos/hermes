@@ -4,13 +4,13 @@
         xmlns:app="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"
         android:id="@+id/event_recycler_view"
-        android:name="org.hermes.fragments.EventFragment"
+        android:name="org.hermes.fragments.EventLogFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginLeft="16dp"
         android:layout_marginRight="16dp"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-        tools:context="org.hermes.fragments.EventFragment"
+        tools:context="org.hermes.fragments.EventLogFragment"
         tools:listitem="@layout/event_list_item">
 
 </androidx.recyclerview.widget.RecyclerView>

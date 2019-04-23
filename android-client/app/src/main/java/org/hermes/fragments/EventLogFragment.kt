@@ -42,7 +42,7 @@ class EventLogFragment : Fragment() {
         return (inflater.inflate(R.layout.event_list_fragment, container, false) as RecyclerView)
             .let {
                 it.layoutManager = LinearLayoutManager(context)
-                it.adapter = PagedEventViewAdapter()
+                it.adapter = PagedEventViewAdapter(context as Context)
                 it
             }
     }

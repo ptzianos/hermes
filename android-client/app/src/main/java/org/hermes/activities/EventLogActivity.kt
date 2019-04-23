@@ -35,15 +35,11 @@ class EventLogActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_event_list)
 
-        // TODO: Change the id to something more suitable
-        val recyclerView: RecyclerView = findViewById(R.id.fragment)
-        val adapter = PagedEventViewAdapter()
-
-        recyclerView.adapter = adapter
+        val recyclerView: RecyclerView = findViewById(R.id.eventFragment)
 
         viewModel.allEvents.observe(this, Observer<PagedList<Event>?> {
             Log.i(loggingTag,"Observed change of data")
-            adapter.submitList(it)
+            (recyclerView.adapter as PagedEventViewAdapter).submitList(it)
         })
     }
 }
