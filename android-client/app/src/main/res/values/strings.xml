@@ -17,7 +17,8 @@
     <string name="auth_hashed_pin">hashed_pin</string>
     <string name="auth_private_key">private_key</string>
     <string name="auth_seed">seed</string>
-    <string name="title_activity_event">Event Log</string>
+    <string name="title_activity_event_log">Event Log</string>
+    <string name="title_activity_sensor_list">Sensor List</string>
     <string name="action_settings">Settings</string>
     <string name="remote_service_label">Hermes</string>
     <string name="remote_service_started">service started</string>

@@ -21,7 +21,8 @@
         <service
                 android:name="org.hermes.LedgerService"
                 android:enabled="true"
-                android:exported="true">
+                android:exported="true"
+                tools:ignore="ExportedService">
         </service>
         <activity
                 android:name="org.hermes.activities.LoginActivity"
@@ -37,9 +38,13 @@
         </activity>
         <activity
                 android:name="org.hermes.activities.EventLogActivity"
-                android:label="@string/title_activity_event">
+                android:label="@string/title_activity_event_log">
         </activity>
         <activity android:name=".activities.EventActivity"/>
+        <activity
+                android:name="org.hermes.activities.SensorListActivity"
+                android:label="@string/title_activity_sensor_list">
+        </activity>
     </application>
 
 </manifest>

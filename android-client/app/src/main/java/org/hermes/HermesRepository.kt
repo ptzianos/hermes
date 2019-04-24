@@ -4,6 +4,8 @@ import android.app.*
 import android.content.Intent
 import android.content.SharedPreferences
 import android.util.Log
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.launch
@@ -36,6 +38,12 @@ class HermesRepository @Inject constructor(val application: Application,
     private var unsealed: Boolean = false
     private var credentialsLoaded: Boolean = false
     private var ledgerServiceRunning: Boolean = false
+    private var sensorList: LinkedList<LedgerService.Sensor> = LinkedList()
+    private var sensorListData: MutableLiveData<List<LedgerService.Sensor>> = {
+        val mld = MutableLiveData<List<LedgerService.Sensor>>()
+        mld.value = sensorList
+        mld
+    }()
 
     /**
      * This method produces a new set of credentials for the application and if there is
@@ -156,6 +164,10 @@ class HermesRepository @Inject constructor(val application: Application,
         credentialsLoaded = true
     }
 
+    fun getSensorLiveData(): LiveData<List<LedgerService.Sensor>> {
+        return sensorListData
+    }
+
     /**
      * Start the LedgerService if it's not running already
      */
@@ -168,6 +180,18 @@ class HermesRepository @Inject constructor(val application: Application,
         } else {
             Log.i(loggingTag, "Ledger service is already running")
         }
+    }
+
+    fun addSensor(sensor: LedgerService.Sensor) {
+        sensorList.add(sensor)
+        // Do this to notify clients that the data has changed
+        sensorListData.postValue(sensorListData.value)
+    }
+
+    fun removeSensor(sensor: LedgerService.Sensor) {
+        sensorList.remove(sensor)
+        // Do this to notify clients that the data has changed
+        sensorListData.value = sensorList
     }
 
     fun getSeed(): Seed? {

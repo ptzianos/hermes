@@ -32,12 +32,14 @@ class LedgerService : Service() {
     @Module
     abstract class DaggerModule
 
-    data class Client(val dataId: String, val unit: String, val mtype: String, val what: String?, val device: String?) {
+    data class Sensor(val dataId: String, val unit: String, val mtype: String, val what: String?, val device: String?) {
         private var i = 0
         private val lock = ReentrantLock()
         // TODO: Make this configurable
         private val sampleSize = 10
         private var buffer = Array<Metric20?>(sampleSize) { null }
+        lateinit var uuid: String
+        var active = false
 
         /**
          * Put a new sample in the buffer.
@@ -69,11 +71,13 @@ class LedgerService : Service() {
                 dataId == null -> ErrorCode.NO_DATA_ID.errorStr
                 unit == null -> ErrorCode.NO_UNIT.errorStr
                 mtype == null -> ErrorCode.NO_TYPE.errorStr
-                clientRegistry.containsValue(Client(dataId, unit, mtype, what, device)) ->
+                sensorRegistry.containsValue(Sensor(dataId, unit, mtype, what, device)) ->
                     ErrorCode.ALREADY_REGISTERED.errorStr
                 else -> {
                     val uuid = UUID.randomUUID().toString()
-                    clientRegistry[uuid] = Client(dataId, unit, mtype, what, device)
+                    val newSensor = Sensor(dataId, unit, mtype, what, device).apply { this.uuid = uuid }
+                    sensorRegistry[uuid] = newSensor
+                    repository.addSensor(newSensor)
                     uuid
                 }
             }
@@ -82,7 +86,8 @@ class LedgerService : Service() {
             when (uuid) {
                 null -> ErrorCode.NO_UUID.errorStr
                 else -> {
-                    clientRegistry.remove(uuid)
+                    val sensor = sensorRegistry.remove(uuid)
+                    if (sensor != null) repository.removeSensor(sensor)
                     ""
                 }
             }
@@ -92,12 +97,12 @@ class LedgerService : Service() {
                                     file: String?, line: Int, env: String?): String =
             when {
                 uuid == null -> ErrorCode.NO_UUID.errorStr
-                !clientRegistry.containsKey(uuid) -> ErrorCode.NOT_REGISTERED.errorStr
+                !sensorRegistry.containsKey(uuid) -> ErrorCode.NOT_REGISTERED.errorStr
                 !repository.unsealed() -> ErrorCode.SEALED.errorStr
                 else -> {
                     Log.d(loggingTag, "Got a new sample from client with uuid $uuid")
                     // TODO: Add a check to ensure that the data are in the expected form
-                    val client = clientRegistry[uuid] as Client
+                    val client = sensorRegistry[uuid] as Sensor
                     val newSample = Metric20(client.dataId, value)
                         .setData(Metric20.TagKey.MTYPE, client.mtype)
                         .setData(Metric20.TagKey.UNIT, client.unit)
@@ -111,12 +116,12 @@ class LedgerService : Service() {
                                     file: String?, line: Int, env: String?): String  =
             when {
                 uuid == null -> ErrorCode.NO_UUID.errorStr
-                !clientRegistry.containsKey(uuid) -> ErrorCode.NOT_REGISTERED.errorStr
+                !sensorRegistry.containsKey(uuid) -> ErrorCode.NOT_REGISTERED.errorStr
                 !repository.unsealed() -> ErrorCode.SEALED.errorStr
                 else -> {
                     Log.d(loggingTag, "Got a new sample from client with uuid $uuid")
                     // TODO: Add a check to ensure that the data are in the expected form
-                    val client = clientRegistry[uuid] as Client
+                    val client = sensorRegistry[uuid] as Sensor
                     val newSample = Metric20(client.dataId, value.toString())
                         .setData(Metric20.TagKey.MTYPE, client.mtype)
                         .setData(Metric20.TagKey.UNIT, client.unit)
@@ -148,8 +153,8 @@ class LedgerService : Service() {
 
     private var mNotificationManager: NotificationManager? = null
     private val channelId = SecureRandom.getInstanceStrong().nextInt().toString()
-    private var foregroundNotificationId: Int = 15970
-    private val clientRegistry = ConcurrentHashMap<String, Client>()
+    private val foregroundNotificationId: Int = 15970
+    private val sensorRegistry = ConcurrentHashMap<String, Sensor>()
 
     @Inject
     lateinit var db: HermesRoomDatabase
@@ -278,7 +283,7 @@ class LedgerService : Service() {
     private suspend fun broadcastData() {
         while (true) {
             Log.d(loggingTag, "Hermes service looking at the registered client data")
-            for ((uuid, client) in clientRegistry) {
+            for ((uuid, client) in sensorRegistry) {
                 Log.d(loggingTag, "Broadcasting data of client with id $uuid")
                 iotaConnector.sendData(*client.flushData(), clientUUID = uuid,
                     blockUntilConfirmation = true, asyncConfirmation = true)

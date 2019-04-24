@@ -2,11 +2,7 @@ package org.hermes.di
 
 import dagger.android.ContributesAndroidInjector
 import dagger.Module
-import org.hermes.activities.EventActivity
-
-import org.hermes.activities.EventLogActivity
-import org.hermes.activities.LoginActivity
-import org.hermes.activities.SetupActivity
+import org.hermes.activities.*
 
 
 @Module
@@ -24,4 +20,6 @@ abstract class ActivityBindingModule {
     @ContributesAndroidInjector(modules = [EventActivity.DaggerModule::class])
     abstract fun eventActivity(): EventActivity
 
+    @ContributesAndroidInjector(modules = [SensorListActivity.DaggerModule::class])
+    abstract fun sensorListActivity(): SensorListActivity
 }
