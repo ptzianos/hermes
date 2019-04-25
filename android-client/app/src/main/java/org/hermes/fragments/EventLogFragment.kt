@@ -15,7 +15,6 @@ import javax.inject.Inject
 import org.hermes.HermesClientApp
 import org.hermes.R
 import org.hermes.adapters.PagedEventViewAdapter
-import org.hermes.entities.Event
 import org.hermes.viewmodels.EventLogViewModel
 
 
@@ -30,8 +29,6 @@ class EventLogFragment : Fragment() {
     lateinit var application: HermesClientApp
 
     lateinit var viewModel: EventLogViewModel
-
-    private var listener: EventLogFragment.OnListFragmentInteractionListener? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -56,20 +53,5 @@ class EventLogFragment : Fragment() {
     override fun onAttach(context: Context) {
         AndroidSupportInjection.inject(this)
         super.onAttach(context)
-//        if (context is EventFragment.OnListFragmentInteractionListener) {
-//            listener = context
-//        } else {
-//            throw RuntimeException(context.toString() + " must implement OnListFragmentInteractionListener")
-//        }
     }
-
-    override fun onDetach() {
-        super.onDetach()
-        listener = null
-    }
-
-    interface OnListFragmentInteractionListener {
-        fun onListFragmentInteraction(item: Event?)
-    }
-
 }

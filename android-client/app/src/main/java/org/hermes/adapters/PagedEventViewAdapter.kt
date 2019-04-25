@@ -1,7 +1,6 @@
 package org.hermes.adapters
 
 import android.content.Context
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.paging.PagedListAdapter
@@ -9,7 +8,6 @@ import androidx.recyclerview.widget.DiffUtil
 
 import org.hermes.R
 import org.hermes.entities.Event
-import org.hermes.fragments.EventLogFragment.OnListFragmentInteractionListener
 import org.hermes.viewholders.EventLogViewHolder
 
 /**
