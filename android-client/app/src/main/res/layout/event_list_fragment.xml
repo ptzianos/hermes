@@ -11,6 +11,6 @@
         android:layout_marginRight="16dp"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         tools:context="org.hermes.fragments.EventLogFragment"
-        tools:listitem="@layout/event_list_item">
+        tools:listitem="@layout/event_list_item" android:background="#EAE8E8">
 
 </androidx.recyclerview.widget.RecyclerView>
