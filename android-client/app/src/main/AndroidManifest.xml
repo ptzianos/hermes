@@ -45,6 +45,10 @@
                 android:name="org.hermes.activities.SensorListActivity"
                 android:label="@string/title_activity_sensor_list">
         </activity>
+        <activity
+                android:name="org.hermes.activities.SensorActivity"
+                android:label="@string/title_activity_sensor">
+        </activity>
     </application>
 
 </manifest>

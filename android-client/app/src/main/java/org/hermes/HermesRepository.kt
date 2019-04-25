@@ -120,6 +120,15 @@ class HermesRepository @Inject constructor(val application: Application,
         }
     }
 
+    fun fetchSensor(id: String, callback: (sensor: LedgerService.Sensor) -> Unit) {
+        for (sensor in sensorList) {
+            if (sensor.dataId == id) {
+                callback(sensor)
+                return
+            }
+        }
+    }
+
     /**
      * Returns true if the necessary credentials of the application are available,
      * false otherwise.

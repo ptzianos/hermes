@@ -13,7 +13,6 @@ import dagger.android.support.AndroidSupportInjection
 import javax.inject.Inject
 
 import org.hermes.HermesClientApp
-import org.hermes.LedgerService
 import org.hermes.R
 import org.hermes.adapters.SensorListViewAdapter
 import org.hermes.viewmodels.SensorListViewModel
@@ -45,7 +44,6 @@ class SensorListFragment : Fragment() {
             }
     }
 
-
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         viewModel = application.daggerHermesComponent.getSensorListViewModel()
@@ -55,14 +53,4 @@ class SensorListFragment : Fragment() {
         AndroidSupportInjection.inject(this)
         super.onAttach(context)
     }
-//
-//    override fun onDetach() {
-//        super.onDetach()
-//        listener = null
-//    }
-
-    interface OnListFragmentInteractionListener {
-        fun onListFragmentInteraction(item: LedgerService.Sensor?)
-    }
-
 }

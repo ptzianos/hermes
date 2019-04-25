@@ -13,7 +13,8 @@ import org.hermes.viewholders.SensorListViewHolder
 /**
  * [RecyclerView.Adapter] that can display a [LedgerService.Sensor].
  */
-class SensorListViewAdapter(val context: Context): ListAdapter<LedgerService.Sensor, SensorListViewHolder>(diffCallback) {
+class SensorListViewAdapter(val context: Context):
+    ListAdapter<LedgerService.Sensor, SensorListViewHolder>(diffCallback) {
 
     companion object {
         private val diffCallback = object : DiffUtil.ItemCallback<LedgerService.Sensor>() {

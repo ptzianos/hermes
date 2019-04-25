@@ -22,4 +22,7 @@ abstract class ActivityBindingModule {
 
     @ContributesAndroidInjector(modules = [SensorListActivity.DaggerModule::class])
     abstract fun sensorListActivity(): SensorListActivity
+
+    @ContributesAndroidInjector(modules = [SensorActivity.DaggerModule::class])
+    abstract fun sensorActivity(): SensorActivity
 }
