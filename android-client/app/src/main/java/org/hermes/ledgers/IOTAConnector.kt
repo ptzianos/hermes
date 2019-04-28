@@ -5,9 +5,9 @@ import android.content.SharedPreferences
 import android.util.Log
 import java.lang.Exception
 import java.lang.StringBuilder
+import java.security.KeyPair
 import javax.inject.Inject
 import javax.inject.Named
-import java.security.KeyPair
 import jota.IotaAPI
 import jota.model.Bundle
 import jota.model.Transaction
