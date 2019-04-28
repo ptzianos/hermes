@@ -22,6 +22,7 @@ class SensorListActivity : BaseActivity() {
 
     private val loggingTag = "SensorListActivity"
 
+    @Inject
     lateinit var viewModel: SensorListViewModel
 
     @Inject
@@ -29,7 +30,6 @@ class SensorListActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         AndroidInjection.inject(this)
-        viewModel = hermesApplication.daggerHermesComponent.getSensorListViewModel()
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_sensor_list)
 

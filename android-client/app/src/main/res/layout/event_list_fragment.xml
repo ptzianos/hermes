@@ -3,14 +3,13 @@
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"
-        android:id="@+id/event_recycler_view"
+        android:id="@+id/eventRecyclerView"
         android:name="org.hermes.fragments.EventLogFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginLeft="16dp"
-        android:layout_marginRight="16dp"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         tools:context="org.hermes.fragments.EventLogFragment"
-        tools:listitem="@layout/event_list_item" android:background="#EAE8E8">
+        tools:listitem="@layout/event_list_item" android:background="@color/dividerColor" android:layout_margin="0dp"
+        android:padding="0dp">
 
 </androidx.recyclerview.widget.RecyclerView>

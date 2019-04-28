@@ -3,4 +3,16 @@
     <color name="colorPrimary">#3F51B5</color>
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
+    <color name="primaryColor">#00BCD4</color>
+    <color name="primaryDarkColor">#0097A7</color>
+    <color name="primaryLightColor">#B2EBF2</color>
+    <color name="accentColor">#536DFE</color>
+    <color name="primaryTextColor">#212121</color>
+    <color name="secondaryTextColor">#757575</color>
+    <color name="iconsColor">#FFFFFF</color>
+    <color name="dividerColor">#BDBDBD</color>
+
+    <drawable name="iconsColor">#FFFFFF</drawable>
+    <drawable name="primaryDarkColor">#0097A7</drawable>
+    <drawable name="secondaryTextColor">#757575</drawable>
 </resources>

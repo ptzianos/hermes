@@ -3,8 +3,8 @@
           xmlns:tools="http://schemas.android.com/tools"
           package="org.hermes">
 
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.INTERNET"/>
 
     <application
             android:name="org.hermes.HermesClientApp"
@@ -16,7 +16,7 @@
             android:label="@string/app_name"
             android:roundIcon="@mipmap/ic_launcher_round"
             android:supportsRtl="true"
-            android:theme="@style/AppTheme"
+            android:theme="@style/HermesAppTheme"
             tools:ignore="GoogleAppIndexingWarning">
         <service
                 android:name="org.hermes.LedgerService"
@@ -24,6 +24,10 @@
                 android:exported="true"
                 tools:ignore="ExportedService">
         </service>
+        <activity
+                android:name="org.hermes.activities.DrawerActivity"
+                android:label="@string/title_activity_drawer">
+        </activity>
         <activity
                 android:name="org.hermes.activities.LoginActivity"
                 android:label="@string/app_name">
@@ -49,6 +53,7 @@
                 android:name="org.hermes.activities.SensorActivity"
                 android:label="@string/title_activity_sensor">
         </activity>
+        <meta-data android:name="preloaded_fonts" android:resource="@array/preloaded_fonts"/>
     </application>
 
 </manifest>

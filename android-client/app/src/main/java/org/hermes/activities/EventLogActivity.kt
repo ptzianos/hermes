@@ -1,7 +1,6 @@
 package org.hermes.activities
 
 import android.os.Bundle
-import android.util.Log
 import androidx.lifecycle.Observer
 import androidx.paging.PagedList
 import androidx.recyclerview.widget.RecyclerView
@@ -35,11 +34,8 @@ class EventLogActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_event_list)
 
-        val recyclerView: RecyclerView = findViewById(R.id.eventFragment)
-
         viewModel.allEvents.observe(this, Observer<PagedList<Event>?> {
-            Log.i(loggingTag,"Observed change of data")
-            (recyclerView.adapter as PagedEventViewAdapter).submitList(it)
+            (findViewById<RecyclerView>(R.id.eventRecyclerView).adapter as PagedEventViewAdapter).submitList(it)
         })
     }
 }

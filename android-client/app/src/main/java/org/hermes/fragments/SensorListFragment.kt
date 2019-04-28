@@ -10,15 +10,15 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import dagger.Module
 import dagger.android.support.AndroidSupportInjection
+import java.util.*
 import javax.inject.Inject
 
 import org.hermes.HermesClientApp
 import org.hermes.R
 import org.hermes.adapters.SensorListViewAdapter
-import org.hermes.viewmodels.SensorListViewModel
 
 
-class SensorListFragment : Fragment() {
+class SensorListFragment @Inject constructor() : Fragment(), HasOnCreateViewCallbacks {
 
     @Module
     abstract class DaggerModule
@@ -28,7 +28,7 @@ class SensorListFragment : Fragment() {
     @Inject
     lateinit var application: HermesClientApp
 
-    lateinit var viewModel: SensorListViewModel
+    private val callbacks = LinkedList<() -> Unit>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,7 +36,7 @@ class SensorListFragment : Fragment() {
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        return (inflater.inflate(R.layout.event_list_fragment, container, false) as RecyclerView)
+        return (inflater.inflate(R.layout.sensor_list_fragment, container, false) as RecyclerView)
             .let {
                 it.layoutManager = LinearLayoutManager(context)
                 it.adapter = SensorListViewAdapter(context as Context)
@@ -46,11 +46,15 @@ class SensorListFragment : Fragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        viewModel = application.daggerHermesComponent.getSensorListViewModel()
+        callbacks.forEach { it() }
     }
 
     override fun onAttach(context: Context) {
         AndroidSupportInjection.inject(this)
         super.onAttach(context)
+    }
+
+    override fun addCreateViewCallback(callback: () -> Unit) {
+        callbacks.add(callback)
     }
 }

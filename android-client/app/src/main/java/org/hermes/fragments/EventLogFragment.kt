@@ -10,15 +10,15 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import dagger.Module
 import dagger.android.support.AndroidSupportInjection
+import java.util.*
 import javax.inject.Inject
 
 import org.hermes.HermesClientApp
 import org.hermes.R
 import org.hermes.adapters.PagedEventViewAdapter
-import org.hermes.viewmodels.EventLogViewModel
 
 
-class EventLogFragment : Fragment() {
+class EventLogFragment @Inject constructor() : Fragment(), HasOnCreateViewCallbacks {
 
     @Module
     abstract class DaggerModule
@@ -28,7 +28,7 @@ class EventLogFragment : Fragment() {
     @Inject
     lateinit var application: HermesClientApp
 
-    lateinit var viewModel: EventLogViewModel
+    private var callbacks = LinkedList<() -> Unit>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,11 +47,15 @@ class EventLogFragment : Fragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        viewModel = application.daggerHermesComponent.getEventLogViewModel()
+        callbacks.forEach { it() }
     }
 
     override fun onAttach(context: Context) {
         AndroidSupportInjection.inject(this)
         super.onAttach(context)
+    }
+
+    override fun addCreateViewCallback(callback: () -> Unit) {
+        callbacks.add(callback)
     }
 }
