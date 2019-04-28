@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.content.res.ResourcesCompat
 import dagger.Module
 import dagger.android.AndroidInjection
 import javax.inject.Inject
@@ -65,10 +66,33 @@ class SensorActivity : BaseActivity() {
         sensorType.text = sensor.mtype
         sensorUnit.text = sensor.unit
         sensorDevice.text = sensor.device
-        if (sensor.active) {
-            sensorActivateButton.text = "Deactivate"
-        } else {
-            sensorActivateButton.text = "Activate"
+        val activateText = "Activate"
+        val deActivateText = "Deactivate"
+        val green = ResourcesCompat.getColor(resources, R.color.green, null)
+        val red = ResourcesCompat.getColor(resources, R.color.red, null)
+        sensorActivateButton.text = when(sensor.active.get()) {
+            true -> {
+                sensorActivateButton.setBackgroundColor(green)
+                deActivateText
+            }
+            false -> {
+                sensorActivateButton.setBackgroundColor(red)
+                activateText
+            }
+        }
+        sensorActivateButton.setOnClickListener {
+            when (sensorActivateButton.text) {
+                activateText -> {
+                    sensor.active.compareAndSet(false, true)
+                    sensorActivateButton.text = deActivateText
+                    sensorActivateButton.setBackgroundColor(green)
+                }
+                deActivateText -> {
+                    sensor.active.compareAndSet(false, true)
+                    sensorActivateButton.text = activateText
+                    sensorActivateButton.setBackgroundColor(red)
+                }
+            }
         }
     }
 }

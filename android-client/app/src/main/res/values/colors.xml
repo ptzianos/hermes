@@ -11,6 +11,8 @@
     <color name="secondaryTextColor">#757575</color>
     <color name="iconsColor">#FFFFFF</color>
     <color name="dividerColor">#BDBDBD</color>
+    <color name="green">#00FF06</color>
+    <color name="red">#FF0000</color>
 
     <drawable name="iconsColor">#FFFFFF</drawable>
     <drawable name="primaryDarkColor">#0097A7</drawable>

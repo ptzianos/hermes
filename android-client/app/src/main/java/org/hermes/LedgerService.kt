@@ -18,6 +18,7 @@ import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.locks.ReentrantLock
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 import kotlin.concurrent.withLock
 import kotlinx.coroutines.*
@@ -39,7 +40,7 @@ class LedgerService : Service() {
         private val sampleSize = 10
         private var buffer = Array<Metric20?>(sampleSize) { null }
         lateinit var uuid: String
-        var active = false
+        var active: AtomicBoolean = AtomicBoolean(false)
 
         /**
          * Put a new sample in the buffer.
@@ -60,6 +61,7 @@ class LedgerService : Service() {
                 tempBuffer[j] = buffer[(i + j) % sampleSize]
                 buffer[i] = null
             }
+            i = 0
             return tempBuffer
         }
     }
@@ -283,7 +285,7 @@ class LedgerService : Service() {
     private suspend fun broadcastData() {
         while (true) {
             Log.d(loggingTag, "Hermes service looking at the registered client data")
-            for ((uuid, client) in sensorRegistry) {
+            for ((uuid, client) in sensorRegistry.filter { it.value.active.get() }) {
                 Log.d(loggingTag, "Broadcasting data of client with id $uuid")
                 iotaConnector.sendData(*client.flushData(), clientUUID = uuid,
                     blockUntilConfirmation = true, asyncConfirmation = true)

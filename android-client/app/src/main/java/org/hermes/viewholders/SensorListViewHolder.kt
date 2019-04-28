@@ -22,11 +22,10 @@ class SensorListViewHolder(val parent : View) :
     private lateinit var context: Context
 
     fun bind(item: LedgerService.Sensor, context: Context) {
-        if (item.active) {
-            sensorActiveImg.setImageResource(R.drawable.green_circle)
-        } else {
-            sensorActiveImg.setImageResource(R.drawable.red_circle)
-        }
+        sensorActiveImg.setImageResource(when(item.active.get()) {
+            true -> R.drawable.green_circle
+            false -> R.drawable.red_circle
+        })
         sensorId.text = item.uuid
         sensorUUID.text = item.dataId
         mItem = item
