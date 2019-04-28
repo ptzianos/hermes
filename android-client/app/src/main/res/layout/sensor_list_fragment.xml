@@ -7,8 +7,8 @@
         android:name="org.hermes.fragments.SensorListFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginLeft="16dp"
-        android:layout_marginRight="16dp"
+        android:layout_marginLeft="0dp"
+        android:layout_marginRight="0dp"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         tools:context="org.hermes.fragments.SensorListFragment"
         tools:listitem="@layout/sensor_list_item" android:background="#EAE8E8">
