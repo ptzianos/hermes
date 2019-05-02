@@ -1,13 +1,18 @@
 [tool.poetry]
-name = "ansible"
+name = "hermes-ansible"
 version = "0.1.0"
 description = "Ansible configuration for Hermes Marketplace API server deployment"
 authors = ["Pavlos Tzianos <pavlos.tzianos@gmail.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.6"
+reclass = { git = "https://github.com/salt-formulas/reclass.git", tag = "v1.6.0" }
+ansible = "^2.7"
+jinja2 = "^2.10"
+ansible-toolbox = "^0.3.0"
 
 [tool.poetry.dev-dependencies]
+ipdb = "^0.12.0"
 
 [build-system]
 requires = ["poetry>=0.12"]

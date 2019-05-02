@@ -1,0 +1,12 @@
+classes:
+  - linux
+parameters:
+  rabbitmq_users:
+    - name: hermes
+      password: btnss1y2afjix0ofnlxn
+      admin: True
+    - name: celery
+      password: 8qcih6j5n82jtwn21e1a
+  rabbitmq_vhosts:
+    - celery
+    - ads

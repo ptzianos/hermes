@@ -1,0 +1,7 @@
+applications:
+  - common
+parameters:
+  linux:
+    ssh_active_users: []
+    inactive_users: []
+    sudoers: []

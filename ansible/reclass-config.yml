@@ -1,4 +1,5 @@
 storage_type: yaml_fs
 pretty_print: True
 output: yaml
-inventory_base_uri: /path/to/current/directory
+inventory_base_uri: inventory 
+

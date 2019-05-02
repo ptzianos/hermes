@@ -11,6 +11,12 @@
     state: present
     force_apt_get: yes
 
+- name: Remove unused packages
+  apt:
+    pkg: ["docker", "docker-engine", "docker.io", "containerd", "runc", "docker-ce", "docker-ce-cli"]
+    state: absent
+    force_apt_get: yes
+
 - name: Manage SSH users
   user:
     name: "{{ item.name }}"
@@ -18,19 +24,19 @@
     state: present
     create_home: yes
     remove: no
-  with_items: "{{ ssh_active_users }}"
+  with_items: "{{ linux.ssh_active_users }}"
 
 - name: Manage sudoers 
   user:
     name: "{{ item }}"
     groups: ["{{ item }}", sudo, adm] 
-  with_items: "{{ sudoers }}"
+  with_items: "{{ linux.sudoers }}"
 
 - name: Remove inactive users
   user:
     name: "{{ item }}"
     remove: yes 
-  with_items: "{{ inactive_users }}"
+  with_items: "{{ linux.inactive_users }}"
 
 - name: Set authorized keys for active users
   authorized_key:
@@ -38,7 +44,7 @@
     key: '{{ item.public_key }}'
     state: present
     exclusive: True
-  with_items: "{{ ssh_active_users }}"
+  with_items: "{{ linux.ssh_active_users }}"
 
 - name: Disable empty password login
   lineinfile: dest=/etc/ssh/sshd_config regexp="^#?PermitEmptyPasswords" line="PermitEmptyPasswords no"

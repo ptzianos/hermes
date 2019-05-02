@@ -1,0 +1,5 @@
+applications:
+  - haproxy
+parameters:
+  gateway:
+    hostname: ""

@@ -1,0 +1,11 @@
+common_hosts:
+- hermes-data.io
+hermes.api-server:
+- hermes-data.io
+hermes.postgres:
+- hermes-data.io
+hermes.rabbitmq:
+- hermes-data.io
+linux:
+- hermes-data.io
+

@@ -1,0 +1,15 @@
+---
+- name: Common operations such as setting up SSH keys and standard security configurations
+  hosts: common_hosts
+  roles:
+    - common
+
+- name: PostgreSQL installation and configuration
+  hosts: db_hosts
+  roles:
+    - postgres
+
+- name: HAProxy installation and configuration
+  hosts: haproxy_hosts
+  roles:
+    - haproxy
