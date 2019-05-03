@@ -3,7 +3,6 @@ package org.hermes.viewholders
 import android.content.Context
 import android.content.Intent
 import android.view.View
-import android.widget.EditText
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import org.threeten.bp.format.DateTimeFormatter

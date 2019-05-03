@@ -154,7 +154,7 @@ class LedgerService : Service() {
     private val loggingTag = "LedgerService"
 
     private var mNotificationManager: NotificationManager? = null
-    private val channelId = SecureRandom.getInstanceStrong().nextInt().toString()
+    private val channelId = SecureRandom.getInstance("SHA1PRNG").nextInt().toString()
     private val foregroundNotificationId: Int = 15970
     private val sensorRegistry = ConcurrentHashMap<String, Sensor>()
 
@@ -238,6 +238,7 @@ class LedgerService : Service() {
             // Register the channel with the system
             mNotificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             mNotificationManager?.createNotificationChannel(channel)
+        } else {
         }
     }
 

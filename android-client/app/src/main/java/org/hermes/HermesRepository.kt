@@ -3,6 +3,7 @@ package org.hermes
 import android.app.*
 import android.content.Intent
 import android.content.SharedPreferences
+import android.os.Build
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -60,7 +61,7 @@ class HermesRepository @Inject constructor(val application: Application,
 
         // Generate the EC KeyPair
         keypair = KeyPairGenerator.getInstance("EC")
-            .apply { initialize(256, SecureRandom.getInstanceStrong()) }
+            .apply { initialize(256, SecureRandom.getInstance("SHA1PRNG")) }
             .generateKeyPair()
 
         // Generate a self-signed cert for the newly created key
@@ -68,7 +69,7 @@ class HermesRepository @Inject constructor(val application: Application,
         // Issues and subject will be the same because it's a self-signed certificate
         val issuer = X500Name(issuerString)
         val subject = X500Name(issuerString)
-        val serial = SecureRandom.getInstanceStrong().nextLong().toBigInteger()
+        val serial = SecureRandom.getInstance("SHA1PRNG").nextLong().toBigInteger()
         val notBefore = Date()
         val notAfter = Date(System.currentTimeMillis() + (1000L * 24L * 60L * 60L * 1000L))
         val v3CertificateBuilder = JcaX509v3CertificateBuilder(issuer, serial, notBefore,
@@ -184,7 +185,8 @@ class HermesRepository @Inject constructor(val application: Application,
         if (!ledgerServiceRunning) {
             Log.i(loggingTag,"Ledger service is not running. Starting it now")
             val intent = Intent(application.applicationContext, LedgerService::class.java)
-            application.startForegroundService(intent)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) application.startForegroundService(intent)
+            else application.startService(intent)
             ledgerServiceRunning = true
         } else {
             Log.i(loggingTag, "Ledger service is already running")

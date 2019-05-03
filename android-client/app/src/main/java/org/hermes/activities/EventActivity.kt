@@ -7,6 +7,7 @@ import android.widget.TextView
 import android.widget.Toast
 import dagger.Module
 import dagger.android.AndroidInjection
+import java.util.regex.Pattern
 import javax.inject.Inject
 
 import org.hermes.BaseActivity
@@ -14,7 +15,6 @@ import org.hermes.HermesRepository
 import org.hermes.R
 import org.hermes.entities.Event
 import org.threeten.bp.format.DateTimeFormatter
-import java.util.regex.Pattern
 
 
 class EventActivity : BaseActivity() {

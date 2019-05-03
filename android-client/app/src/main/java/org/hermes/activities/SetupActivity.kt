@@ -51,8 +51,8 @@ class SetupActivity : BaseActivity() {
         setupButton.setOnClickListener { checkSetupForm() }
     }
 
-    private fun goToEventPage() {
-        startActivity(Intent(this, EventLogActivity::class.java))
+    private fun goToDashBoard() {
+        startActivity(Intent(this, DrawerActivity::class.java))
     }
 
     private fun checkSetupForm() {
@@ -75,7 +75,7 @@ class SetupActivity : BaseActivity() {
         }
         if (!errorsInForm && repository.generateCredentials(pinSetupInput.text.toString())) {
             repository.unseal(pinSetupInput.toString())
-            goToEventPage()
+            goToDashBoard()
         }
     }
 }
