@@ -1,7 +1,7 @@
 package org.hermes
 
-import org.threeten.bp.OffsetDateTime
 import java.lang.Exception
+import org.threeten.bp.OffsetDateTime
 
 /**
  * An implementation of the Metrics2.0 spec for the Hermes client
