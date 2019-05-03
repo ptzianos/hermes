@@ -88,7 +88,7 @@ class SensorActivity : BaseActivity() {
                     sensorActivateButton.setBackgroundColor(green)
                 }
                 deActivateText -> {
-                    sensor.active.compareAndSet(false, true)
+                    sensor.active.compareAndSet(true, false)
                     sensorActivateButton.text = activateText
                     sensorActivateButton.setBackgroundColor(red)
                 }
