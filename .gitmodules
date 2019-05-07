@@ -4,3 +4,6 @@
 [submodule "entangled"]
 	path = entangled
 	url = git@github.com:iotaledger/entangled
+[submodule "iota-java"]
+	path = iota-java
+	url = git@github.com:ptzianos/iota-java.git
