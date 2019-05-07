@@ -36,3 +36,9 @@ ndk.dir = /usr/lib/android-ndk
 ```
 
 You should also add the path in a variable in your environment called `ANDROID_NDK_HOME`.
+
+### Jota
+
+In order for Jota library to work with older Android versions, we had to fork it and change some of its internals.
+In order to build the legacy api flavor you need to go into the jota directory and use Maven to package the project.
+Once that is finished, copy the .jar into the libs folder of the app and you should be able to build all the flavors.
