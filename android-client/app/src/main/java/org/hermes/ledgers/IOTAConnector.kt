@@ -8,13 +8,15 @@ import java.lang.StringBuilder
 import java.security.KeyPair
 import javax.inject.Inject
 import javax.inject.Named
-import jota.IotaAPI
-import jota.model.Bundle
-import jota.model.Transaction
-import jota.pow.SpongeFactory
-import jota.utils.*
 import kotlinx.coroutines.*
 import org.apache.commons.lang3.StringUtils
+import org.iota.jota.IotaAPI
+import org.iota.jota.model.Bundle
+import org.iota.jota.model.Transaction
+import org.iota.jota.pow.SpongeFactory
+import org.iota.jota.utils.Constants
+import org.iota.jota.utils.InputValidator
+import org.iota.jota.utils.IotaAPIUtils
 import org.threeten.bp.OffsetDateTime
 
 import org.hermes.BACKGROUND

@@ -2,7 +2,7 @@ package org.hermes.di
 
 import dagger.Module
 import dagger.Provides
-import jota.IotaAPI
+import org.iota.jota.IotaAPI
 
 @Module
 class IOTAModule {
@@ -10,7 +10,7 @@ class IOTAModule {
         return IotaAPI.Builder()
             .protocol("https")
             .host("nodes.thetangle.org")
-            .port("443")
+            .port(443)
             .build()
     }
 }

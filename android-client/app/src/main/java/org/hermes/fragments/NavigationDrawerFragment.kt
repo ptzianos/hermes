@@ -104,7 +104,7 @@ class NavigationDrawerFragment @Inject constructor() : Fragment() {
         ) as ListView
 
         mDrawerListView.onItemClickListener =
-            AdapterView.OnItemClickListener { parent, view, position, id ->
+            AdapterView.OnItemClickListener { _, view, position, _ ->
                 selectItem(position)
                 view.isSelected = true
             }

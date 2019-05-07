@@ -1,10 +1,9 @@
 package org.hermes.utils
 
 import android.util.Log
-import jota.utils.TrytesConverter
 import org.bouncycastle.util.encoders.Hex
+import org.iota.jota.utils.TrytesConverter
 import java.lang.StringBuilder
-import java.security.NoSuchAlgorithmException
 import java.security.PrivateKey
 import java.security.Signature
 
