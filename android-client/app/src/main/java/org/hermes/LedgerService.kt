@@ -80,6 +80,7 @@ class LedgerService : Service() {
                     val newSensor = Sensor(dataId, unit, mtype, what, device).apply { this.uuid = uuid }
                     sensorRegistry[uuid] = newSensor
                     repository.addSensor(newSensor)
+                    Log.i(loggingTag, "A new sensor has registered with the application with uuid ${uuid}")
                     uuid
                 }
             }
