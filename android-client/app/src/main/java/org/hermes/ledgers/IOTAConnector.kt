@@ -86,9 +86,9 @@ class IOTAConnector(val seed: Seed, val keyPair: KeyPair, app: HermesClientApp) 
             val previousAddress = prefs.getString("latest_addr_used", "")
             Log.d(loggingTag, "$clientUUID -- Next IOTA address index to use is: $newAddressIndex")
             val newAddress = IotaAPIUtils.newAddress(seed.toString(), Seed.DEFAULT_SEED_SECURITY,
-                newAddressIndex, false, SpongeFactory.create(SpongeFactory.Mode.KERL))
+                newAddressIndex, true, SpongeFactory.create(SpongeFactory.Mode.KERL))
             val nextAddress = IotaAPIUtils.newAddress(seed.toString(), Seed.DEFAULT_SEED_SECURITY,
-                newAddressIndex + 1, false, SpongeFactory.create(SpongeFactory.Mode.KERL))
+                newAddressIndex + 1, true, SpongeFactory.create(SpongeFactory.Mode.KERL))
 
             prefs.edit()
                 .putInt("latest_addr_index", newAddressIndex)
@@ -133,29 +133,27 @@ class IOTAConnector(val seed: Seed, val keyPair: KeyPair, app: HermesClientApp) 
             db.eventDao().insertAll(event)
 
             Log.i(loggingTag, eventMessage)
-            val trxs: List<Transaction> = api.sendTrytes(trxTrytes.toTypedArray(),
-                depth, minWeightMagnitude, null)
+            api.sendTrytes(trxTrytes.toTypedArray(), depth, minWeightMagnitude, null)
 
             if (asyncConfirmation) {
-                if (blockUntilConfirmation) runBlocking { checkResultOfTransactions(trxs, clientUUID) }
+                if (blockUntilConfirmation) runBlocking { checkResultOfTransactions(arrayOf(newAddress), clientUUID) }
                 else CoroutineScope(BACKGROUND.asCoroutineDispatcher())
-                    .launch { checkResultOfTransactions(trxs, clientUUID) }
+                    .launch { checkResultOfTransactions(arrayOf(newAddress), clientUUID) }
             }
         } catch (e: Exception) {
             Log.e(loggingTag, "$clientUUID -- There was an error while trying to broadcast a sample to IOTA: $e")
         }
     }
 
-    private suspend fun checkResultOfTransactions(trxs: List<Transaction>, clientUUID: String) {
-        val txsAddresses = trxs.map { it.address }.toTypedArray()
-        val txsAddressesStr = txsAddresses.joinToString()
+    private suspend fun checkResultOfTransactions(trxs: Array<String>, clientUUID: String) {
+        val txsAddressesStr = trxs.joinToString()
 
         for (i in 0 until 3) {
             delay(5 * 1000)
 
             Log.d(loggingTag, "$clientUUID -- Starting IOTA API call $i/3 for addresses: $txsAddressesStr.")
 
-            val fetchedTxs = api.findTransactionObjectsByAddresses(txsAddresses)
+            val fetchedTxs = api.findTransactionObjectsByAddresses(trxs)
             val successfulTxs = fetchedTxs.filter { it.hash.isNotEmpty() }
 
             if (successfulTxs.isNotEmpty()) {
@@ -170,7 +168,7 @@ class IOTAConnector(val seed: Seed, val keyPair: KeyPair, app: HermesClientApp) 
                 Log.i(loggingTag, eventMessage.toString())
                 return
             }
-            Log.d(loggingTag, "$clientUUID -- IOTA API call $i/3 was unsuccessful for addresses: $txsAddresses")
+            Log.d(loggingTag, "$clientUUID -- IOTA API call $i/3 was unsuccessful for addresses: $txsAddressesStr")
         }
         val eventMessage = StringBuilder()
             .append("$clientUUID -- Broadcast was unsuccessful for txs: ")
