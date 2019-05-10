@@ -74,7 +74,7 @@ class SetupActivity : BaseActivity() {
             pinSetupInputVerify.error = "The two fields must be equal"
         }
         if (!errorsInForm && repository.generateCredentials(pinSetupInput.text.toString())) {
-            repository.unseal(pinSetupInput.toString())
+            repository.unseal(pinSetupInput.text.toString())
             goToDashBoard()
         }
     }
