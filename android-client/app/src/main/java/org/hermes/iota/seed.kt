@@ -21,7 +21,9 @@ class Seed(val value: CharArray) {
 
         const val MAX_SEED_LENGTH = 81
 
-        const val ADDRESS_LENGTH = 90
+        const val ADDRESS_LENGTH = 81
+
+        const val ADDRESS_AND_CHECKSUM_LENGTH = 90
 
         const val VALID_SEED_REGEX = "/^[A-Z9]+$/"
 
