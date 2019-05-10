@@ -90,7 +90,6 @@ class IOTAConnector(val seed: Seed, val keyPair: KeyPair, app: HermesClientApp) 
             val nextAddress = IotaAPIUtils.newAddress(seed.toString(), Seed.DEFAULT_SEED_SECURITY,
                 newAddressIndex + 1, false, SpongeFactory.create(SpongeFactory.Mode.KERL))
 
-            // TODO: This should be done only after the transactions have been committed to the ledger
             prefs.edit()
                 .putInt("latest_addr_index", newAddressIndex)
                 .putString("latest_addr_used", newAddress)
@@ -102,7 +101,6 @@ class IOTAConnector(val seed: Seed, val keyPair: KeyPair, app: HermesClientApp) 
             val minWeightMagnitude = 14
             val timestamp = OffsetDateTime.now().toEpochSecond()
 
-            // TODO: Add better support for multiplexing messages for many sensors streaming at the same time
             val header = StringBuilder()
                 .append("next_address:")
                 .append(nextAddress)
