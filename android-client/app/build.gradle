@@ -34,7 +34,6 @@ android {
     productFlavors {
         min24 {
             dimension "targetAPILevel"
-            applicationIdSuffix ".min24api"
             versionNameSuffix "-min24api"
             minSdkVersion 24
             versionCode 24 * 10 + android.defaultConfig.versionCode
@@ -42,7 +41,6 @@ android {
         }
         max23 {
             dimension "targetAPILevel"
-            applicationIdSuffix ".max23api"
             versionNameSuffix "-max23api"
             minSdkVersion 23
             maxSdkVersion 23
