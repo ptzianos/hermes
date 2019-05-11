@@ -158,6 +158,7 @@ class LedgerService : Service() {
     private val channelId = SecureRandom.getInstance("SHA1PRNG").nextInt().toString()
     private val foregroundNotificationId: Int = 15970
     private val sensorRegistry = ConcurrentHashMap<String, Sensor>()
+    private var broadcastStart: Long? = null
 
     @Inject
     lateinit var db: HermesRoomDatabase
@@ -286,11 +287,25 @@ class LedgerService : Service() {
 
     private suspend fun broadcastData() {
         while (true) {
-            Log.d(loggingTag, "Hermes service looking at the registered client data")
-            for ((uuid, client) in sensorRegistry.filter { it.value.active.get() }) {
-                Log.d(loggingTag, "Broadcasting data of client with id $uuid")
-                iotaConnector.sendData(*client.flushData(), clientUUID = uuid,
-                    blockUntilConfirmation = true, asyncConfirmation = true)
+            if (!repository.ledgerServiceRunning.get()) {
+                Log.d(loggingTag, "Ledger service skipping broadcasting data for now")
+                broadcastStart = null
+            } else {
+                Log.d(loggingTag, "Hermes service looking at the registered client data")
+                if (broadcastStart == null) {
+                    broadcastStart = System.currentTimeMillis()
+                    repository.ledgerServiceUptime.postValue(0)
+                } else {
+                    repository.ledgerServiceUptime.postValue(((System.currentTimeMillis() - broadcastStart as Long) / (60 * 1000)).toInt())
+                }
+                for ((uuid, client) in sensorRegistry.filter { it.value.active.get() }) {
+                    Log.d(loggingTag, "Broadcasting data of client with id $uuid")
+                    iotaConnector.sendData(
+                        *client.flushData(), clientUUID = uuid,
+                        blockUntilConfirmation = true, asyncConfirmation = true,
+                        packetCounter = repository.packetBroadcastNum
+                    )
+                }
             }
             delay(10 * 1000)
         }

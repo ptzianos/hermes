@@ -3,6 +3,8 @@ package org.hermes.ledgers
 
 import android.content.SharedPreferences
 import android.util.Log
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import java.lang.Exception
 import java.lang.StringBuilder
 import java.security.KeyPair
@@ -74,7 +76,7 @@ class IOTAConnector(val seed: Seed, val keyPair: KeyPair, app: HermesClientApp) 
     }
 
     fun sendData(vararg samples: Metric20?, clientUUID: String, asyncConfirmation: Boolean,
-                 blockUntilConfirmation: Boolean) {
+                 blockUntilConfirmation: Boolean, packetCounter: MutableLiveData<Int>) {
         try {
             // Validate seed
             if (!InputValidator.isValidSeed(seed.toString())) {
@@ -136,16 +138,19 @@ class IOTAConnector(val seed: Seed, val keyPair: KeyPair, app: HermesClientApp) 
             api.sendTrytes(trxTrytes.toTypedArray(), depth, minWeightMagnitude, null)
 
             if (asyncConfirmation) {
-                if (blockUntilConfirmation) runBlocking { checkResultOfTransactions(arrayOf(newAddress), clientUUID) }
+                if (blockUntilConfirmation) runBlocking {
+                    checkResultOfTransactions(arrayOf(newAddress), clientUUID, packetCounter, samples.size)
+                }
                 else CoroutineScope(BACKGROUND.asCoroutineDispatcher())
-                    .launch { checkResultOfTransactions(arrayOf(newAddress), clientUUID) }
+                    .launch { checkResultOfTransactions(arrayOf(newAddress), clientUUID, packetCounter, samples.size) }
             }
         } catch (e: Exception) {
             Log.e(loggingTag, "$clientUUID -- There was an error while trying to broadcast a sample to IOTA: $e")
         }
     }
 
-    private suspend fun checkResultOfTransactions(trxs: Array<String>, clientUUID: String) {
+    private suspend fun checkResultOfTransactions(trxs: Array<String>, clientUUID: String,
+                                                  packetCounter: MutableLiveData<Int>, packetsBroadcast: Int) {
         val txsAddressesStr = trxs.joinToString()
 
         for (i in 0 until 3) {
@@ -165,6 +170,9 @@ class IOTAConnector(val seed: Seed, val keyPair: KeyPair, app: HermesClientApp) 
 
                 val event = Event(action = "confirm attach", resource = "iota", extraInfo = eventMessage.toString())
                 db.eventDao().insertAll(event)
+                packetCounter.postValue(
+                    (if (packetCounter.value != null) packetCounter.value as Int else 0) + packetsBroadcast
+                )
                 Log.i(loggingTag, eventMessage.toString())
                 return
             }

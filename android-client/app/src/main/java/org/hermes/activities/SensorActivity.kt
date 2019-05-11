@@ -86,11 +86,13 @@ class SensorActivity : BaseActivity() {
                     sensor.active.compareAndSet(false, true)
                     sensorActivateButton.text = deActivateText
                     sensorActivateButton.setBackgroundColor(green)
+                    repository.refreshSensorList()
                 }
                 deActivateText -> {
                     sensor.active.compareAndSet(true, false)
                     sensorActivateButton.text = activateText
                     sensorActivateButton.setBackgroundColor(red)
+                    repository.refreshSensorList()
                 }
             }
         }

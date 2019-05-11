@@ -20,7 +20,7 @@
     <string name="title_activity_event_log">Event Log</string>
     <string name="title_activity_sensor_list">Sensor List</string>
     <string name="title_activity_sensor">Sensor Info</string>
-    <string name="title_activity_dashboard">Dashboard(Not implemented yet)</string>
+    <string name="title_activity_dashboard">Dashboard</string>
     <string name="action_settings">Settings</string>
     <string name="remote_service_label">Hermes</string>
     <string name="remote_service_started">service started</string>
@@ -34,4 +34,11 @@
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="action_example">Example action</string>
+    <string name="uptime">Uptime</string>
+    <string name="samples_broadcast">Samples Broadcast</string>
+    <string name="iota_received">IOTA Received</string>
+    <string name="active_sensors">Active Sensors</string>
+    <string name="button">Button</string>
+    <string name="show_seed">Show seed</string>
+    <string name="show_key">Show Key</string>
 </resources>

@@ -23,6 +23,7 @@ import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder
 import org.hermes.crypto.PasswordHasher
 import org.hermes.entities.Event
 import org.hermes.iota.Seed
+import java.util.concurrent.atomic.AtomicBoolean
 
 
 @Singleton
@@ -38,11 +39,32 @@ class HermesRepository @Inject constructor(val application: Application,
 
     private var unsealed: Boolean = false
     private var credentialsLoaded: Boolean = false
-    private var ledgerServiceRunning: Boolean = false
+    private var ledgerServiceBootstrapped: Boolean = false
+    var ledgerServiceRunning: AtomicBoolean = AtomicBoolean(true)
     private var sensorList: LinkedList<LedgerService.Sensor> = LinkedList()
     private var sensorListData: MutableLiveData<List<LedgerService.Sensor>> = {
         val mld = MutableLiveData<List<LedgerService.Sensor>>()
         mld.value = sensorList
+        mld
+    }()
+    private val activeSensorNum: MutableLiveData<Int> = {
+        val mld = MutableLiveData<Int>()
+        mld.value = 0
+        mld
+    }()
+    val ledgerServiceUptime: MutableLiveData<Int> = {
+        val mld = MutableLiveData<Int>()
+        mld.value = 0
+        mld
+    }()
+    val packetBroadcastNum: MutableLiveData<Int> = {
+        val mld = MutableLiveData<Int>()
+        mld.value = 0
+        mld
+    }()
+    val ledgerServiceRunningLiveData: MutableLiveData<Boolean> = {
+        val mld = MutableLiveData<Boolean>()
+        mld.value = ledgerServiceRunning.get()
         mld
     }()
 
@@ -179,15 +201,30 @@ class HermesRepository @Inject constructor(val application: Application,
     }
 
     /**
+     * Returns the number of minutes the service has been running
+     */
+    fun getLedgerServiceUptime(): LiveData<Int> {
+        return ledgerServiceUptime
+    }
+
+    fun getActiveSensorNumLiveData(): LiveData<Int> {
+        return activeSensorNum
+    }
+
+    fun getPacketsBroadcast(): LiveData<Int> {
+        return packetBroadcastNum
+    }
+
+    /**
      * Start the LedgerService if it's not running already
      */
     private fun startLedgerService() {
-        if (!ledgerServiceRunning) {
+        if (!ledgerServiceBootstrapped) {
             Log.i(loggingTag,"Ledger service is not running. Starting it now")
             val intent = Intent(application.applicationContext, LedgerService::class.java)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) application.startForegroundService(intent)
             else application.startService(intent)
-            ledgerServiceRunning = true
+            ledgerServiceBootstrapped = true
         } else {
             Log.i(loggingTag, "Ledger service is already running")
         }
@@ -197,12 +234,19 @@ class HermesRepository @Inject constructor(val application: Application,
         sensorList.add(sensor)
         // Do this to notify clients that the data has changed
         sensorListData.postValue(sensorListData.value)
+        activeSensorNum.postValue(sensorList.filter { it.active.get() }.size)
     }
 
     fun removeSensor(sensor: LedgerService.Sensor) {
         sensorList.remove(sensor)
         // Do this to notify clients that the data has changed
+        sensorListData.postValue(sensorList)
+        activeSensorNum.postValue(sensorList.filter { it.active.get() }.size)
+    }
+
+    fun refreshSensorList() {
         sensorListData.value = sensorList
+        activeSensorNum.value = sensorList.filter { it.active.get() }.size
     }
 
     fun getSeed(): Seed? {

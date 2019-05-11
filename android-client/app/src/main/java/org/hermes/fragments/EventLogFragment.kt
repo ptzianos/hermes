@@ -6,19 +6,22 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
+import androidx.paging.PagedList
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import dagger.Module
 import dagger.android.support.AndroidSupportInjection
-import java.util.*
 import javax.inject.Inject
 
 import org.hermes.HermesClientApp
 import org.hermes.R
 import org.hermes.adapters.PagedEventViewAdapter
+import org.hermes.entities.Event
+import org.hermes.viewmodels.EventLogViewModel
 
 
-class EventLogFragment @Inject constructor() : Fragment(), HasOnCreateViewCallbacks {
+class EventLogFragment @Inject constructor() : Fragment() {
 
     @Module
     abstract class DaggerModule
@@ -28,7 +31,10 @@ class EventLogFragment @Inject constructor() : Fragment(), HasOnCreateViewCallba
     @Inject
     lateinit var application: HermesClientApp
 
-    private var callbacks = LinkedList<() -> Unit>()
+    @Inject
+    lateinit var eventLogViewModel: EventLogViewModel
+
+    private lateinit var mView: View
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,26 +42,24 @@ class EventLogFragment @Inject constructor() : Fragment(), HasOnCreateViewCallba
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        return (inflater.inflate(R.layout.event_list_fragment, container, false) as RecyclerView)
+        mView = (inflater.inflate(R.layout.event_list_fragment, container, false) as RecyclerView)
             .let {
                 it.layoutManager = LinearLayoutManager(context)
                 it.adapter = PagedEventViewAdapter(context as Context)
                 it
             }
+        return mView
     }
-
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        callbacks.forEach { it() }
+        eventLogViewModel.allEvents.observe(this, Observer<PagedList<Event>?> {
+            (mView.findViewById<RecyclerView>(R.id.eventRecyclerView).adapter as PagedEventViewAdapter).submitList(it)
+        })
     }
 
     override fun onAttach(context: Context) {
         AndroidSupportInjection.inject(this)
         super.onAttach(context)
-    }
-
-    override fun addCreateViewCallback(callback: () -> Unit) {
-        callbacks.add(callback)
     }
 }
