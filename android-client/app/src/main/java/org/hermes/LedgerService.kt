@@ -34,7 +34,8 @@ class LedgerService : Service() {
     abstract class DaggerModule
 
     data class Sensor(val dataId: String, val unit: String, val mtype: String, val what: String?, val device: String?) {
-        private var i = 0
+        private var start = 0
+        private var end = -1
         private val lock = ReentrantLock()
         // TODO: Make this configurable
         private val sampleSize = 10
@@ -48,20 +49,24 @@ class LedgerService : Service() {
          * samples, the oldest sample will be overwritten.
          */
         fun putSample(metric: Metric20) = lock.withLock {
-            i = (i + 1) % sampleSize
-            buffer[i] = metric
+            end += 1
+            start = (start + (end / sampleSize)) % sampleSize
+            end %= sampleSize
+            buffer[end] = metric
         }
 
         /**
-         * Return a clean buffer with all the samples
+         * Return a buffer with all the samples in the correct order and clear the original buffer
          */
         fun flushData(): Array<Metric20?> = lock.withLock {
-            val tempBuffer = Array<Metric20?>(sampleSize) { null }
-            for (j in 0 until sampleSize) {
-                tempBuffer[j] = buffer[(i + j) % sampleSize]
-                buffer[i] = null
+            val sampleNum = if (start != 0) sampleSize else end
+            val tempBuffer = Array<Metric20?>(sampleNum) { null }
+            for (j in 0 until sampleNum) {
+                tempBuffer[j] = buffer[(start + j) % sampleSize]
+                buffer[(start + j) % sampleSize] = null
             }
-            i = 0
+            start = 0
+            end = -1
             return tempBuffer
         }
     }
@@ -277,7 +282,7 @@ class LedgerService : Service() {
             return
         }
         Log.i(loggingTag, "Starting generating data with uuid $uuid")
-        for (i: Int in 0 until 10) {
+        for (i: Int in 0 until 100) {
             Log.d(loggingTag, "Generating a data sample for the Hermes Service")
             iHermesService?.sendDataDouble(uuid, (Random().nextInt() % 30).toDouble(), null, null,
                 null, null, null, null, -1, null)
@@ -307,7 +312,7 @@ class LedgerService : Service() {
                     )
                 }
             }
-            delay(10 * 1000)
+            delay(20 * 1000)
         }
     }
 }
