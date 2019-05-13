@@ -309,11 +309,13 @@ class LedgerService : Service() {
                 }
                 for ((uuid, client) in sensorRegistry.filter { it.value.active.get() }) {
                     Log.d(loggingTag, "Broadcasting data of client with id $uuid")
-                    iotaConnector.sendData(
-                        *client.flushData(), clientUUID = uuid,
-                        blockUntilConfirmation = true, asyncConfirmation = true,
-                        packetCounter = repository.packetBroadcastNum
-                    )
+                    client.flushData().apply {
+                        if (isNotEmpty()) iotaConnector.sendData(
+                            *this, clientUUID = uuid,
+                            blockUntilConfirmation = true, asyncConfirmation = true,
+                            packetCounter = repository.packetBroadcastNum
+                        )
+                    }
                 }
             }
             delay(20 * 1000)
