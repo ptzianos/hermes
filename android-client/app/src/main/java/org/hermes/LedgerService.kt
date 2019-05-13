@@ -82,14 +82,16 @@ class LedgerService : Service() {
                 dataId == null -> ErrorCode.NO_DATA_ID.errorStr
                 unit == null -> ErrorCode.NO_UNIT.errorStr
                 mtype == null -> ErrorCode.NO_TYPE.errorStr
-                sensorRegistry.containsValue(Sensor(dataId, unit, mtype, what, device)) ->
-                    ErrorCode.ALREADY_REGISTERED.errorStr
                 else -> {
-                    val uuid = UUID.randomUUID().toString()
-                    val newSensor = Sensor(dataId, unit, mtype, what, device).apply { this.uuid = uuid }
-                    sensorRegistry[uuid] = newSensor
-                    repository.addSensor(newSensor)
-                    Log.i(loggingTag, "A new sensor has registered with the application with uuid ${uuid}")
+                    var uuid = reverseSensorRegistry.getOrDefault(Sensor(dataId, unit, mtype, what, device), "")
+                    if (uuid.isEmpty()) {
+                        uuid = UUID.randomUUID().toString()
+                        val newSensor = Sensor(dataId, unit, mtype, what, device).apply { this.uuid = uuid }
+                        sensorRegistry[uuid] = newSensor
+                        repository.addSensor(newSensor)
+                        reverseSensorRegistry[newSensor] = uuid
+                        Log.i(loggingTag, "A new sensor has registered with the application with uuid ${uuid}")
+                    }
                     uuid
                 }
             }
@@ -167,6 +169,7 @@ class LedgerService : Service() {
     private val channelId = SecureRandom.getInstance("SHA1PRNG").nextInt().toString()
     private val foregroundNotificationId: Int = 15970
     private val sensorRegistry = ConcurrentHashMap<String, Sensor>()
+    private val reverseSensorRegistry = HashMap<Sensor, String>()
     private var broadcastStart: Long? = null
 
     @Inject
