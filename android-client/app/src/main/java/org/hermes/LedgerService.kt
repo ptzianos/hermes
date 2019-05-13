@@ -60,7 +60,7 @@ class LedgerService : Service() {
          */
         fun flushData(): Array<Metric20?> = lock.withLock {
             val sampleNum = if (start != 0) sampleSize else end
-            if (sampleNum < 0) {
+            if (sampleNum <= 0) {
                 Array(0) { null }
             } else {
                 val tempBuffer = Array<Metric20?>(sampleNum) { null }
