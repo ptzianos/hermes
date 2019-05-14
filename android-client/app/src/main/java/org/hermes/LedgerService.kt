@@ -90,7 +90,7 @@ class LedgerService : Service() {
                         sensorRegistry[uuid] = newSensor
                         repository.addSensor(newSensor)
                         reverseSensorRegistry[newSensor] = uuid
-                        Log.i(loggingTag, "A new sensor has registered with the application with uuid ${uuid}")
+                        Log.i(loggingTag, "A new sensor has registered with the application with uuid $uuid")
                     }
                     uuid
                 }
