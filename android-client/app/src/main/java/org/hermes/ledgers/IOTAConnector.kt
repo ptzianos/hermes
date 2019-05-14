@@ -127,8 +127,11 @@ class IOTAConnector(val seed: Seed, val keyPair: KeyPair, app: HermesClientApp) 
             val trxTrytes = bundle.transactions.map { it.toTrytes() }.reversed()
 
             val eventMessage = StringBuilder()
-                .append("$clientUUID -- Broadcasting of transactions with addresses: ")
-                .append(bundle.transactions.map { it.address }.toTypedArray().joinToString())
+                .append("$clientUUID -- Broadcasting ")
+                .append(carbon20SignatureFragments.size)
+                .append(" transaction" + (if (carbon20SignatureFragments.size > 1) "s" else ""))
+                .append("to address: ")
+                .append(newAddress)
                 .toString()
 
             val event = Event(action = "broadcast", resource = "iota", extraInfo = eventMessage)
