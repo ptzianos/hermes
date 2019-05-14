@@ -130,7 +130,7 @@ class IOTAConnector(val seed: Seed, val keyPair: KeyPair, app: HermesClientApp) 
                 .append("$clientUUID -- Broadcasting ")
                 .append(carbon20SignatureFragments.size)
                 .append(" transaction" + (if (carbon20SignatureFragments.size > 1) "s" else ""))
-                .append("to address: ")
+                .append(" to address: ")
                 .append(newAddress)
                 .toString()
 

@@ -6,7 +6,7 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
-    <style name="HermesAppTheme.Toolbar" parent="Theme.AppCompat.Light.DarkActionBar">
+    <style name="HermesAppTheme.Toolbar" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="android:background">@color/primaryColor</item>
     </style>
 

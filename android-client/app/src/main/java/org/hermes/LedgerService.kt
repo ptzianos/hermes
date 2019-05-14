@@ -34,8 +34,8 @@ class LedgerService : Service() {
     abstract class DaggerModule
 
     data class Sensor(val dataId: String, val unit: String, val mtype: String, val what: String?, val device: String?) {
-        private var start = 0
-        private var end = -1
+        private var counter = 0
+        private var metricPosition = -1
         private val lock = ReentrantLock()
         // TODO: Make this configurable
         private val sampleSize = 10
@@ -49,27 +49,29 @@ class LedgerService : Service() {
          * samples, the oldest sample will be overwritten.
          */
         fun putSample(metric: Metric20) = lock.withLock {
-            end += 1
-            start = (start + (end / sampleSize)) % sampleSize
-            end %= sampleSize
-            buffer[end] = metric
+            metricPosition = (metricPosition + 1) % sampleSize
+            counter++
+            Log.d("Sensor", "Putting new sample at pos: $metricPosition, counter: $counter")
+            buffer[metricPosition] = metric
         }
 
         /**
          * Return a buffer with all the samples in the correct order and clear the original buffer
          */
         fun flushData(): Array<Metric20?> = lock.withLock {
-            val sampleNum = if (start != 0) sampleSize else end
+            val sampleNum = Math.min(counter, sampleSize)
             if (sampleNum <= 0) {
                 Array(0) { null }
             } else {
+                val start = if (counter > sampleSize) counter % sampleSize else 0
                 val tempBuffer = Array<Metric20?>(sampleNum) { null }
                 for (j in 0 until sampleNum) {
                     tempBuffer[j] = buffer[(start + j) % sampleSize]
                     buffer[(start + j) % sampleSize] = null
                 }
-                start = 0
-                end = -1
+                Log.d("Sensor", "Flushing $sampleNum samples from $start to ${(start + sampleNum - 1) % sampleSize}")
+                metricPosition = -1
+                counter = 0
                 tempBuffer
             }
         }
@@ -289,7 +291,7 @@ class LedgerService : Service() {
             return
         }
         Log.i(loggingTag, "Starting generating data with uuid $uuid")
-        for (i: Int in 0 until 100) {
+        while (true) {
             Log.d(loggingTag, "Generating a data sample for the Hermes Service")
             iHermesService?.sendDataDouble(uuid, (Random().nextInt() % 30).toDouble(), null, null,
                 null, null, null, null, -1, null)
