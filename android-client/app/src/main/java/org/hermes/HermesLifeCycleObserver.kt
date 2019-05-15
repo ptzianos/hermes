@@ -38,7 +38,6 @@ class HermesLifeCycleObserver @Inject constructor(val repository: HermesReposito
         if (activity.javaClass.name == onScreenActivity) {
             Log.d(loggingTag, "Exiting application")
             onScreenActivity = null
-            repository.seal()
         }
     }
 
