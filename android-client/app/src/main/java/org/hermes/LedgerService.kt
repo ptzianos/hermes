@@ -34,6 +34,7 @@ class LedgerService : Service() {
     abstract class DaggerModule
 
     data class Sensor(val dataId: String, val unit: String, val mtype: String, val what: String?, val device: String?) {
+        private val loggingTag = "Sensor"
         private var counter = 0
         private var metricPosition = -1
         private val lock = ReentrantLock()
@@ -51,7 +52,7 @@ class LedgerService : Service() {
         fun putSample(metric: Metric20) = lock.withLock {
             metricPosition = (metricPosition + 1) % sampleSize
             counter++
-            Log.d("Sensor", "Putting new sample at pos: $metricPosition, counter: $counter")
+            Log.d(loggingTag, "Putting new sample at pos: $metricPosition, counter: $counter")
             buffer[metricPosition] = metric
         }
 
