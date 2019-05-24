@@ -11,16 +11,16 @@ class HermesSession(SessionInterface):
     """Implements the Session Flask interface with SQLAlchemy Session model as a backend
     """
     def open_session(self, app: Flask, request: Request, *args) -> 'ProxySession':
-        session_token = request.cookies.get(app.session_cookie_name) or None
+        session_token_str = request.cookies.get(app.session_cookie_name) or None
         # Get the db_session object that has been created in the before request hook
         db_session = g.db_session = current_app.new_db_session_instance()
-        if session_token:
+        if session_token_str:
             user_session = (db_session
                             .query(SessionToken)
-                            .filter_by(token=session_token, expired=False)
+                            .filter_by(token=session_token_str, expired=False)
                             .first())  # type: SessionToken
             if not user_session or user_session.is_expired:
-                session_token = None
+                session_token_str = None
             else:
                 user_session.refresh()
         authorization_str = request.headers.get('Authorization')  # type: str
@@ -39,7 +39,7 @@ class HermesSession(SessionInterface):
             # TODO: Fix the session object. Probably create one but don't save it
             return api_token.owner
 
-        if session_token is None:
+        if session_token_str is None:
             user_session = SessionToken()
             user_session.refresh()
             db_session.add(user_session)
