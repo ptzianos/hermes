@@ -70,6 +70,7 @@ def register() -> ViewResponse:
             "name": user.name,
             "fullname": user.fullname,
             "email_id": email_token.email.uuid if email_token else '',
+            "email": email_token.email.address if email_token else '',
             "public_key_id": public_key_verification.public_key.uuid,
             "public_key_verification_token": public_key_verification.token,
             "public_key_verification_message": public_key_verification.original_message
