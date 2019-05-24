@@ -1,5 +1,7 @@
 package org.hermes.utils
 
+import androidx.lifecycle.MutableLiveData
+
 object Integers {
     fun max(i1: Int, i2: Int, vararg ints: Int): Int {
         var max = when {
@@ -14,3 +16,5 @@ object Integers {
         return max
     }
 }
+
+fun Int.toMutableLiveData() = MutableLiveData<Int>().apply { value = 0 }
