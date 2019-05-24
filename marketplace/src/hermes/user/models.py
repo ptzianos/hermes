@@ -139,10 +139,6 @@ class SessionToken(BaseToken, current_app.Base):
         return ("<Session(owner='{}', token='{}', expiry='{}', expired='{}')>"
                 .format(str(self.owner), self.token, self.expiry, self.expired))
 
-    def __init__(self, *args, **kwargs) -> None:
-        self.proxy = ProxySession(self)
-        super().__init__(*args, **kwargs)
-
     @property
     def is_su_session(self) -> bool:
         return self.admin_owner is not None
@@ -150,6 +146,12 @@ class SessionToken(BaseToken, current_app.Base):
     @property
     def is_anonymous(self) -> bool:
         return self.owner is None
+
+    @property
+    def proxy(self) -> 'ProxySession':
+        if not getattr(self, '_proxy', None):
+            self._proxy = ProxySession(self)
+        return self._proxy
 
 
 class APIToken(BaseToken, current_app.Base):
