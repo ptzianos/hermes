@@ -18,7 +18,9 @@ import javax.inject.Singleton
 import org.bouncycastle.asn1.x500.X500Name
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter
 import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder
+import org.bouncycastle.jcajce.provider.digest.SHA3
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder
+import org.bouncycastle.util.encoders.Hex
 
 import org.hermes.crypto.PasswordHasher
 import org.hermes.entities.Event
@@ -67,6 +69,15 @@ class HermesRepository @Inject constructor(val application: Application,
         mld.value = ledgerServiceRunning.get()
         mld
     }()
+    private val pkHashString by lazy {
+        val sha3512 = SHA3.Digest512().apply { update(keypair.public.encoded) }
+        Hex.toHexString(sha3512.digest())
+    }
+    val pkHash: String
+        get() {
+            return if (!credentialsLoaded) ""
+            else pkHashString
+        }
 
     /**
      * This method produces a new set of credentials for the application and if there is
