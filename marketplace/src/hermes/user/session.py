@@ -58,3 +58,4 @@ class HermesSession(SessionInterface):
                             domain=self.get_cookie_domain(app),
                             path=self.get_cookie_path(app),
                             secure=self.get_cookie_secure(app))
+        g.db_session.close()
