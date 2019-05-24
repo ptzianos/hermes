@@ -3,11 +3,11 @@ from itertools import chain
 from logging import getLogger
 from typing import Dict, Iterable, List, Optional, Tuple, Union
 
+from Crypto.Hash import SHA3_512
 from Crypto.PublicKey.ECC import import_key as import_ecdsa_key
 from Crypto.PublicKey.RSA import import_key as import_rsa_key
 from Crypto.Signature.DSS import new as new_dss_sig_scheme
 from Crypto.Signature.pkcs1_15 import new as new_pkcs_115_scheme
-from Crypto.Hash import SHA3_512
 from flask import g
 from sqlalchemy import or_
 
@@ -122,7 +122,7 @@ def hash_password(passwd: str) -> str:
         - Implement this
 
     """
-    return passwd
+    return SHA3_512.new(data=passwd).digest().decode()
 
 
 def hash_value(some_str: str) -> str:
