@@ -35,11 +35,13 @@ class User(current_app.Base):
     last_modified_on = Column(DateTime, onupdate=datetime.now)
 
     def __repr__(self) -> str:
-        return ("<User(id='{}', name='{}', fullname='{}', public_key='{}')>"
-                .format(self.id, self.name, self.fullname, "__public_key__"))
+        return ("<User(id='{}', uuid='{}', name='{}', fullname='{}', "
+                "public_key='{}')>"
+                .format(self.id, self.uuid, self.name, self.fullname,
+                        "__public_key__"))
 
     def __str__(self) -> str:
-        return "<User(id='{}', name='{}')>".format(self.id, self.name)
+        return "<User(id='{}', name='{}')>".format(self.uuid, self.name)
 
 
 class EmailAddress(current_app.Base):

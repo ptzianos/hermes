@@ -36,8 +36,15 @@ class Ad(current_app.Base):
     last_pinged_on = Column(DateTime)
 
     def __repr__(self) -> str:
-        return ("<Ad(id='{}', name='{}', fullname='{}', public_key='{}')>"
-                .format(self.id, self.name, self.fullname, "__public_key__"))
+        return ("<Ad(id='{}', owner='{}', data_uuid='{}', location=({}, {}),"
+                " type={}, unit={}, mobile={}, protocol={})>"
+                .format(self.uuid, self.owner.uuid, '', self.location_x,
+                        self.location_y, self.data_type, self.data_unit,
+                        self.mobile, self.protocol))
 
     def __str__(self) -> str:
-        return "<Ad(id='{}', name='{}')>".format(self.id, self.name)
+        return ("<Ad(id='{}', owner='{}', data_uuid='{}', location=({}, {}),"
+                " type={}, unit={}, mobile={}, protocol={})>"
+                .format(self.uuid, self.owner.uuid, '', self.location_x,
+                        self.location_y, self.data_type, self.data_unit,
+                        self.mobile, self.protocol))
