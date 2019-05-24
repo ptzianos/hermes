@@ -5,16 +5,14 @@ import tempfile
 import pytest
 from flask import Flask
 from flask.logging import create_logger
+from flask.testing import FlaskClient
 
 from hermes.db import init_db
 from hermes.signals import register_signals
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope='session')
 def flask_app():
-    import ipdb
-    ipdb.set_trace()
-
     hermes_test_app = Flask(__name__)
     hermes_test_app.config['TESTING'] = True
     db_fd, hermes_test_app.config['DATABASE'] = tempfile.mkstemp()
@@ -38,3 +36,8 @@ def flask_app():
 
     os.close(db_fd)
     os.unlink(hermes_test_app.config['DATABASE'])
+
+
+@pytest.fixture(scope='session')
+def api_client(flask_app: Flask) -> FlaskClient:
+    return flask_app.test_client()
