@@ -85,6 +85,7 @@ class LedgerService : Service() {
                 dataId == null -> ErrorCode.NO_DATA_ID.errorStr
                 unit == null -> ErrorCode.NO_UNIT.errorStr
                 mtype == null -> ErrorCode.NO_TYPE.errorStr
+                dataId.startsWith(".") -> ErrorCode.INVALID_DATA_ID.errorStr
                 else -> {
                     var uuid = reverseSensorRegistry.getOrDefault(Sensor(dataId, unit, mtype, what, device), "")
                     if (uuid.isEmpty()) {
