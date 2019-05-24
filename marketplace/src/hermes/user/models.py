@@ -73,6 +73,7 @@ class PublicKey(current_app.Base):
     verified = Column(Boolean, default=False)
     owner_id = Column(Integer, ForeignKey('users.id'))
     owner = relationship(User, primaryjoin=owner_id == User.id)
+    # TODO: Add the hash of the public key
     created_on = Column(DateTime, nullable=False, default=datetime.now)
 
 
