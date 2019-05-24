@@ -143,7 +143,7 @@ def hash_value(some_str: str) -> str:
             .hex())
 
 
-def check_ecdsa_public_key(key: str) -> bool:
+def valid_ecdsa_public_key(key: str) -> bool:
     """Parses a public ECDSA key and returns whether it's valid or not."""
     try:
         import_ecdsa_key(key)
@@ -198,7 +198,7 @@ def register_user(
     name = name or email or hash_value(public_key)
     fullname = fullname or name
     if (public_key_type == 'ecdsa'
-            and not check_ecdsa_public_key(public_key)):
+            and not valid_ecdsa_public_key(public_key)):
         raise WrongParameters()
     elif (public_key_type == 'rsa'
             and not check_rsa_public_key(public_key)):
