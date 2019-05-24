@@ -121,7 +121,7 @@ class LedgerService : Service() {
                     Log.d(loggingTag, "Got a new sample from client with uuid $uuid")
                     // TODO: Add a check to ensure that the data are in the expected form
                     val client = sensorRegistry[uuid] as Sensor
-                    val newSample = Metric20(client.dataId, value)
+                    val newSample = Metric20("${repository.pkHash}.${client.dataId}", value)
                         .setData(Metric20.TagKey.MTYPE, client.mtype)
                         .setData(Metric20.TagKey.UNIT, client.unit)
                     client.putSample(newSample)
@@ -140,7 +140,7 @@ class LedgerService : Service() {
                     Log.d(loggingTag, "Got a new sample from client with uuid $uuid")
                     // TODO: Add a check to ensure that the data are in the expected form
                     val client = sensorRegistry[uuid] as Sensor
-                    val newSample = Metric20(client.dataId, value.toString())
+                    val newSample = Metric20("${repository.pkHash}.${client.dataId}", value.toString())
                         .setData(Metric20.TagKey.MTYPE, client.mtype)
                         .setData(Metric20.TagKey.UNIT, client.unit)
                     client.putSample(newSample)
