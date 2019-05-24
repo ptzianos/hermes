@@ -7,5 +7,6 @@ enum class ErrorCode(val errorStr: String) {
     NO_TYPE("no_type"),
     NO_UNIT("no_unit"),
     NO_UUID("no_uuid"),
+    INVALID_DATA_ID("invalid_data_id"),
     SEALED("sealed")
 }
