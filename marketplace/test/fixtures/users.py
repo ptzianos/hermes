@@ -90,5 +90,5 @@ def rsa_key_pair() -> Iterator[RsaKey]:
 def ecdsa_key_pair() -> Iterator[EccKey]:
     def ecdsa_key_pair_generator() -> Iterator[EccKey]:
         while True:
-            yield ecc_generate('secp256r1')
+            yield ecc_generate(curve='secp256r1')
     return ecdsa_key_pair_generator()
