@@ -4,6 +4,7 @@ import tempfile
 
 import pytest
 from flask import Flask
+from flask.ctx import AppContext
 from flask.logging import create_logger
 from flask.testing import FlaskClient
 
@@ -42,6 +43,13 @@ def flask_app():
 
     log = create_logger(hermes_test_app)
     log.setLevel(logging.DEBUG)
+
+    def context() -> AppContext:
+        app_context = hermes_test_app.app_context()
+        app_context.g.db_session = hermes_test_app.new_db_session_instance()
+        return app_context
+
+    hermes_test_app.app_context_and_db_session = context
 
     yield hermes_test_app
 
