@@ -118,11 +118,8 @@ def hash_password(passwd: str) -> str:
     Returns:
         str: the password in hashed form.
 
-    Todo:
-        - Implement this
-
     """
-    return SHA3_512.new(data=passwd).digest().decode()
+    return SHA3_512.new(data=passwd.encode(encoding='utf-8', errors='ignore')).digest().hex()
 
 
 def hash_value(some_str: str) -> str:
