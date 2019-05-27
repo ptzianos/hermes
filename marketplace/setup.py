@@ -6,7 +6,7 @@ with open(os.path.join(os.path.dirname(__file__), 'README.md')) as f:
 
 setup(
     name='hermes',
-    version='0.0.1',
+    version='0.1',
     description='Hermes Marketplace for IoT data',
     long_description=readme,
     long_description_content_type='text/markdown',
