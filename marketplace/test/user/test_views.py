@@ -1,6 +1,7 @@
 from typing import Iterator
 
 import requests
+from Crypto.PublicKey.ECC import EccKey
 from Crypto.PublicKey.RSA import RsaKey
 from flask import Flask
 from flask.testing import FlaskClient
@@ -9,7 +10,7 @@ from flask.testing import FlaskClient
 def test_register_view(flask_app: Flask,
                        api_client: FlaskClient,
                        random_email: Iterator[str],
-                       ecdsa_key_pair: Iterator[RsaKey],
+                       ecdsa_key_pair: Iterator[EccKey],
                        rsa_key_pair: Iterator[RsaKey]) -> None:
 
     # Register a standard user with an ECDSA key
