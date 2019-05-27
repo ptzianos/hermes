@@ -33,6 +33,7 @@ android-client/captures/
 
 # Temporary Vim files
 **/*.tmp
+**/*.swp
 
 # Android app jars
 android-client/app/libs/*.jar
