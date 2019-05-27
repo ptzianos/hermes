@@ -63,6 +63,7 @@ def register() -> ViewResponse:
                           password=request.form.get('password'),
                           name=request.form.get('name'),
                           fullname=request.form.get('fullname'),
+                          public_key_type=request.form.get('public_key_type'),
                           public_key=request.form.get('public_key'))
         )
         return make_json_response(200, **{
