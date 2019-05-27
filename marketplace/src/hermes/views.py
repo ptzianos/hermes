@@ -78,6 +78,8 @@ def register() -> ViewResponse:
         })
     except AlreadyRegistered:
         return make_response('already_registered', 400)
+    except WrongParameters:
+        return make_response('wrong_parameters', 400)
 
 
 @post('/api/v1/users/deregister')
