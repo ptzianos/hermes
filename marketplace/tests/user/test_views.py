@@ -6,6 +6,8 @@ from Crypto.PublicKey.RSA import RsaKey
 from flask import Flask
 from flask.testing import FlaskClient
 
+from test.user.utils import register_user
+
 
 def test_register_view(flask_app: Flask,
                        api_client: FlaskClient,
@@ -52,3 +54,11 @@ def test_register_view(flask_app: Flask,
         'public_key_type': 'ecdsa',
     })
     assert resp.status_code == requests.codes.bad_request
+
+
+def test_generate_key_verification_views(
+        flask_app: Flask, api_client: FlaskClient,
+        ecdsa_key_pair: Iterator[EccKey]
+) -> None:
+    user, pk, _ = register_user(flask_app, api_client, next(ecdsa_key_pair))
+    resp = api_client.get('/api/v1/users/{user_uuid}/keys/{key_id}/message'.format(user_uuid=user.uuid, key_id=pk.uuid))
