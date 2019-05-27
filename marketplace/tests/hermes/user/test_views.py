@@ -6,7 +6,7 @@ from Crypto.PublicKey.RSA import RsaKey
 from flask import Flask
 from flask.testing import FlaskClient
 
-from test.user.utils import register_user
+from tests.hermes.user.utils import register_user
 
 
 def test_register_view(flask_app: Flask,
@@ -61,4 +61,11 @@ def test_generate_key_verification_views(
         ecdsa_key_pair: Iterator[EccKey]
 ) -> None:
     user, pk, _ = register_user(flask_app, api_client, next(ecdsa_key_pair))
-    resp = api_client.get('/api/v1/users/{user_uuid}/keys/{key_id}/message'.format(user_uuid=user.uuid, key_id=pk.uuid))
+    token_endpoint = ('/api/v1/users/{user_uuid}/keys/{key_id}/message'
+                      .format(user_uuid=user.uuid, key_id=pk.uuid))
+    resp = api_client.get(token_endpoint)
+
+    assert resp.status_code == requests.codes.ok
+    assert resp.json.get('public_key_verification_token') is not None
+    assert resp.json.get('public_key_verification_message') is not None
+

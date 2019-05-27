@@ -1,16 +1,19 @@
-from typing import Tuple, Union, Type
+from typing import TYPE_CHECKING, Tuple, Union
 
 import requests
 from Crypto.PublicKey import ECC, RSA
 from flask import Flask
 from flask.testing import FlaskClient
 
+if TYPE_CHECKING:
+    from hermes.user.models import EmailAddress, PublicKey, User
+
 
 def register_user(
         flask_app: Flask, api_client: FlaskClient,
         key: Union[ECC.EccKey, RSA.RsaKey],
         passwd: str = '', name: str = '', email: str = ''
-) -> Tuple['hermes.user.models.User', 'hermes.user.models.PublicKey', 'hermes.user.models.EmailAddress']:
+) -> Tuple['User', 'PublicKey', 'EmailAddress']:
     if isinstance(key, ECC.EccKey):
         public_key = key.export_key(format='PEM')
     elif isinstance(key, RSA.RsaKey):

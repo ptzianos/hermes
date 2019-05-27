@@ -8,7 +8,7 @@ from Crypto.PublicKey.ECC import EccKey, generate as ecc_generate
 from flask import Flask
 
 from hermes.types import EmailAddressType, SessionTokenType, UserType
-from test.fixtures.seeds import *
+from tests.hermes.fixtures.seeds import *
 
 
 def infinite_user_generator(

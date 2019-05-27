@@ -10,11 +10,11 @@ poetry-docker:
 debug-market:
 	cd marketplace && poetry run src/hermes/cli --host=127.0.0.1 --port=8000 run --dev
 
-market-test:
+market-tests:
 	cd marketplace && poetry run pytest -s
 
 market-test-cov:
-	cd marketplace && poetry run pytest --cov=hermes test/
+	cd marketplace && poetry run pytest --cov=hermes tests/
 
 market-lint:
 	printf "\n===============================\nRunning pylint...\n===============================\n\n"

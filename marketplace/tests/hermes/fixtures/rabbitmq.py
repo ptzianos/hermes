@@ -1,6 +1,6 @@
 import pytest
 
-from test.utils import mock_response
+from tests.hermes.utils import mock_response
 
 
 sample_overview_response = {
