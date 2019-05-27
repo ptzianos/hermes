@@ -30,6 +30,10 @@ class UnknownToken(Exception):
     msg = 'unknown_token'
 
 
+class UnknownPublicKey(Exception):
+    msg = 'unknown_public_key'
+
+
 class UserHasNoPassword(Exception):
     msg = 'no_password'
 

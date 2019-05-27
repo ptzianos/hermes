@@ -22,6 +22,7 @@ from hermes.user.models import (APIToken, BaseToken, EmailAddress,
 
 UserLikeObj = Optional[Union[str, User]]
 TokenLikeObj = Optional[Union[str, APIToken, SessionToken]]
+PublicKeyLikeObj = Optional[Union[str, PublicKey]]
 
 log = getLogger(__name__)
 
@@ -63,7 +64,7 @@ def resolve_user(some_user: UserLikeObj) -> Optional[User]:
 
 
 def resolve_token(some_token: TokenLikeObj) -> Optional[BaseToken]:
-    """Checks if the toke is a string and fetches it from the database.
+    """Checks if the token is a string and fetches it from the database.
 
     Args:
         some_token (TokenLikeObj): A BaseToken-like object.
@@ -87,6 +88,30 @@ def resolve_token(some_token: TokenLikeObj) -> Optional[BaseToken]:
             .query(SessionToken)
             .filter_by(token=some_token)
             .first())
+
+
+def resolve_public_key(some_key: PublicKeyLikeObj) -> Optional[PublicKey]:
+    """Resolves the public key into an instance of the PublicKey model.
+
+    If `some_key` is a string, the database will be queried to find an
+    instance with this UUID. If it is already a public key model instance
+    it will be returned immediately. If the type is incorrect, an exception
+    will be thrown.
+
+    Args:
+        some_key (PublicKeyLikeObj): A PublicKey-like object.
+
+    Returns:
+        Optional[PublicKey]: The public key that is resolved.
+
+    """
+    if not some_key:
+        return None
+    if type(some_key) not in [str, PublicKey]:
+        raise UnknownPublicKey()
+    if isinstance(some_key, PublicKey):
+        return some_key
+    return g.db_session.query(PublicKey).filter_by(uuid=some_key).first()
 
 
 def check_password_strength(password: str):
@@ -621,25 +646,20 @@ def generate_public_key_verification_request(
         PublicKeyVerificationRequest
 
     """
+    public_key = resolve_public_key(some_key=public_key)
+    if not public_key:
+        raise UnknownPublicKey()
+
     if public_key.verified:
         raise AlreadyVerified()
 
-    if isinstance(public_key, PublicKey):
-        existing_public_key_verification_tokens: Iterable[PublicKeyVerificationRequest] = (
-            g.db_session
-             .query(PublicKeyVerificationRequest)
-             .filter_by(public_key_id=public_key.id,
-                        expired=False)
-        )
-    else:
-        existing_public_key_verification_tokens: Iterable[PublicKeyVerificationRequest] = (
-            g.db_session
-             .query(PublicKeyVerificationRequest)
-             .filter_by(expired=False)
-             .join(PublicKey)
-             .filter_by(uuid=public_key)
-        )
-    for token in existing_public_key_verification_tokens[1:]:
+    existing_public_key_verification_tokens: Iterable[PublicKeyVerificationRequest] = (
+        g.db_session
+         .query(PublicKeyVerificationRequest)
+         .filter_by(public_key_id=public_key.id,
+                    expired=False)
+    )
+    for token in existing_public_key_verification_tokens:
         token.revoke()
 
     message = PUBLIC_KEY_VERIFICATION_TEXT.format(
@@ -654,6 +674,8 @@ def generate_public_key_verification_request(
     )
     public_key_verification_token.refresh()
     g.db_session.add(public_key_verification_token)
+    # Commit session to ensure token for verification request is generated
+    g.db_session.commit()
     return public_key_verification_token
 
 
