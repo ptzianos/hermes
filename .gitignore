@@ -37,3 +37,6 @@ android-client/captures/
 
 # Android app jars
 android-client/app/libs/*.jar
+
+# MYPY
+**/.mypy_cache/
