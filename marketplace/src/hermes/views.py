@@ -236,7 +236,7 @@ def create_token(user_id: str) -> ViewResponse:
             )
             session.owner = user
             session.refresh()
-        except (UnknownUser, WrongParameters):
+        except (ExpiredToken, UnknownUser, WrongParameters):
             return make_response('forbidden', requests.codes.forbidden)
 
     if user_id != session.owner.uuid and not session.owner.admin:
