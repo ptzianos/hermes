@@ -119,10 +119,7 @@ class BaseToken:
         return self
 
 
-class SessionToken(BaseToken, current_app.Base):
-    __tablename__ = 'session_tokens'
-
-    duration = SESSION_DURATION
+class AuthenticationToken(BaseToken):
 
     class Meta:
         non_pickled_fields = ['id', 'owner', 'token', 'expired', 'expiry',
@@ -130,9 +127,30 @@ class SessionToken(BaseToken, current_app.Base):
                               'created_on', 'data', 'is_expired',
                               'is_sudo_session', 'is_anonymous']
 
+    data = Column(String, default='')
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._proxy = None
+
+    @property
+    def proxy(self) -> 'ProxySession':
+        if not getattr(self, '_proxy', None):
+            self._proxy = ProxySession(self)
+        return self._proxy
+
+    @property
+    def is_anonymous(self) -> bool:
+        return self.owner is None
+
+
+class SessionToken(AuthenticationToken, current_app.Base):
+    __tablename__ = 'session_tokens'
+
+    duration = SESSION_DURATION
+
     admin_owner = Column(ForeignKey(User.id))
     failed_login_attempts = Column(Integer, default=0)
-    data = Column(String, default='')
 
     def __repr__(self) -> str:
         return ("<Session(owner='{}', token='{}', expiry='{}', expired='{}')>"
@@ -142,18 +160,8 @@ class SessionToken(BaseToken, current_app.Base):
     def is_su_session(self) -> bool:
         return self.admin_owner is not None
 
-    @property
-    def is_anonymous(self) -> bool:
-        return self.owner is None
 
-    @property
-    def proxy(self) -> 'ProxySession':
-        if not getattr(self, '_proxy', None):
-            self._proxy = ProxySession(self)
-        return self._proxy
-
-
-class APIToken(BaseToken, current_app.Base):
+class APIToken(AuthenticationToken, current_app.Base):
     __tablename__ = 'api_tokens'
 
     duration = API_TOKEN_DURATION
@@ -198,7 +206,7 @@ class PublicKeyVerificationRequest(BaseToken, current_app.Base):
 class ProxySession(SessionMixin):
     """Acts as a proxy between the actual persistent object and the outer environment"""
 
-    def __init__(self, session: SessionToken) -> None:
+    def __init__(self, session: AuthenticationToken) -> None:
         def json_updater(updated_dict):
             self.persistent_session.data = json.dumps(updated_dict)
 
