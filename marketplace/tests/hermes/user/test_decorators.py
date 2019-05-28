@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 from typing import Callable, Iterator
 
+import pytest
 import requests
 from flask import Flask, make_response
 
@@ -9,6 +10,7 @@ from hermes.user.decorators import (admin_only, authenticated_only,
                                     unauthenticated_only)
 
 
+@pytest.mark.usefixtures('sqlalchemy_test_session')
 def test_authenticated_only_decorator_forbids_anonymous_session(
     flask_app: Flask
 ) -> None:
@@ -21,6 +23,7 @@ def test_authenticated_only_decorator_forbids_anonymous_session(
             'Decorator did not prevent anonymous user'
 
 
+@pytest.mark.usefixtures('sqlalchemy_test_session')
 def test_authenticated_only_decorator_forbids_expired_session(
     flask_app: Flask,
     user: Iterator[UserType],
@@ -39,6 +42,7 @@ def test_authenticated_only_decorator_forbids_expired_session(
             'Decorator allowed expired authenticated session'
 
 
+@pytest.mark.usefixtures('sqlalchemy_test_session')
 def test_authenticated_only_decorator_allows_authenticated_session(
     flask_app: Flask,
     user: Iterator[UserType],
@@ -56,6 +60,7 @@ def test_authenticated_only_decorator_allows_authenticated_session(
             'Decorator prevented authenticated user'
 
 
+@pytest.mark.usefixtures('sqlalchemy_test_session')
 def test_unauthenticated_only_decorator_allows_anonymous_session(
     flask_app: Flask
 ) -> None:
@@ -68,6 +73,7 @@ def test_unauthenticated_only_decorator_allows_anonymous_session(
             'Decorator did not allow anonymous user'
 
 
+@pytest.mark.usefixtures('sqlalchemy_test_session')
 def test_unauthenticated_only_decorator_redirects_authenticated_session(
     flask_app: Flask,
     user: Iterator[UserType],
@@ -85,6 +91,7 @@ def test_unauthenticated_only_decorator_redirects_authenticated_session(
             'Decorator allowed authenticated user'
 
 
+@pytest.mark.usefixtures('sqlalchemy_test_session')
 def test_admin_only_decorator_forbids_anonymous_session(
     flask_app: Flask
 ) -> None:
@@ -97,6 +104,7 @@ def test_admin_only_decorator_forbids_anonymous_session(
             'Decorator did not prevent anonymous user'
 
 
+@pytest.mark.usefixtures('sqlalchemy_test_session')
 def test_admin_only_decorator_forbids_non_admin_session(
     flask_app: Flask,
     user: Iterator[UserType],
@@ -114,6 +122,7 @@ def test_admin_only_decorator_forbids_non_admin_session(
             'Decorator did not prevent authenticated user'
 
 
+@pytest.mark.usefixtures('sqlalchemy_test_session')
 def test_admin_only_decorator_allows_admin_session(
     flask_app: Flask,
     admin_user: Iterator[UserType],
