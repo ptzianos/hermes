@@ -1,3 +1,6 @@
+MARKET_POETRY=cd marketplace && poetry
+ANSIBLE_POETRY=cd ansible && poetry
+
 market-install:
 	pip3 install -r marketplace/requirementst.txt
 
@@ -8,13 +11,13 @@ poetry-docker:
 	docker build -t poetry -f docker/Dockerfile.poetry .
 
 debug-market:
-	cd marketplace && poetry run src/hermes/cli --host=127.0.0.1 --port=8000 run --dev
+	$(MARKET_POETRY) run src/hermes/cli --host=127.0.0.1 --port=8000 run --dev
 
 market-tests:
-	cd marketplace && poetry run pytest -s
+	$(MARKET_POETRY) run pytest -s
 
 market-test-cov:
-	cd marketplace && poetry run pytest --cov=hermes tests/
+	$(MARKET_POETRY) run pytest --cov=hermes tests/
 
 market-lint:
 	printf "\n===============================\nRunning pylint...\n===============================\n\n"
@@ -22,9 +25,12 @@ market-lint:
 	printf "\n\n\n===============================\nRunning flake8...\n===============================\n"
 	flake8 marketplace/src/hermes
 
+market-requirements:
+	$(MARKET_POETRY) run pip freeze | grep -v hermes.git > requirements.txt
+
 ansible-setup:
-	cd ansible && poetry install
+	$(ANSIBLE_POETRY) install
 
 ansible-playbook:
-	cd ansible && poetry run ansible-playbook -i reclass complete-setup.yml --become
+	$(ANSIBLE_POETRY) run ansible-playbook -i reclass complete-setup.yml --become
 
