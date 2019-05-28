@@ -650,9 +650,6 @@ def generate_public_key_verification_request(
     if not public_key:
         raise UnknownPublicKey()
 
-    if public_key.verified:
-        raise AlreadyVerified()
-
     existing_public_key_verification_tokens: Iterable[PublicKeyVerificationRequest] = (
         g.db_session
          .query(PublicKeyVerificationRequest)
@@ -739,7 +736,9 @@ def reset_password(user: UserLikeObj,
         raise UnknownToken()
 
 
-def verify_username_and_pass(email_or_username: str, password_plaintext: str) -> User:
+def verify_username_and_pass(
+    email_or_username: str, password_plaintext: str
+) -> User:
     """Checks whether or not the email/password matches is valid."""
     user = resolve_user(email_or_username)
     if not user:

@@ -72,7 +72,6 @@ class PublicKey(current_app.Base):
                   default=partial(lambda: str(uuid4().hex)))
     value = Column(String, unique=True, nullable=False)
     type = Column(ChoiceType(PUBLIC_KEY_TYPES), nullable=False)
-    verified = Column(Boolean, default=False)
     owner_id = Column(Integer, ForeignKey('users.id'))
     owner = relationship(User, primaryjoin=owner_id == User.id)
     # TODO: Add the hash of the public key
