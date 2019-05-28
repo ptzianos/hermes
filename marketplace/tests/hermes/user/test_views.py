@@ -59,7 +59,8 @@ def test_register_view(api_client: FlaskClient,
 
 
 @pytest.mark.usefixtures('sqlalchemy_test_session')
-def test_generate_token_verification_views(
+def test_generate_api_token_view(
+    flask_app,
     api_client: FlaskClient,
     ecdsa_key_pair: Iterator[EccKey]
 ) -> None:
@@ -74,13 +75,17 @@ def test_generate_token_verification_views(
     assert resp.json.get('public_key_verification_token') is not None
     assert resp.json.get('public_key_verification_message') is not None
 
-    msg_hash = SHA3_512.new().update(resp.json.get('public_key_verification_message').encode())
-    sig_scheme = new_dss_sig_scheme(import_ecdsa_key(pk.value), mode='fips-186-3')
+    msg_hash = (SHA3_512.new()
+                .update(resp.json.get('public_key_verification_message')
+                        .encode()))
+    sig_scheme = new_dss_sig_scheme(import_ecdsa_key(pk.value),
+                                    mode='fips-186-3')
     signature = sig_scheme.sign(msg_hash)
     token_endpoint = ('/api/v1/users/{user_uuid}/tokens/'
                       .format(user_uuid=user.uuid))
     resp = api_client.post(token_endpoint, data={
-        'proof_of_ownership_request': resp.json.get('public_key_verification_token'),
+        'proof_of_ownership_request':
+            resp.json.get('public_key_verification_token'),
         'proof_of_ownership': signature.hex(),
     })
 
@@ -88,10 +93,13 @@ def test_generate_token_verification_views(
     assert resp.json.get('token') is not None
 
     api_token = resp.json.get('token')
+    api_client.delete_cookie('localhost.local', flask_app.session_cookie_name)
     resp = api_client.get(
         '/api/v1/users/me',
         headers={
-            'Bearer': base64.encodebytes(api_token.encode()).decode('utf-8').strip()
+            'Authorization': 'Bearer ' + base64.encodebytes(api_token.encode())
+                                               .decode('utf-8')
+                                               .strip()
         })
 
     assert resp.status_code == requests.codes.ok
