@@ -238,7 +238,7 @@ def create_token(user_id: str) -> ViewResponse:
         except (UnknownUser, WrongParameters):
             return make_response('forbidden', 403)
 
-    if user_id != session.user.uuid and not session.user.admin:
+    if user_id != session.owner.uuid and not session.owner.admin:
         return make_response('forbidden', 403)
 
     token = generate_api_token(session['owner'])
@@ -250,7 +250,7 @@ def create_token(user_id: str) -> ViewResponse:
 @delete('/api/v1/users/<string:user_id>/token/<string:token_id>')
 @authenticated_only
 def revoke_token_view(user_id: str, token_id: str) -> ViewResponse:
-    if user_id != session.user.uuid and not session.user.admin:
+    if user_id != session.owner.uuid and not session.owner.admin:
         return make_response('forbidden', 403)
     try:
         revoke_token(session['owner'], token_id)
