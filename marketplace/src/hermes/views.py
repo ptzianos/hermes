@@ -1,5 +1,6 @@
 from typing import Any, Callable, Tuple, Union
 
+import requests
 from flask import (Flask, make_response, redirect, request,
                    Response, session, url_for)
 # from flask.logging import create_logger
@@ -66,7 +67,7 @@ def register() -> ViewResponse:
                           public_key_type=request.form.get('public_key_type'),
                           public_key=request.form.get('public_key'))
         )
-        return make_json_response(200, **{
+        return make_json_response(requests.codes.ok, **{
             "uuid": user.uuid,
             "name": user.name,
             "fullname": user.fullname,
@@ -77,9 +78,9 @@ def register() -> ViewResponse:
             "public_key_verification_message": public_key_verification.original_message
         })
     except AlreadyRegistered:
-        return make_response('already_registered', 400)
+        return make_response('already_registered', requests.codes.bad_request)
     except WrongParameters:
-        return make_response('wrong_parameters', 400)
+        return make_response('wrong_parameters', requests.codes.bad_request)
 
 
 @post('/api/v1/users/deregister')
@@ -98,15 +99,15 @@ def login() -> ViewResponse:
         session.refresh()
         return redirect(url_for(index))
     except (UnknownUser, WrongParameters):
-        return make_response('wrong credentials', 400)
+        return make_response('wrong credentials', requests.codes.bad_request)
 
 
 @get('/api/v1/users/<string:user_id>/emails')
 @authenticated_only
 def get_emails(user_id: str):
     if user_id != session.owner.id and not session.owner.is_admin:
-        return make_response(403)
-    return make_response(200, list_emails(user_id))
+        return make_response(requests.codes.forbidden)
+    return make_response(requests.codes.ok, list_emails(user_id))
 
 
 @get('/api/v1/users/<string:user_id>/emails/<string:email_id>/verify')
@@ -119,13 +120,13 @@ def verify_email_view(user_id: str, email_id: str):
     """
     try:
         verify_email(user_id, email_id, request.form.get('token'))
-        return make_response(200)
+        return make_response(requests.codes.ok)
     except UnknownUser:
-        return make_response(403)
+        return make_response(requests.codes.forbidden)
     except UnknownEmail:
-        return make_response(404)
+        return make_response(requests.codes.not_found)
     except UnknownToken:
-        return make_response(400)
+        return make_response(requests.codes.bad_request)
 
 
 @get('/api/v1/users/<string:user_id>/keys/<string:key_id>/message')
@@ -135,31 +136,31 @@ def get_key_verification_message(user_id: str, key_id: str):
         public_key_verification_request = \
             generate_public_key_verification_request(key_id)
         return make_json_response(
-            status_code=200, **{
+            status_code=requests.codes.ok, **{
                 "public_key_verification_token":
                     public_key_verification_request.token,
                 "public_key_verification_message":
                     public_key_verification_request.original_message,
             })
     except UnknownUser:
-        return make_response(403)
+        return make_response(requests.codes.forbidden)
     except UnknownEmail:
-        return make_response(404)
+        return make_response(requests.codes.not_found)
     except (AlreadyVerified, UnknownPublicKey):
-        return make_response(400)
+        return make_response(requests.codes.bad_request)
 
 
 @delete('/api/v1/users/<string:user_id>/emails/<string:email_id>')
 @authenticated_only
 def delete_email_view(user_id: str, email_id: str):
     if user_id != session.owner.id and not session.owner.is_admin:
-        return make_response(403)
+        return make_response(requests.codes.forbidden)
     try:
         # TODO: implement this
         delete_email(email_id)
-        return make_response(200)
+        return make_response(requests.codes.ok)
     except UnknownEmail:
-        return make_response(404)
+        return make_response(requests.codes.not_found)
 
 
 @get('/api/v1/users/<string:user_id>/keys/')
@@ -173,7 +174,7 @@ def list_public_keys():
 @authenticated_only
 def logout() -> ViewResponse:
     session.revoke()
-    return make_response(200)
+    return make_response(requests.codes.ok)
 
 
 @post('/api/v1/users/<string:user_id>/su')
@@ -182,11 +183,11 @@ def logout() -> ViewResponse:
 def post_su(user_id: str) -> ViewResponse:
     try:
         su(user=session['owner'], user_to_su=user_id, session=session)
-        return make_response(200)
+        return make_response(requests.codes.ok)
     except WrongParameters:
-        return make_response(400)
+        return make_response(requests.codes.bad_request)
     except ForbiddenAction:
-        return make_response(403)
+        return make_response(requests.codes.forbidden)
 
 
 @get('/api/v1/users/')
@@ -212,9 +213,9 @@ def get_user_details(user_id: str) -> ViewResponse:
             user=user_id)
         )
     except ForbiddenAction:
-        return make_response(403)
+        return make_response(requests.codes.forbidden)
     except UnknownUser:
-        return make_response(404)
+        return make_response(requests.codes.not_found)
 
 
 @patch('/api/v1/users/<string:user_id>')
@@ -236,10 +237,10 @@ def create_token(user_id: str) -> ViewResponse:
             session.owner = user
             session.refresh()
         except (UnknownUser, WrongParameters):
-            return make_response('forbidden', 403)
+            return make_response('forbidden', requests.codes.forbidden)
 
     if user_id != session.owner.uuid and not session.owner.admin:
-        return make_response('forbidden', 403)
+        return make_response('forbidden', requests.codes.forbidden)
 
     token = generate_api_token(session['owner'])
     return make_json_response(id=token.id,
@@ -251,14 +252,14 @@ def create_token(user_id: str) -> ViewResponse:
 @authenticated_only
 def revoke_token_view(user_id: str, token_id: str) -> ViewResponse:
     if user_id != session.owner.uuid and not session.owner.admin:
-        return make_response('forbidden', 403)
+        return make_response('forbidden', requests.codes.forbidden)
     try:
         revoke_token(session['owner'], token_id)
-        return make_response(200)
+        return make_response(requests.codes.ok)
     except UnknownToken:
-        return make_response(404)
+        return make_response(requests.codes.not_found)
     except ForbiddenAction:
-        return make_response(403)
+        return make_response(requests.codes.forbidden)
 
 
 @get('/api/v1/ads/')
