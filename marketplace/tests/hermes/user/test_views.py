@@ -1,19 +1,23 @@
+import base64
 from typing import Iterator
 
+import pytest
 import requests
-from Crypto.PublicKey.ECC import EccKey
+from Crypto.Hash import SHA3_512
+from Crypto.PublicKey.ECC import EccKey, import_key as import_ecdsa_key
 from Crypto.PublicKey.RSA import RsaKey
-from flask import Flask
+from Crypto.Signature.DSS import new as new_dss_sig_scheme
 from flask.testing import FlaskClient
 
 from tests.hermes.user.utils import register_user
 
 
-def test_register_view(flask_app: Flask,
-                       api_client: FlaskClient,
+@pytest.mark.usefixtures('sqlalchemy_test_session')
+def test_register_view(api_client: FlaskClient,
                        random_email: Iterator[str],
                        ecdsa_key_pair: Iterator[EccKey],
                        rsa_key_pair: Iterator[RsaKey]) -> None:
+    from hermes.user.controllers import resolve_user
 
     # Register a standard user with an ECDSA key
     resp = api_client.post('/api/v1/users/register', data={
@@ -22,13 +26,13 @@ def test_register_view(flask_app: Flask,
         'public_key_type': 'ecdsa',
     })
     assert resp.status_code == requests.codes.ok
-    with flask_app.app_context_and_db_session():
-        from hermes.user.controllers import resolve_user
-        user = resolve_user(resp.json['uuid'])
-        assert user is not None
-        user2 = resolve_user(resp.json['email'])
-        assert user2 is not None
-        assert user.uuid == user2.uuid
+
+    user = resolve_user(resp.json['uuid'])
+    user2 = resolve_user(resp.json['email'])
+
+    assert user is not None
+    assert user2 is not None
+    assert user.uuid == user2.uuid
 
     # Try to register a user with a duplicate email
     resp = api_client.post('/api/v1/users/register', data={
@@ -44,9 +48,7 @@ def test_register_view(flask_app: Flask,
         'public_key_type': 'rsa',
     })
     assert resp.status_code == requests.codes.ok
-    with flask_app.app_context_and_db_session():
-        from hermes.user.controllers import resolve_user
-        assert resolve_user(resp.json['uuid']) is not None
+    assert resolve_user(resp.json['uuid']) is not None
 
     # Try to register a user with the wrong type of key
     resp = api_client.post('/api/v1/users/register', data={
@@ -56,16 +58,41 @@ def test_register_view(flask_app: Flask,
     assert resp.status_code == requests.codes.bad_request
 
 
-def test_generate_key_verification_views(
-        flask_app: Flask, api_client: FlaskClient,
-        ecdsa_key_pair: Iterator[EccKey]
+@pytest.mark.usefixtures('sqlalchemy_test_session')
+def test_generate_token_verification_views(
+    api_client: FlaskClient,
+    ecdsa_key_pair: Iterator[EccKey]
 ) -> None:
-    user, pk, _ = register_user(flask_app, api_client, next(ecdsa_key_pair))
-    token_endpoint = ('/api/v1/users/{user_uuid}/keys/{key_id}/message'
-                      .format(user_uuid=user.uuid, key_id=pk.uuid))
-    resp = api_client.get(token_endpoint)
+    user, pk, _, verification_request_token, verification_request_msg = \
+        register_user(api_client, next(ecdsa_key_pair))
+
+    msg_endpoint = ('/api/v1/users/{user_uuid}/keys/{key_id}/message'
+                    .format(user_uuid=user.uuid, key_id=pk.uuid))
+    resp = api_client.get(msg_endpoint)
 
     assert resp.status_code == requests.codes.ok
     assert resp.json.get('public_key_verification_token') is not None
     assert resp.json.get('public_key_verification_message') is not None
 
+    msg_hash = SHA3_512.new().update(resp.json.get('public_key_verification_message').encode())
+    sig_scheme = new_dss_sig_scheme(import_ecdsa_key(pk.value), mode='fips-186-3')
+    signature = sig_scheme.sign(msg_hash)
+    token_endpoint = ('/api/v1/users/{user_uuid}/tokens/'
+                      .format(user_uuid=user.uuid))
+    resp = api_client.post(token_endpoint, data={
+        'proof_of_ownership_request': resp.json.get('public_key_verification_token'),
+        'proof_of_ownership': signature.hex(),
+    })
+
+    assert resp.status_code == requests.codes.ok
+    assert resp.json.get('token') is not None
+
+    api_token = resp.json.get('token')
+    resp = api_client.get(
+        '/api/v1/users/me',
+        headers={
+            'Bearer': base64.encodebytes(api_token.encode()).decode('utf-8').strip()
+        })
+
+    assert resp.status_code == requests.codes.ok
+    assert resp.json['uuid'] == user.uuid
