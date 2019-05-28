@@ -475,7 +475,6 @@ def list_keys(user: UserLikeObj) -> List[Dict[str, str]]:
     def to_json(public_key: PublicKey):
         return {
             "uuid": public_key.uuid,
-            "verified": public_key.verified,
             "added_on": public_key.created_on,
         }
     return list(map(to_json,

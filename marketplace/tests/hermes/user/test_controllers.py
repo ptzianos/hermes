@@ -170,7 +170,6 @@ def test_list_keys(
 
         def get_public_key(user: User) -> PublicKey:
             pk = PublicKey(
-                verified=True,
                 value=''.join([random.choice(ascii_letters) for _ in range(20)]),
                 owner=user,
                 type='rsa',
