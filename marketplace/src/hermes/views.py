@@ -243,8 +243,7 @@ def create_token(user_id: str) -> ViewResponse:
         return make_response('forbidden', requests.codes.forbidden)
 
     token = generate_api_token(session['owner'])
-    return make_json_response(id=token.id,
-                              token=token.token,
+    return make_json_response(token=token.token,
                               expiration_date=token.expiry)
 
 
