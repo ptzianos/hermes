@@ -67,15 +67,16 @@ class HermesSession(SessionInterface):
     ) -> None:
         if not response:
             return
-        # TODO: Work on fixing permanent sessions
-        expires = self.get_expiration_time(app, session)
-        response.set_cookie(app.session_cookie_name,
-                            session['token'],
-                            expires=expires,
-                            httponly=self.get_cookie_httponly(app),
-                            domain=self.get_cookie_domain(app),
-                            path=self.get_cookie_path(app),
-                            secure=self.get_cookie_secure(app))
+        if isinstance(session.persistent_session, SessionToken):
+            # TODO: Work on fixing permanent sessions
+            expires = self.get_expiration_time(app, session)
+            response.set_cookie(app.session_cookie_name,
+                                session['token'],
+                                expires=expires,
+                                httponly=self.get_cookie_httponly(app),
+                                domain=self.get_cookie_domain(app),
+                                path=self.get_cookie_path(app),
+                                secure=self.get_cookie_secure(app))
 
         if self.db_session_initialized:
             g.db_session.close()
