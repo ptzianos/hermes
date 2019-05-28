@@ -64,20 +64,11 @@ def test_generate_api_token_view(
     api_client: FlaskClient,
     ecdsa_key_pair: Iterator[EccKey]
 ) -> None:
-    user, pk, _, verification_request_token, verification_request_msg = \
-        register_user(api_client, next(ecdsa_key_pair))
-
-    msg_endpoint = ('/api/v1/users/{user_uuid}/keys/{key_id}/message'
-                    .format(user_uuid=user.uuid, key_id=pk.uuid))
-    resp = api_client.get(msg_endpoint)
-
-    assert resp.status_code == requests.codes.ok
-    assert resp.json.get('public_key_verification_token') is not None
-    assert resp.json.get('public_key_verification_message') is not None
+    user, pk, _, verification_request = register_user(api_client,
+                                                      next(ecdsa_key_pair))
 
     msg_hash = (SHA3_512.new()
-                .update(resp.json.get('public_key_verification_message')
-                        .encode()))
+                .update(verification_request.original_message.encode()))
     sig_scheme = new_dss_sig_scheme(import_ecdsa_key(pk.value),
                                     mode='fips-186-3')
     signature = sig_scheme.sign(msg_hash)
@@ -85,8 +76,7 @@ def test_generate_api_token_view(
                       .format(user_uuid=user.uuid))
     api_client.delete_cookie('localhost.local', flask_app.session_cookie_name)
     resp = api_client.post(token_endpoint, data={
-        'proof_of_ownership_request':
-            resp.json.get('public_key_verification_token'),
+        'proof_of_ownership_request': verification_request.token,
         'proof_of_ownership': signature.hex(),
     })
 
@@ -113,28 +103,18 @@ def test_cant_generate_token_twice_with_same_verification_request(
     api_client: FlaskClient,
     ecdsa_key_pair: Iterator[EccKey]
 ) -> None:
-    user, pk, _, verification_request_token, verification_request_msg = \
-        register_user(api_client, next(ecdsa_key_pair))
-
-    msg_endpoint = ('/api/v1/users/{user_uuid}/keys/{key_id}/message'
-                    .format(user_uuid=user.uuid, key_id=pk.uuid))
-    resp = api_client.get(msg_endpoint)
-
-    assert resp.status_code == requests.codes.ok
-    assert resp.json.get('public_key_verification_token') is not None
-    assert resp.json.get('public_key_verification_message') is not None
+    user, pk, _, verification_request = register_user(api_client,
+                                                      next(ecdsa_key_pair))
 
     msg_hash = (SHA3_512.new()
-                .update(resp.json.get('public_key_verification_message')
-                        .encode()))
+                .update(verification_request.original_message.encode()))
     sig_scheme = new_dss_sig_scheme(import_ecdsa_key(pk.value),
                                     mode='fips-186-3')
     signature = sig_scheme.sign(msg_hash)
     token_endpoint = ('/api/v1/users/{user_uuid}/tokens/'
                       .format(user_uuid=user.uuid))
     post_data = {
-        'proof_of_ownership_request':
-            resp.json.get('public_key_verification_token'),
+        'proof_of_ownership_request': verification_request.token,
         'proof_of_ownership': signature.hex(),
     }
     api_client.delete_cookie('localhost.local', flask_app.session_cookie_name)
@@ -147,3 +127,57 @@ def test_cant_generate_token_twice_with_same_verification_request(
     resp = api_client.post(token_endpoint, data=post_data)
 
     assert resp.status_code == requests.codes.forbidden
+
+
+@pytest.mark.usefixtures('sqlalchemy_test_session')
+def test_new_verification_request_expires_old_one(
+    flask_app,
+    api_client: FlaskClient,
+    ecdsa_key_pair: Iterator[EccKey]
+) -> None:
+    user, pk, _, verification_request = register_user(api_client,
+                                                      next(ecdsa_key_pair))
+    msg_endpoint = ('/api/v1/users/{user_uuid}/keys/{key_id}/message'
+                    .format(user_uuid=user.uuid, key_id=pk.uuid))
+    api_client.delete_cookie('localhost.local', flask_app.session_cookie_name)
+    verification_request_resp = api_client.get(msg_endpoint)
+
+    assert verification_request_resp.status_code == requests.codes.ok
+    assert verification_request_resp.json.get('public_key_verification_token') is not None
+    assert verification_request_resp.json.get('public_key_verification_message') is not None
+    assert verification_request.is_expired
+
+    # Old verification request should be useless now
+    msg_hash = (SHA3_512.new()
+                .update(verification_request.original_message.encode()))
+    sig_scheme = new_dss_sig_scheme(import_ecdsa_key(pk.value),
+                                    mode='fips-186-3')
+    signature = sig_scheme.sign(msg_hash)
+    token_endpoint = ('/api/v1/users/{user_uuid}/tokens/'
+                      .format(user_uuid=user.uuid))
+    api_client.delete_cookie('localhost.local', flask_app.session_cookie_name)
+    resp = api_client.post(token_endpoint, data={
+        'proof_of_ownership_request': verification_request.token,
+        'proof_of_ownership': signature.hex(),
+    })
+    assert resp.status_code == requests.codes.forbidden
+
+    # New verification request must be usable now
+    msg_hash = (SHA3_512.new()
+                .update(verification_request_resp.json
+                        .get('public_key_verification_message')
+                        .encode()))
+    sig_scheme = new_dss_sig_scheme(import_ecdsa_key(pk.value),
+                                    mode='fips-186-3')
+    signature = sig_scheme.sign(msg_hash)
+    token_endpoint = ('/api/v1/users/{user_uuid}/tokens/'
+                      .format(user_uuid=user.uuid))
+    api_client.delete_cookie('localhost.local', flask_app.session_cookie_name)
+    resp = api_client.post(token_endpoint, data={
+        'proof_of_ownership_request':
+            verification_request_resp.json.get('public_key_verification_token'),
+        'proof_of_ownership': signature.hex(),
+    })
+
+    assert resp.status_code == requests.codes.ok
+    assert resp.json['token'] is not None
