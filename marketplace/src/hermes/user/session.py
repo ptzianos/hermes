@@ -10,10 +10,16 @@ from hermes.user.models import APIToken, ProxySession, SessionToken
 class HermesSession(SessionInterface):
     """Implements the Session Flask interface with SQLAlchemy Session model as a backend
     """
+    db_session_initialized = False
+
     def open_session(self, app: Flask, request: Request, *args) -> 'ProxySession':
         session_token_str = request.cookies.get(app.session_cookie_name) or None
-        # Get the db_session object that has been created in the before request hook
-        db_session = g.db_session = current_app.new_db_session_instance()
+        # Create a db_session only if one has not been created yet
+        if not getattr(g, 'db_session'):
+            db_session = g.db_session = current_app.new_db_session_instance()
+            self.db_session_initialized = True
+        else:
+            db_session = g.db_session
         if session_token_str:
             user_session = (db_session
                             .query(SessionToken)
@@ -58,4 +64,6 @@ class HermesSession(SessionInterface):
                             domain=self.get_cookie_domain(app),
                             path=self.get_cookie_path(app),
                             secure=self.get_cookie_secure(app))
-        g.db_session.close()
+
+        if self.db_session_initialized:
+            g.db_session.close()
