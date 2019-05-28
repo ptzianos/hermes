@@ -83,6 +83,7 @@ def test_generate_api_token_view(
     signature = sig_scheme.sign(msg_hash)
     token_endpoint = ('/api/v1/users/{user_uuid}/tokens/'
                       .format(user_uuid=user.uuid))
+    api_client.delete_cookie('localhost.local', flask_app.session_cookie_name)
     resp = api_client.post(token_endpoint, data={
         'proof_of_ownership_request':
             resp.json.get('public_key_verification_token'),
@@ -104,3 +105,45 @@ def test_generate_api_token_view(
 
     assert resp.status_code == requests.codes.ok
     assert resp.json['uuid'] == user.uuid
+
+
+@pytest.mark.usefixtures('sqlalchemy_test_session')
+def test_cant_generate_token_twice_with_same_verification_request(
+    flask_app,
+    api_client: FlaskClient,
+    ecdsa_key_pair: Iterator[EccKey]
+) -> None:
+    user, pk, _, verification_request_token, verification_request_msg = \
+        register_user(api_client, next(ecdsa_key_pair))
+
+    msg_endpoint = ('/api/v1/users/{user_uuid}/keys/{key_id}/message'
+                    .format(user_uuid=user.uuid, key_id=pk.uuid))
+    resp = api_client.get(msg_endpoint)
+
+    assert resp.status_code == requests.codes.ok
+    assert resp.json.get('public_key_verification_token') is not None
+    assert resp.json.get('public_key_verification_message') is not None
+
+    msg_hash = (SHA3_512.new()
+                .update(resp.json.get('public_key_verification_message')
+                        .encode()))
+    sig_scheme = new_dss_sig_scheme(import_ecdsa_key(pk.value),
+                                    mode='fips-186-3')
+    signature = sig_scheme.sign(msg_hash)
+    token_endpoint = ('/api/v1/users/{user_uuid}/tokens/'
+                      .format(user_uuid=user.uuid))
+    post_data = {
+        'proof_of_ownership_request':
+            resp.json.get('public_key_verification_token'),
+        'proof_of_ownership': signature.hex(),
+    }
+    api_client.delete_cookie('localhost.local', flask_app.session_cookie_name)
+    resp = api_client.post(token_endpoint, data=post_data)
+
+    assert resp.status_code == requests.codes.ok
+    assert resp.json.get('token') is not None
+
+    api_client.delete_cookie('localhost.local', flask_app.session_cookie_name)
+    resp = api_client.post(token_endpoint, data=post_data)
+
+    assert resp.status_code == requests.codes.forbidden
