@@ -403,7 +403,7 @@ def revoke_token(user: UserLikeObj, token: TokenLikeObj) -> None:
 def su(
     user: UserLikeObj,
     user_to_su: UserLikeObj,
-    session: Optional[SessionToken]
+    session: Optional[SessionToken] = None
 ) -> None:
     """Modifies the session to impersonate a user.
 
