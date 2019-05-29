@@ -144,12 +144,47 @@ def test_new_verification_request_expires_old_one(
     signature = sig_scheme.sign(msg_hash)
     token_endpoint = ('/api/v1/users/{user_uuid}/tokens/'
                       .format(user_uuid=user.uuid))
-    api_client.delete_cookie('localhost.local', flask_app.session_cookie_name)
-    resp = api_client.post(token_endpoint, data={
+    resp = post(token_endpoint, data={
         'proof_of_ownership_request':
             verification_request_resp.json.get('public_key_verification_token'),
         'proof_of_ownership': signature.hex(),
-    })
+    }, no_cookies=True)
 
     assert resp.status_code == requests.codes.ok
     assert resp.json['token'] is not None
+
+
+@pytest.mark.usefixtures('sqlalchemy_test_session')
+def test_user_details_endpoint(
+    ecdsa_key_pair: Iterator[EccKey]
+) -> None:
+    user1, pk1, _, api_token1 = \
+        register_user_and_get_token(next(ecdsa_key_pair))
+    user2, pk2, _, api_token2 = \
+        register_user_and_get_token(next(ecdsa_key_pair))
+    admin_user, admin_pk, _, admin_api_token = \
+        register_user_and_get_token(next(ecdsa_key_pair), admin=True)
+
+    resp = get('/api/v1/users/{user_id}'.format(user_id=user1.uuid),
+               api_token=api_token1.token, no_cookies=True)
+    assert resp.status_code == requests.codes.ok
+
+    resp = get('/api/v1/users/{user_id}'.format(user_id=user2.uuid),
+               api_token=api_token1.token, no_cookies=True)
+    assert resp.status_code == requests.codes.forbidden
+
+    resp = get('/api/v1/users/{user_id}'.format(user_id=user1.uuid),
+               api_token=admin_api_token.token, no_cookies=True)
+    assert resp.status_code == requests.codes.ok
+
+    resp = get('/api/v1/users/'.format(user_id=user1.uuid),
+               api_token=api_token1.token, no_cookies=True)
+    assert resp.status_code == requests.codes.forbidden
+
+    resp = get('/api/v1/users/'.format(user_id=user1.uuid),
+               api_token=admin_api_token.token, no_cookies=True)
+    assert resp.status_code == requests.codes.ok
+
+    resp = get('/api/v1/users/asdasd', api_token=admin_api_token.token,
+               no_cookies=True)
+    assert resp.status_code == requests.codes.not_found
