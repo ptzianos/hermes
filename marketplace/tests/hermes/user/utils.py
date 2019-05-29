@@ -7,6 +7,8 @@ from Crypto.PublicKey.RSA import RsaKey
 from Crypto.Signature.DSS import new as new_dss_sig_scheme
 from flask.testing import FlaskClient
 
+from tests.utils import post
+
 if TYPE_CHECKING:
     from hermes.user.models import (APIToken, EmailAddress, PublicKey,
                                     PublicKeyVerificationRequest,
@@ -14,7 +16,6 @@ if TYPE_CHECKING:
 
 
 def register_user(
-    api_client: FlaskClient,
     key: Union[EccKey, RsaKey],
     passwd: str = '', name: str = '', email: str = '', admin: bool = False
 ) -> Tuple['User', 'PublicKey', Optional['EmailAddress'], 'PublicKeyVerificationRequest']:
@@ -29,13 +30,13 @@ def register_user(
         public_key = key.export_key().decode()
     else:
         raise Exception('Key must be either RSA or ECDSA')
-    resp = api_client.post('/api/v1/users/register', data={
+    resp = post('/api/v1/users/register', data={
         'email': email,
         'fullname': name,
         'password': passwd,
         'public_key': public_key,
         'public_key_type': 'ecdsa',
-    })
+    }, no_cookies=True)
     assert resp.status_code == requests.codes.ok
 
     from flask import g
@@ -65,7 +66,6 @@ def register_user(
 
 
 def register_user_and_get_token(
-    api_client: FlaskClient,
     key: Union[EccKey, RsaKey],
     passwd: str = '', name: str = '', email: str = '', admin: bool = False
 ) -> Tuple['User', 'PublicKey', Optional['EmailAddress'], 'APIToken']:
@@ -74,9 +74,8 @@ def register_user_and_get_token(
     Returns the user, the verification token request model and the email
     object if an email was provided.
     """
-    user, pk, email, verification_request = register_user(api_client, key,
-                                                          passwd, name, email,
-                                                          admin)
+    user, pk, email, verification_request = register_user(key, passwd, name,
+                                                          email, admin)
 
     msg_hash = (SHA3_512.new()
                 .update(verification_request.original_message.encode()))
@@ -85,10 +84,10 @@ def register_user_and_get_token(
     signature = sig_scheme.sign(msg_hash)
     token_endpoint = ('/api/v1/users/{user_uuid}/tokens/'
                       .format(user_uuid=user.uuid))
-    resp = api_client.post(token_endpoint, data={
+    resp = post(token_endpoint, data={
         'proof_of_ownership_request': verification_request.token,
         'proof_of_ownership': signature.hex(),
-    })
+    }, no_cookies=True)
     assert resp.status_code == requests.codes.ok
     assert resp.json['token'] is not None
 
