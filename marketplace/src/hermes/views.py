@@ -10,6 +10,7 @@ from hermes.user.controllers import (authenticate_user,
                                      generate_api_token,
                                      generate_public_key_verification_request,
                                      list_emails,
+                                     list_keys,
                                      list_tokens,
                                      register_user,
                                      resolve_user,
@@ -18,7 +19,7 @@ from hermes.user.controllers import (authenticate_user,
                                      user_details,
                                      verify_email,)
 from hermes.user.decorators import (admin_only, authenticated_only,
-                                    unauthenticated_only)
+                                    owner_or_admin, unauthenticated_only)
 from hermes.utils import make_json_response
 
 
@@ -171,9 +172,12 @@ def delete_email_view(user_id: str, email_id: str):
 
 @get('/api/v1/users/<string:user_id>/keys/')
 @authenticated_only
-def list_public_keys():
+@owner_or_admin
+def list_public_keys(user_id: str) -> ViewResponse:
     """Returns a list of the user's public keys"""
-    return 'Not implemented yet'
+    if not session.owner.is_admin and not user_id == session.owner.uuid:
+        return make_response('', requests.codes.forbidden)
+    return make_json_response(requests.codes.ok, keys=list_keys(user_id))
 
 
 @post('/api/v1/users/logout')
