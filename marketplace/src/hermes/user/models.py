@@ -3,11 +3,10 @@ from datetime import datetime
 from itertools import chain
 from functools import partial
 from typing import Any
-from uuid import uuid4
 
 from flask import current_app
 from flask.sessions import SessionMixin
-from sqlalchemy import (Boolean, Column, DateTime, ForeignKey,
+from sqlalchemy import (Boolean, Column, DateTime, event, ForeignKey,
                         Integer, String)
 from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.orm import relationship
@@ -166,6 +165,9 @@ class APIToken(AuthenticationToken, current_app.Base):
 
     duration = API_TOKEN_DURATION
 
+    # Gets assigned a value by a signal
+    name = Column(String, unique=True, nullable=False)
+
 
 class EmailVerificationToken(BaseToken, current_app.Base):
     __tablename__ = 'email_verification_tokens'
@@ -254,3 +256,7 @@ class ProxySession(SessionMixin):
 
     def __len__(self):
         return len(self.data) + len(SessionToken.Meta.non_pickled_fields)
+
+
+# Import the signals to ensure that they are activated
+from hermes.user.signals import *
