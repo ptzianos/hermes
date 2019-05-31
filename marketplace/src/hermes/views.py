@@ -258,18 +258,20 @@ def create_token(user_id: str) -> ViewResponse:
     return make_json_response(token=token.token, expiration_date=token.expiry)
 
 
-@delete('/api/v1/users/<string:user_id>/token/<string:token_id>')
+@delete('/api/v1/users/<string:user_id>/tokens/<string:token_name>')
 @authenticated_only
-def revoke_token_view(user_id: str, token_id: str) -> ViewResponse:
+def revoke_token_view(user_id: str, token_name: str) -> ViewResponse:
     if user_id != session.owner.uuid and not session.owner.admin:
-        return make_response('forbidden', requests.codes.forbidden)
+        return make_response('', requests.codes.forbidden)
     try:
-        revoke_token(session['owner'], token_id)
+        revoke_token(session['owner'], token_name)
         return make_response('', requests.codes.ok)
     except UnknownToken:
         return make_response('', requests.codes.not_found)
     except ForbiddenAction:
         return make_response('', requests.codes.forbidden)
+    except AlreadyRevoked:
+        return make_response('', requests.codes.bad_request)
 
 
 @get('/api/v1/ads/')
