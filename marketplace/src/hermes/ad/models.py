@@ -26,7 +26,7 @@ class Ad(current_app.Base):
 
     id = Column(Integer, primary_key=True)
     uuid = Column(String, unique=True,
-                  default=partial(lambda: str(uuid4().hex)))
+                  default=partial(lambda: uuid4().hex))
     owner_id = Column(Integer, ForeignKey('users.id'))
     owner = relationship(User, primaryjoin=owner_id == User.id)
     protocol = Column(ChoiceType(PROTOCOL), nullable=False)
