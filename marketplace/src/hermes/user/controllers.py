@@ -398,6 +398,8 @@ def revoke_token(user: UserLikeObj, token: TokenLikeObj) -> None:
         raise UnknownToken()
     if user.id != token.owner.id and not user.admin:
         raise ForbiddenAction()
+    if token.is_expired:
+        raise AlreadyRevoked()
     token.revoke()
 
 
