@@ -1,9 +1,9 @@
 import base64
 from typing import Optional
 
-import requests
-from flask import current_app, Flask, g, make_response, Request, Response
+from flask import current_app, Flask, g, Request, Response
 from flask.sessions import SessionInterface
+from sqlalchemy.orm.session import Session
 
 from hermes.user.models import APIToken, ProxySession, SessionToken
 
@@ -13,15 +13,23 @@ class HermesSession(SessionInterface):
 
     db_session_initialized = False
 
+    @staticmethod
+    def _empty_session(db_session: Session) -> ProxySession:
+        user_session = SessionToken()
+        user_session.refresh()
+        db_session.add(user_session)
+        return user_session.proxy
+
     def open_session(
         self, app: Flask, request: Request, *args
     ) -> 'ProxySession':
         # Create a db_session only if one has not been created yet
         if not getattr(g, 'db_session'):
-            db_session = g.db_session = current_app.new_db_session_instance()
+            db_session = g.db_session = \
+                current_app.new_db_session_instance()  # type: Session
             self.db_session_initialized = True
         else:
-            db_session = g.db_session
+            db_session: Session = g.db_session
 
         session_token_str: Optional[str] = \
             request.cookies.get(app.session_cookie_name, None)
@@ -44,7 +52,7 @@ class HermesSession(SessionInterface):
             elif authorization_str.startswith('Bearer'):
                 base64_token = authorization_str.split('Bearer ')[-1]
             if not base64_token:
-                raise make_response('', requests.codes.forbidden)
+                return self._empty_session(db_session)
             token = (base64
                      .decodebytes(base64_token.encode('utf-8',
                                                       errors='ignore'))
@@ -54,13 +62,10 @@ class HermesSession(SessionInterface):
                                    .filter_by(token=token, expired=False)
                                    .first())
             if not api_token or api_token.is_expired:
-                return make_response(requests.codes.forbidden)
+                return self._empty_session(db_session)
             return api_token.proxy
 
-        user_session = SessionToken()
-        user_session.refresh()
-        db_session.add(user_session)
-        return user_session.proxy
+        return self._empty_session(db_session)
 
     def save_session(
         self, app: Flask, session: 'ProxySession', response: Response
