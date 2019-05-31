@@ -37,7 +37,7 @@ class Ad(current_app.Base):
     location_y = Column(Numeric)
     created_on = Column(DateTime, nullable=False, default=datetime.now)
     last_modified_on = Column(DateTime, onupdate=datetime.now)
-    last_pinged_on = Column(DateTime)
+    last_pinged_on = Column(DateTime, default=datetime.now)
     rate = Column(Float, default=0.0)
     currency = Column(ChoiceType(CURRENCIES), default='miota')
 
