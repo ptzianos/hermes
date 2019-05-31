@@ -56,3 +56,7 @@ class UnsupportedPublicKeyType(Exception):
 
 class UnknownEmail(Exception):
     msg = 'unknown_email'
+
+
+class UnknownProtocol(Exception):
+    msg = 'unknown_messaging_protocol'
