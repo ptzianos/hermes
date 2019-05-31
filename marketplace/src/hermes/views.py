@@ -81,7 +81,7 @@ def register() -> ViewResponse:
     except AlreadyRegistered:
         return make_response('already_registered', requests.codes.bad_request)
     except WrongParameters:
-        return make_response('wrong_parameters', requests.codes.bad_request)
+        return make_response('', requests.codes.bad_request)
 
 
 @post('/api/v1/users/deregister')
@@ -100,7 +100,7 @@ def login() -> ViewResponse:
         session.refresh()
         return redirect(url_for(index))
     except (UnknownUser, WrongParameters):
-        return make_response('wrong credentials', requests.codes.bad_request)
+        return make_response('', requests.codes.bad_request)
 
 
 @get('/api/v1/users/<string:user_id>/emails')
@@ -228,10 +228,10 @@ def patch_user(user_id: str) -> ViewResponse:
 @get('/api/v1/users/<string:user_id>/tokens/')
 def list_tokens_view(user_id: str) -> ViewResponse:
     if session.is_anonymous:
-        return make_response('forbidden', requests.codes.forbidden)
+        return make_response('', requests.codes.forbidden)
     if session.owner.admin or session.owner.uuid == user_id:
         return make_json_response(requests.codes.ok, tokens=list_tokens(user_id))
-    return make_response('forbidden', requests.codes.forbidden)
+    return make_response('', requests.codes.forbidden)
 
 
 @post('/api/v1/users/<string:user_id>/tokens/')
