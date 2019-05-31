@@ -82,7 +82,8 @@ def register() -> ViewResponse:
             "email": email_token.email.address if email_token else '',
             "public_key_id": public_key_verification.public_key.uuid,
             "public_key_verification_token": public_key_verification.token,
-            "public_key_verification_message": public_key_verification.original_message
+            "public_key_verification_message":
+                public_key_verification.original_message
         })
     except AlreadyRegistered:
         return make_response('already_registered', requests.codes.bad_request)
@@ -190,7 +191,7 @@ def logout() -> ViewResponse:
 @admin_only
 def post_su(user_id: str) -> ViewResponse:
     try:
-        su(user=session['owner'], user_to_su=user_id, session=session)
+        su(user=session['owner'], user_to_su=user_id)
         return make_response('', requests.codes.ok)
     except WrongParameters:
         return make_response('', requests.codes.bad_request)
@@ -208,7 +209,8 @@ def list_users() -> ViewResponse:
 @get('/api/v1/users/me')
 @authenticated_only
 def me() -> ViewResponse:
-    return make_json_response(**user_details(requesting_user=session['owner'],
+    return make_json_response(requests.codes.ok,
+                              **user_details(requesting_user=session['owner'],
                                              user=session['owner']))
 
 
@@ -311,4 +313,5 @@ def delete_ad(ad_id: str) -> ViewResponse:
 def register_views_to_app(flask_app: Flask) -> None:
     for http_method, func, rule in view_registry:
         # log.debug('Registering view to flask app: {} {}'.format(http_method, rule))
-        flask_app.add_url_rule(rule, func.__name__, func, methods=[http_method])
+        flask_app.add_url_rule(rule, func.__name__, func,
+                               methods=[http_method])
