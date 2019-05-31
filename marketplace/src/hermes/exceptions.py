@@ -26,6 +26,10 @@ class AlreadyVerified(Exception):
     msg = 'already_verified'
 
 
+class AlreadyRevoked(Exception):
+    msg = 'already_revoked'
+
+
 class UnknownToken(Exception):
     msg = 'unknown_token'
 
