@@ -10,6 +10,7 @@ from hermes.user.controllers import (authenticate_user,
                                      generate_api_token,
                                      generate_public_key_verification_request,
                                      list_emails,
+                                     list_tokens,
                                      register_user,
                                      resolve_user,
                                      revoke_token,
@@ -222,6 +223,15 @@ def get_user_details(user_id: str) -> ViewResponse:
 @authenticated_only
 def patch_user(user_id: str) -> ViewResponse:
     return make_response(501)
+
+
+@get('/api/v1/users/<string:user_id>/tokens/')
+def list_tokens_view(user_id: str) -> ViewResponse:
+    if session.is_anonymous:
+        return make_response('forbidden', requests.codes.forbidden)
+    if session.owner.admin or session.owner.uuid == user_id:
+        return make_json_response(requests.codes.ok, tokens=list_tokens(user_id))
+    return make_response('forbidden', requests.codes.forbidden)
 
 
 @post('/api/v1/users/<string:user_id>/tokens/')
