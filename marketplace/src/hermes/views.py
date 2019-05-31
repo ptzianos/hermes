@@ -1,4 +1,4 @@
-from typing import Any, Callable, Tuple, Union
+from typing import Any, Callable, Tuple, TYPE_CHECKING, Union
 
 import requests
 from flask import (Flask, make_response, redirect, request,
@@ -20,6 +20,11 @@ from hermes.user.controllers import (authenticate_user,
 from hermes.user.decorators import (admin_only, authenticated_only,
                                     unauthenticated_only)
 from hermes.utils import make_json_response
+
+
+if TYPE_CHECKING:
+    from hermes.user.models import AuthenticationToken
+    session: AuthenticationToken
 
 
 # log = getLogger(__name__)
