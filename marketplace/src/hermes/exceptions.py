@@ -60,3 +60,11 @@ class UnknownEmail(Exception):
 
 class UnknownProtocol(Exception):
     msg = 'unknown_messaging_protocol'
+
+
+class UnknownLocation(Exception):
+    msg = 'unknown_location_of_static_sensor'
+
+
+class WrongRate(Exception):
+    msg = 'wrong_rate'
