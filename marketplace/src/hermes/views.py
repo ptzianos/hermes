@@ -246,15 +246,16 @@ def create_token(user_id: str) -> ViewResponse:
             )
             session.owner = user
             session.refresh()
-        except (ExpiredToken, UnknownUser, WrongParameters):
-            return make_response('forbidden', requests.codes.forbidden)
+        except (UnknownUser, WrongParameters):
+            return make_response('', requests.codes.forbidden)
+        except (ExpiredToken, ValueError):
+            return make_response('', requests.codes.bad_request)
 
     if user_id != session.owner.uuid and not session.owner.admin:
-        return make_response('forbidden', requests.codes.forbidden)
+        return make_response('', requests.codes.forbidden)
 
     token = generate_api_token(session['owner'])
-    return make_json_response(token=token.token,
-                              expiration_date=token.expiry)
+    return make_json_response(token=token.token, expiration_date=token.expiry)
 
 
 @delete('/api/v1/users/<string:user_id>/token/<string:token_id>')
