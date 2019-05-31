@@ -1,8 +1,13 @@
 from functools import wraps
-from typing import Any, Callable
+from typing import Any, Callable, TYPE_CHECKING
 
 import requests
 from flask import make_response, redirect, Response, session, url_for
+
+
+if TYPE_CHECKING:
+    from hermes.user.models import AuthenticationToken
+    session: AuthenticationToken
 
 
 def authenticated_only(func) -> Callable[[Any], Response]:
@@ -16,6 +21,20 @@ def authenticated_only(func) -> Callable[[Any], Response]:
             session.revoke()
             return make_response('', requests.codes.forbidden)
         return func(*args, **kwargs)
+    return decorator
+
+
+def owner_or_admin(func) -> Callable[[Any], Response]:
+    """A decorator for views that require authentication and a `user_id` field.
+
+    It allows a call to be made only if the `user_id` is the same as the
+    session owner's or the session owner is an administrator.
+    """
+    @wraps(func)
+    def decorator(user_id: str, *args, **kwargs) -> Response:
+        if session.owner.is_admin or session.owner.uuid == user_id:
+            return func(user_id=user_id, *args, **kwargs)
+        return make_response('', requests.codes.forbidden)
     return decorator
 
 
