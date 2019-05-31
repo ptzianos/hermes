@@ -111,9 +111,8 @@ def login() -> ViewResponse:
 
 @get('/api/v1/users/<string:user_id>/emails')
 @authenticated_only
+@owner_or_admin
 def get_emails(user_id: str):
-    if user_id != session.owner.id and not session.owner.is_admin:
-        return make_response('', requests.codes.forbidden)
     return make_response('', requests.codes.ok, list_emails(user_id))
 
 
@@ -159,9 +158,8 @@ def get_key_verification_message(user_id: str, key_id: str):
 
 @delete('/api/v1/users/<string:user_id>/emails/<string:email_id>')
 @authenticated_only
+@owner_or_admin
 def delete_email_view(user_id: str, email_id: str):
-    if user_id != session.owner.id and not session.owner.is_admin:
-        return make_response('', requests.codes.forbidden)
     try:
         # TODO: implement this
         delete_email(email_id)
@@ -230,17 +228,17 @@ def get_user_details(user_id: str) -> ViewResponse:
 
 @patch('/api/v1/users/<string:user_id>')
 @authenticated_only
+@owner_or_admin
+# TODO: Implement me
 def patch_user(user_id: str) -> ViewResponse:
     return make_response(501)
 
 
 @get('/api/v1/users/<string:user_id>/tokens/')
+@authenticated_only
+@owner_or_admin
 def list_tokens_view(user_id: str) -> ViewResponse:
-    if session.is_anonymous:
-        return make_response('', requests.codes.forbidden)
-    if session.owner.admin or session.owner.uuid == user_id:
-        return make_json_response(requests.codes.ok, tokens=list_tokens(user_id))
-    return make_response('', requests.codes.forbidden)
+    return make_json_response(requests.codes.ok, tokens=list_tokens(user_id))
 
 
 @post('/api/v1/users/<string:user_id>/tokens/')
@@ -269,9 +267,8 @@ def create_token(user_id: str) -> ViewResponse:
 
 @delete('/api/v1/users/<string:user_id>/tokens/<string:token_name>')
 @authenticated_only
+@owner_or_admin
 def revoke_token_view(user_id: str, token_name: str) -> ViewResponse:
-    if user_id != session.owner.uuid and not session.owner.admin:
-        return make_response('', requests.codes.forbidden)
     try:
         revoke_token(session['owner'], token_name)
         return make_response('', requests.codes.ok)
