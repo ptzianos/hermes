@@ -3,8 +3,8 @@ from functools import partial
 from uuid import uuid4
 
 from flask import current_app
-from sqlalchemy import (Boolean, Column, DateTime, ForeignKey,
-                        Integer, Numeric, String)
+from sqlalchemy import (Boolean, Column, DateTime, Float,
+                        ForeignKey, Integer, Numeric, String)
 from sqlalchemy.orm import relationship
 from sqlalchemy_utils.types.choice import ChoiceType
 
@@ -18,6 +18,10 @@ class Ad(current_app.Base):
         ('plaintext', 'PLAINTEXT'),
         ('public_bundle', 'PUBLIC_BUNDLE'),
         ('private_bundle', 'PRIVATE_BUNDLE')
+    ]
+
+    CURRENCIES = [
+        ('miota', 'MIOTA'),
     ]
 
     id = Column(Integer, primary_key=True)
@@ -34,6 +38,8 @@ class Ad(current_app.Base):
     created_on = Column(DateTime, nullable=False, default=datetime.now)
     last_modified_on = Column(DateTime, onupdate=datetime.now)
     last_pinged_on = Column(DateTime)
+    rate = Column(Float, default=0.0)
+    currency = Column(ChoiceType(CURRENCIES), default='miota')
 
     def __repr__(self) -> str:
         return ("<Ad(id='{}', owner='{}', data_uuid='{}', location=({}, {}),"
