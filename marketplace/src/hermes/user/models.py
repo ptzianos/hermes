@@ -85,6 +85,10 @@ class BaseToken:
     expired = Column(Boolean, default=False)
     expiry = Column(DateTime, nullable=False)
 
+    ip = Column(String)
+    user_agent = Column(String)
+    permissions = Column(String)
+
     @declared_attr
     def owner_id(cls) -> Column:
         return Column(Integer, ForeignKey('users.id'))
