@@ -405,8 +405,7 @@ def revoke_token(user: UserLikeObj, token: TokenLikeObj) -> None:
 
 def su(
     user: UserLikeObj,
-    user_to_su: UserLikeObj,
-    session: Optional[SessionToken] = None
+    user_to_su: UserLikeObj
 ) -> None:
     """Modifies the session to impersonate a user.
 
@@ -416,16 +415,16 @@ def su(
     Args:
         user (UserLikeObj): A UserLikeObj that will be resolved.
         user_to_su: A UserLikeObj that will be resolved.
-        session: The session to be modified.
 
     Raises:
         ForbiddenAction: if the session is already an impersonating session
             or is expired.
 
+    TODO: fix me
     """
     user = resolve_user(user)
     user_to_su = resolve_user(user_to_su)
-    if None in [user, user_to_su, session]:
+    if None in [user, user_to_su]:
         raise WrongParameters()
     if not user.admin or user_to_su.admin:
         raise ForbiddenAction()
