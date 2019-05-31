@@ -7,6 +7,7 @@ from flask import (Flask, make_response, redirect, request,
 
 from hermes.exceptions import *
 from hermes.user.controllers import (authenticate_user,
+                                     deregister_user,
                                      generate_api_token,
                                      generate_public_key_verification_request,
                                      list_emails,
@@ -94,8 +95,9 @@ def register() -> ViewResponse:
 @post('/api/v1/users/<string:user_id>/deregister')
 @authenticated_only
 @owner_or_admin
-def deregister() -> ViewResponse:
-    return make_response(501)
+def deregister(user_id: str) -> ViewResponse:
+    deregister_user(user_id)
+    return make_response(200)
 
 
 @post('/api/v1/users/login')
