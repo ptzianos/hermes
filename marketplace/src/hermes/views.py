@@ -91,8 +91,9 @@ def register() -> ViewResponse:
         return make_response('', requests.codes.bad_request)
 
 
-@post('/api/v1/users/deregister')
-@unauthenticated_only
+@post('/api/v1/users/<string:user_id>/deregister')
+@authenticated_only
+@owner_or_admin
 def deregister() -> ViewResponse:
     return make_response(501)
 
