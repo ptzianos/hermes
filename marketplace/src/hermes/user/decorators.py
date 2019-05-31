@@ -12,9 +12,7 @@ def authenticated_only(func) -> Callable[[Any], Response]:
     """
     @wraps(func)
     def decorator(*args, **kwargs) -> Response:
-        if session.is_anonymous:
-            return make_response('', requests.codes.forbidden)
-        if session.is_expired:
+        if session.is_anonymous or session.is_expired:
             session.revoke()
             return make_response('', requests.codes.forbidden)
         return func(*args, **kwargs)
