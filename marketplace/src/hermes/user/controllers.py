@@ -538,7 +538,7 @@ def list_tokens(user: UserLikeObj) -> List[Dict[str, str]]:
 
     def to_json(token: APIToken):
         return {
-            "uuid": token.uuid,
+            "name": token.name,
             "expires": token.expiry,
             "created_on": token.created_on,
         }
