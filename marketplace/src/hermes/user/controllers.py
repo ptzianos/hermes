@@ -20,9 +20,9 @@ from hermes.user.models import (APIToken, BaseToken, EmailAddress,
                                 SessionToken, User, )
 
 
-UserLikeObj = Optional[Union[str, User]]
-TokenLikeObj = Optional[Union[str, APIToken, SessionToken]]
-PublicKeyLikeObj = Optional[Union[str, PublicKey]]
+UserLikeObj = Union[str, User]
+TokenLikeObj = Union[str, APIToken, SessionToken]
+PublicKeyLikeObj = Union[str, PublicKey]
 
 log = getLogger(__name__)
 
