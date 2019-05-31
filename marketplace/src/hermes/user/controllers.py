@@ -81,7 +81,8 @@ def resolve_token(some_token: TokenLikeObj) -> Optional[BaseToken]:
         return some_token
     return (g.db_session
             .query(APIToken)
-            .filter_by(token=some_token)
+            .filter(or_(APIToken.token == some_token,
+                        APIToken.name == some_token))
             .first()
             or
             g.db_session
