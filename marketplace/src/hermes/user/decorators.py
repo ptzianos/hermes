@@ -32,7 +32,7 @@ def owner_or_admin(func) -> Callable[[Any], Response]:
     """
     @wraps(func)
     def decorator(user_id: str, *args, **kwargs) -> Response:
-        if session.owner.is_admin or session.owner.uuid == user_id:
+        if session.owner.admin or session.owner.uuid == user_id:
             return func(user_id=user_id, *args, **kwargs)
         return make_response('', requests.codes.forbidden)
     return decorator
