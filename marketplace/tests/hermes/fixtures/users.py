@@ -35,36 +35,33 @@ def infinite_user_generator(
 
 @pytest.fixture
 def user(flask_app: Flask) -> Iterator[Tuple[UserType, EmailAddressType]]:
-    with flask_app.app_context():
-        from hermes.user.models import EmailAddress, User
-        return infinite_user_generator(user_model_factory=User,
-                                       email_model_factory=EmailAddress,
-                                       admin_user=False)
+    from hermes.user.models import EmailAddress, User
+    return infinite_user_generator(user_model_factory=User,
+                                   email_model_factory=EmailAddress,
+                                   admin_user=False)
 
 
 @pytest.fixture
 def admin_user(flask_app: Flask) -> Iterator[Tuple[UserType, EmailAddressType]]:
-    with flask_app.app_context():
-        from hermes.user.models import EmailAddress, User
-        return infinite_user_generator(user_model_factory=User,
-                                       email_model_factory=EmailAddress,
-                                       admin_user=True)
+    from hermes.user.models import EmailAddress, User
+    return infinite_user_generator(user_model_factory=User,
+                                   email_model_factory=EmailAddress,
+                                   admin_user=True)
 
 
 @pytest.fixture
 def user_session_factory(flask_app: Flask) -> Callable[[UserType], SessionTokenType]:
-    with flask_app.app_context():
-        from hermes.user.models import ProxySession, SessionToken, User
+    from hermes.user.models import ProxySession, SessionToken, User
 
-        def session_factory(user: User) -> ProxySession:
-            persistent_session = SessionToken()
-            persistent_session.owner = user
-            persistent_session.expired = False
-            persistent_session.created_on = datetime.now()
-            persistent_session.refresh()
-            return persistent_session
+    def session_factory(user: User) -> ProxySession:
+        persistent_session = SessionToken()
+        persistent_session.owner = user
+        persistent_session.expired = False
+        persistent_session.created_on = datetime.now()
+        persistent_session.refresh()
+        return persistent_session
 
-        return session_factory
+    return session_factory
 
 
 @pytest.fixture
