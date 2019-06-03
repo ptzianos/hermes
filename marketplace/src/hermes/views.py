@@ -177,7 +177,7 @@ def delete_email_view(user_id: str, email_id: str):
 @owner_or_admin
 def list_public_keys(user_id: str) -> ViewResponse:
     """Returns a list of the user's public keys"""
-    if not session.owner.is_admin and not user_id == session.owner.uuid:
+    if not session.owner.admin and not user_id == session.owner.uuid:
         return make_response('', requests.codes.forbidden)
     return make_json_response(requests.codes.ok, keys=list_keys(user_id))
 
