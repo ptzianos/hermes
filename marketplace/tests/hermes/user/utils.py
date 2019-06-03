@@ -5,7 +5,6 @@ from Crypto.Hash import SHA3_512
 from Crypto.PublicKey.ECC import EccKey, import_key as import_ecdsa_key
 from Crypto.PublicKey.RSA import RsaKey
 from Crypto.Signature.DSS import new as new_dss_sig_scheme
-from flask.testing import FlaskClient
 
 from tests.utils import post
 
