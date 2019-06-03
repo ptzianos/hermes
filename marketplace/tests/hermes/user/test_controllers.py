@@ -15,8 +15,8 @@ from hermes.exceptions import (AlreadyRegistered, AlreadyVerified,
 from hermes.types import EmailAddressType, SessionTokenType, UserType
 
 
+@pytest.mark.usefixtures('sqlalchemy_test_session')
 def test_resolve_user_helper(
-    sqlalchemy_test_session,
     user: Iterator[Tuple[UserType, EmailAddressType]],
 ) -> None:
     def assert_user(user, other_user):
@@ -38,12 +38,12 @@ def test_resolve_user_helper(
     assert_user(resolve_user(test_user.uuid), test_user)
     assert_user(resolve_user(test_email.address), test_user)
     with pytest.raises(Exception):
-        resolve_user(1)
+        resolve_user('1')
     assert resolve_user('bla') is None
 
 
+@pytest.mark.usefixtures('sqlalchemy_test_session')
 def test_resolve_token_helper(
-    sqlalchemy_test_session,
     user: Iterator[UserType],
     user_session_factory: Callable[[UserType], SessionTokenType]
 ) -> None:
@@ -62,11 +62,11 @@ def test_resolve_token_helper(
     assert resolve_token(test_session.token).id == test_session.id, \
         'Wrong token resolved'
     with pytest.raises(UnknownToken):
-        resolve_token(1)
+        resolve_token('1')
 
 
+@pytest.mark.usefixtures('sqlalchemy_test_session')
 def test_generate_api_token(
-    sqlalchemy_test_session,
     user: Iterator[Tuple[UserType, EmailAddressType]]
 ) -> None:
     from flask import g
@@ -85,8 +85,8 @@ def test_generate_api_token(
         generate_api_token('1')
 
 
+@pytest.mark.usefixtures('sqlalchemy_test_session')
 def test_revoke_token(
-    sqlalchemy_test_session,
     user: Iterator[Tuple[UserType, EmailAddressType]]
 ) -> None:
     from flask import g
@@ -109,8 +109,8 @@ def test_revoke_token(
         revoke_token(test_user, '1')
 
 
+@pytest.mark.usefixtures('sqlalchemy_test_session')
 def test_user_details(
-    sqlalchemy_test_session,
     user: Iterator[Tuple[UserType, EmailAddressType]],
     admin_user: Iterator[Tuple[UserType, EmailAddressType]]
 ) -> None:
@@ -148,8 +148,8 @@ def test_user_details(
     assert details['admin'] == str(test_user_1.admin), 'Wrong details'
 
 
+@pytest.mark.usefixtures('sqlalchemy_test_session')
 def test_list_keys(
-    sqlalchemy_test_session,
     user: Iterator[Tuple[UserType, EmailAddressType]]
 ) -> None:
     from flask import g
@@ -194,8 +194,8 @@ def test_list_keys(
         list_keys('1')
 
 
+@pytest.mark.usefixtures('sqlalchemy_test_session')
 def test_user_registration(
-    sqlalchemy_test_session,
     rsa_key_pair: Iterator[RsaKey],
     random_email: Iterator[str]
 ) -> None:
@@ -248,8 +248,8 @@ def test_user_registration(
                       public_key_type='rsa')
 
 
+@pytest.mark.usefixtures('sqlalchemy_test_session')
 def test_email_verification(
-    sqlalchemy_test_session,
     rsa_key_pair: Iterator[RsaKey],
     random_email: Iterator[str]
 ) -> None:
@@ -278,8 +278,8 @@ def test_email_verification(
                      email_verification.token)
 
 
+@pytest.mark.usefixtures('sqlalchemy_test_session')
 def test_public_key_verification(
-    sqlalchemy_test_session,
     rsa_key_pair: Iterator[RsaKey],
 ) -> None:
     from hermes.user.controllers import register_user, verify_public_key
@@ -311,8 +311,8 @@ def test_public_key_verification(
     verify_public_key(pk_verification_request.token, hexed_sig)
 
 
+@pytest.mark.usefixtures('sqlalchemy_test_session')
 def test_user_authentication(
-    sqlalchemy_test_session,
     rsa_key_pair: Iterator[RsaKey],
     random_email: Iterator[str]
 ) -> None:
