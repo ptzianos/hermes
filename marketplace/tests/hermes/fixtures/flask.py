@@ -43,7 +43,8 @@ def flask_app():
     log = create_logger(hermes_test_app)
     log.setLevel(logging.DEBUG)
 
-    yield hermes_test_app
+    with hermes_test_app.app_context():
+        yield hermes_test_app
 
     os.close(db_fd)
     os.unlink(hermes_test_app.config['DATABASE_FILE_PATH'])
@@ -56,8 +57,7 @@ def api_client(flask_app: Flask) -> FlaskClient:
 
 @pytest.fixture()
 def sqlalchemy_test_session(flask_app: Flask):
-    with flask_app.app_context():
-        from flask import g
-        g.db_session = flask_app.new_db_session_instance()
-        yield
-        g.db_session.close()
+    from flask import g
+    g.db_session = flask_app.new_db_session_instance()
+    yield
+    g.db_session.close()
