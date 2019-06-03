@@ -27,8 +27,8 @@ class Ad(current_app.Base):
     id = Column(Integer, primary_key=True)
     uuid = Column(String, unique=True,
                   default=partial(lambda: uuid4().hex))
-    owner_id = Column(Integer, ForeignKey('users.id'))
-    owner = relationship(User, primaryjoin=owner_id == User.id)
+    owner_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    owner = relationship(User)
     protocol = Column(ChoiceType(PROTOCOL), nullable=False)
     mobile = Column(Boolean)
     data_type = Column(String)
@@ -40,17 +40,20 @@ class Ad(current_app.Base):
     last_pinged_on = Column(DateTime, default=datetime.now)
     rate = Column(Float, default=0.0)
     currency = Column(ChoiceType(CURRENCIES), default='miota')
+    start_of_stream = Column(String)
+    inactive = Column(Boolean, default=False)
+    deactivation_data = Column(DateTime)
 
-    def __repr__(self) -> str:
+    def __repr__(self: 'Ad') -> str:
         return ("<Ad(id='{}', owner='{}', data_uuid='{}', location=({}, {}),"
                 " type={}, unit={}, mobile={}, protocol={})>"
-                .format(self.uuid, self.owner.uuid, '', self.location_x,
-                        self.location_y, self.data_type, self.data_unit,
+                .format(self.uuid, self.owner.uuid, '', self.longitude,
+                        self.latitude, self.data_type, self.data_unit,
                         self.mobile, self.protocol))
 
-    def __str__(self) -> str:
+    def __str__(self: 'Ad') -> str:
         return ("<Ad(id='{}', owner='{}', data_uuid='{}', location=({}, {}),"
                 " type={}, unit={}, mobile={}, protocol={})>"
-                .format(self.uuid, self.owner.uuid, '', self.location_x,
-                        self.location_y, self.data_type, self.data_unit,
+                .format(self.uuid, self.owner.uuid, '', self.longitude,
+                        self.latitude, self.data_type, self.data_unit,
                         self.mobile, self.protocol))

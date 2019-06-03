@@ -1,3 +1,4 @@
+from decimal import Decimal, InvalidOperation
 from typing import Any, Callable, Tuple, TYPE_CHECKING, Union
 
 import requests
@@ -5,6 +6,8 @@ from flask import (Flask, make_response, redirect, request,
                    Response, session, url_for)
 # from flask.logging import create_logger
 
+from hermes.ad.controllers import (AdQuery, ad_to_json, create_ad, delete_ad,
+                                   resolve_ad)
 from hermes.exceptions import *
 from hermes.user.controllers import (authenticate_user,
                                      deregister_user,
@@ -163,13 +166,15 @@ def get_key_verification_message(user_id: str, key_id: str):
 @delete('/api/v1/users/<string:user_id>/emails/<string:email_id>')
 @authenticated_only
 @owner_or_admin
+# TODO: Implement me
 def delete_email_view(user_id: str, email_id: str):
-    try:
-        # TODO: implement this
-        delete_email(email_id)
-        return make_response('', requests.codes.ok)
-    except UnknownEmail:
-        return make_response('', requests.codes.not_found)
+    # try:
+    #     # TODO: implement this
+    #     delete_email(email_id)
+    #     return make_response('', requests.codes.ok)
+    # except UnknownEmail:
+    #     return make_response('', requests.codes.not_found)
+    return make_response('', requests.codes.not_implemented)
 
 
 @get('/api/v1/users/<string:user_id>/keys/')
@@ -236,7 +241,7 @@ def get_user_details(user_id: str) -> ViewResponse:
 @owner_or_admin
 # TODO: Implement me
 def patch_user(user_id: str) -> ViewResponse:
-    return make_response(501)
+    return make_response('', requests.codes.not_implemented)
 
 
 @get('/api/v1/users/<string:user_id>/tokens/')
@@ -285,20 +290,55 @@ def revoke_token_view(user_id: str, token_name: str) -> ViewResponse:
         return make_response('', requests.codes.bad_request)
 
 
-@get('/api/v1/ads/')
-def list_ads() -> ViewResponse:
-    return 'Hello World!'
-
-
+@put('/api/v1/ads/')
 @post('/api/v1/ads/')
 @authenticated_only
-def create_ad() -> ViewResponse:
-    return 'Hello World!'
+def create_ad_view() -> ViewResponse:
+    # TODO: Eventually allow non-mobile sensors, non-zero rates and
+    # other currencies
+    try:
+        new_ad = create_ad(
+            owner=session.owner,
+            data_type=request.args.get('data_type'),
+            data_unit=request.args.get('data_unit'),
+            start_of_stream_address=request.args.get('start_of_stream_address'),
+            longitude=Decimal(request.args.get('longitude')),
+            latitude=Decimal(request.args.get('latitude')),
+            mobile=True, rate=Decimal(0.0), currency='miota')
+    except (AttributeError, InvalidOperation, NoStartOfStream, UnknownProtocol,
+            UnknownLocation, WrongRate):
+        return make_response('', requests.codes.bad_request)
+    return make_json_response(requests.codes.ok, uuid=new_ad.uuid)
+
+
+@get('/api/v1/ads/')
+def list_ads() -> ViewResponse:
+    """View function for listing available ads.
+
+    Query parameters are:
+    * x, y, width,height: for defining an area of interest
+    * data_type: type of data in the stream
+    """
+    query = AdQuery().active(active=not request.args.get('inactive'))
+    if any(map(lambda param: request.args.get(param) is not None,
+               ['x', 'y', 'width', 'height'])):
+        try:
+            query.by_location(latitude=Decimal(request.args.get('x')),
+                              longitude=Decimal(request.args.get('y')),
+                              width=Decimal(request.args.get('width')),
+                              height=Decimal(request.args.get('height')))
+        except (InvalidOperation, TypeError, WrongLocationParameters):
+            make_response('', requests.codes.bad_request)
+    if request.args.get('data_type'):
+        query.by_data_type(request.args.get('data_type'))
+    return make_json_response(status_code=200, ads=query.to_json())
 
 
 @get('/api/v1/ads/<string:ad_id>')
 def get_ad(ad_id: str) -> ViewResponse:
-    return 'Hello World!'
+    ad = resolve_ad(ad_id)
+    return (make_json_response(200, **ad_to_json(ad))
+            if ad else make_response('', requests.codes.not_found))
 
 
 @patch('/api/v1/ads/<string:ad_id>')
