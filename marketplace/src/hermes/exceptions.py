@@ -68,3 +68,19 @@ class UnknownLocation(Exception):
 
 class WrongRate(Exception):
     msg = 'wrong_rate'
+
+
+class WrongLocationParameters(Exception):
+    msg = 'wrong_location_params'
+
+
+class UnknownAd(Exception):
+    msg = 'unknown_ad'
+
+
+class NoStartOfStream(Exception):
+    msg = 'no_start_of_stream'
+
+
+class AlreadyInactiveAd(Exception):
+    msg = 'ad_already_inactive'
