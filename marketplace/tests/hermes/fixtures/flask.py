@@ -35,6 +35,9 @@ def flask_app():
 
         register_signals(hermes_test_app)
 
+        from hermes.ad.models import Ad
+        from hermes.user.models import (APIToken, BaseToken, EmailAddress,
+                                        PublicKey, SessionToken, User)
         hermes_test_app.Base.metadata.create_all()
 
         from hermes.views import register_views_to_app
