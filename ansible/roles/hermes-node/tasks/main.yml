@@ -1,0 +1,24 @@
+---
+- name: Manage SSH users
+  user:
+    name: hermes 
+    shell: /bin/bash
+    state: present
+    create_home: no 
+    remove: no
+
+- name: copy Hermes code to the server
+  synchronize:
+    dest: /opt/hermes
+    src: ../market
+    owner: hermes
+    dirs: yes
+    recursive: yes
+    rsync_opts:
+    - ". {{ role_path }}/files/rsync-rules"
+
+- name: Install Python3
+  apt:
+    pkg: [python3, python3-pip]
+    state: present
+    force_apt_get: yes
