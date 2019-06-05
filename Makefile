@@ -31,6 +31,6 @@ market-requirements:
 ansible-setup:
 	$(ANSIBLE_POETRY) install
 
-ansible-playbook:
+ansible-api-deployment:
 	$(ANSIBLE_POETRY) run ansible-playbook -i reclass complete-setup.yml --become
 
