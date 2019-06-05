@@ -1,0 +1,28 @@
+---
+- name: Configure hostname of the machine
+  hostname:
+    name: "{{ gateway.hostname }}"
+
+- name: Setup certbot for Debian 10
+  include_tasks: certbot_debian_10.yml
+  when: ansible_facts['os_family'] == "Debian" and ansible_facts['distribution_major_version'] == "10" 
+
+- name: Setup certbot for Ubuntu 16.04
+  include_tasks: certbot_ubuntu_16.yml
+  when: ansible_facts['os_family'] == "Ubuntu" and ansible_facts['distribution_major_version'] == "16" 
+
+- name: Ensure haproxy user is available
+  user:
+    name: haproxy
+    state: present
+    system: yes 
+
+- name: Install HAProxy
+  apt:
+    pkg: [haproxy]
+    force_apt_get: yes
+
+- name: Expose Hermes API server
+  template:
+    src: templates/haproxy.cfg.j2
+    dest: /etc/haproxy/haproxy.cfg

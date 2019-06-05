@@ -1,0 +1,15 @@
+---
+- name: Add repos for letsencrypt
+  apt_repository:
+    repo: "{{ item }}"
+    state: present
+  with_items:
+    - universe
+    - "ppa:certbot/certbot"
+
+- name: Install Certbot
+  apt:
+    pkg: certbot
+    update_cache: yes
+    force_apt_get: yes
+
