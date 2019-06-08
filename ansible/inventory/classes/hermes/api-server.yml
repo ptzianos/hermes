@@ -1,5 +1,7 @@
 classes:
   - linux
+applications:
+  - hermes_api
 parameters:
   hermes:
     flask:
