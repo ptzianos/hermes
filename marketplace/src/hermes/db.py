@@ -5,6 +5,8 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 
 
 def init_db():
-    current_app.Engine = create_engine(current_app.config['DATABASE'], echo=current_app.config['DEBUG'])
+    current_app.Engine = create_engine(current_app.config['DATABASE'],
+                                       echo=current_app.config['DEBUG'])
     current_app.Base = declarative_base(bind=current_app.Engine)
-    current_app.new_db_session_instance = scoped_session(sessionmaker(bind=current_app.Engine))
+    current_app.new_db_session_instance = scoped_session(
+        sessionmaker(bind=current_app.Engine))
