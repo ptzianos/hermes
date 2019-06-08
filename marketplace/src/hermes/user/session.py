@@ -1,11 +1,12 @@
 import base64
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
 
 from flask import current_app, Flask, g, Request, Response
 from flask.sessions import SessionInterface
 from sqlalchemy.orm.session import Session
 
-from hermes.user.models import APIToken, ProxySession, SessionToken
+if TYPE_CHECKING:
+    from hermes.user.models import ProxySession
 
 
 class HermesSession(SessionInterface):
@@ -14,7 +15,9 @@ class HermesSession(SessionInterface):
     db_session_initialized = False
 
     @staticmethod
-    def _empty_session(db_session: Session) -> ProxySession:
+    def _empty_session(db_session: Session) -> 'ProxySession':
+        from hermes.user.models import SessionToken
+
         user_session = SessionToken()
         user_session.refresh()
         db_session.add(user_session)
@@ -23,6 +26,8 @@ class HermesSession(SessionInterface):
     def open_session(
         self, app: Flask, request: Request, *args
     ) -> 'ProxySession':
+        from hermes.user.models import APIToken, SessionToken
+
         # Create a db_session only if one has not been created yet
         if not getattr(g, 'db_session'):
             db_session = g.db_session = \

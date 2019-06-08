@@ -4,17 +4,17 @@ from typing import Any, Dict, Iterable, Optional, TYPE_CHECKING
 
 from flask import g
 
-from hermes.ad.models import Ad
 from hermes.exceptions import *
 from hermes.user.controllers import resolve_user, UserLikeObj
 
 if TYPE_CHECKING:
     from sqlalchemy.orm import Query
 
+    from hermes.ad.models import Ad
     from hermes.user.models import User
 
 
-def resolve_ad(ad_id: str) -> Optional[Ad]:
+def resolve_ad(ad_id: str) -> Optional['Ad']:
     return (g.db_session.query(Ad).filter(Ad.uuid == ad_id).first()
             if ad_id else None)
 
@@ -23,8 +23,9 @@ def create_ad(owner: 'User', data_type: str, data_unit: str,
               start_of_stream_address: str,
               longitude: Optional[Decimal], latitude: Optional[Decimal],
               protocol: str = 'plaintext', mobile: bool = True,
-              rate: Decimal = 0.0, currency: str = 'miota') -> Ad:
+              rate: Decimal = 0.0, currency: str = 'miota') -> 'Ad':
     """Creates a new Ad instance."""
+    from hermes.ad.models import Ad
     if protocol not in [p[0] for p in Ad.PROTOCOL]:
         raise UnknownProtocol()
     if not mobile and None in [longitude, latitude]:
@@ -61,6 +62,8 @@ class AdQuery:
 
     def by_location(self, latitude: Decimal, longitude: Decimal,
                     width: Decimal, height: Decimal) -> 'AdQuery':
+        from hermes.ad.models import Ad
+
         if not self.query:
             self.active()
         if None in [latitude, longitude, width, height]:
@@ -76,12 +79,14 @@ class AdQuery:
         return self
 
     def by_data_type(self, data_type: str) -> 'AdQuery':
+        from hermes.ad.models import Ad
+
         if not self.query:
             self.active()
         self.query = self.query.filter(Ad.data_type == data_type)
         return self
 
-    def resolve(self) -> Iterable[Ad]:
+    def resolve(self) -> Iterable['Ad']:
         if not self.query:
             self.active()
         return self.query
@@ -90,7 +95,7 @@ class AdQuery:
         return list(map(ad_to_json, self.query))
 
 
-def ad_to_json(ad: Ad) -> Dict[str, Any]:
+def ad_to_json(ad: 'Ad') -> Dict[str, Any]:
     return {
         'uuid': ad.uuid,
         'owner_id': ad.owner_id,
@@ -110,7 +115,9 @@ def ad_to_json(ad: Ad) -> Dict[str, Any]:
     }
 
 
-def ping_ad(ad_id: str, requesting_user: UserLikeObj):
+def ping_ad(ad_id: str, requesting_user: 'UserLikeObj'):
+    from hermes.ad.models import Ad
+
     ad: Ad = g.db_session.query(Ad).filter_by(uuid=ad_id).first()
     if not ad:
         raise UnknownAd()
@@ -122,7 +129,9 @@ def ping_ad(ad_id: str, requesting_user: UserLikeObj):
     ad.last_pinged_on = datetime.utcnow()
 
 
-def delete_ad(ad_id: str, requesting_user: UserLikeObj):
+def delete_ad(ad_id: str, requesting_user: 'UserLikeObj'):
+    from hermes.ad.models import Ad
+
     ad: Ad = g.db_session.query(Ad).filter_by(uuid=ad_id).first()
     if not ad:
         raise UnknownAd()

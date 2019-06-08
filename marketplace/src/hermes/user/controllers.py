@@ -1,7 +1,7 @@
 from datetime import datetime
 from itertools import chain
 from logging import getLogger
-from typing import Dict, Iterable, List, Optional, Tuple, Union
+from typing import Dict, Iterable, List, Optional, Tuple, TYPE_CHECKING, Union
 
 from Crypto.Hash import SHA3_512
 from Crypto.PublicKey.ECC import import_key as import_ecdsa_key
@@ -14,20 +14,22 @@ from sqlalchemy import or_
 from hermes.config import (PUBLIC_KEY_VERIFICATION_TEXT,
                            PUBLIC_KEY_VERIFICATION_REQUEST_DURATION)
 from hermes.exceptions import *
-from hermes.user.models import (APIToken, BaseToken, EmailAddress,
-                                EmailVerificationToken, PasswordResetToken,
-                                PublicKey, PublicKeyVerificationRequest,
-                                SessionToken, User, )
+
+if TYPE_CHECKING:
+    from hermes.user.models import (APIToken, BaseToken, EmailAddress,
+                                    EmailVerificationToken, PasswordResetToken,
+                                    PublicKey, PublicKeyVerificationRequest,
+                                    SessionToken, User, )
 
 
-UserLikeObj = Union[str, User]
-TokenLikeObj = Union[str, APIToken, SessionToken]
-PublicKeyLikeObj = Union[str, PublicKey]
+UserLikeObj = Union[str, 'User']
+TokenLikeObj = Union[str, 'APIToken', 'SessionToken']
+PublicKeyLikeObj = Union[str, 'PublicKey']
 
 log = getLogger(__name__)
 
 
-def resolve_user(some_user: UserLikeObj) -> Optional[User]:
+def resolve_user(some_user: UserLikeObj) -> Optional['User']:
     """Checks if the argument is a string or a User object and resolves it.
 
     Args:
@@ -39,6 +41,7 @@ def resolve_user(some_user: UserLikeObj) -> Optional[User]:
         User: the User object that is resolved.
 
     """
+    from hermes.user.models import EmailAddress, PublicKey, User
     if some_user is None:
         return None
     if type(some_user) not in [str, User]:
@@ -63,7 +66,7 @@ def resolve_user(some_user: UserLikeObj) -> Optional[User]:
             .first()))
 
 
-def resolve_token(some_token: TokenLikeObj) -> Optional[BaseToken]:
+def resolve_token(some_token: TokenLikeObj) -> Optional['BaseToken']:
     """Checks if the token is a string and fetches it from the database.
 
     Args:
@@ -73,6 +76,7 @@ def resolve_token(some_token: TokenLikeObj) -> Optional[BaseToken]:
         Optional[BaseToken]: The token that is resolved.
 
     """
+    from hermes.user.models import APIToken, BaseToken, SessionToken
     if some_token is None:
         return None
     if type(some_token) not in [str, APIToken, SessionToken]:
@@ -91,7 +95,7 @@ def resolve_token(some_token: TokenLikeObj) -> Optional[BaseToken]:
             .first())
 
 
-def resolve_public_key(some_key: PublicKeyLikeObj) -> Optional[PublicKey]:
+def resolve_public_key(some_key: PublicKeyLikeObj) -> Optional['PublicKey']:
     """Resolves the public key into an instance of the PublicKey model.
 
     If `some_key` is a string, the database will be queried to find an
@@ -106,6 +110,7 @@ def resolve_public_key(some_key: PublicKeyLikeObj) -> Optional[PublicKey]:
         Optional[PublicKey]: The public key that is resolved.
 
     """
+    from hermes.user.models import PublicKey
     if not some_key:
         return None
     if type(some_key) not in [str, PublicKey]:
@@ -192,7 +197,7 @@ def register_user(
     public_key: str = '',
     public_key_type: str = 'ecdsa',
     admin: bool = False
-) -> Tuple[User, Optional[EmailVerificationToken], PublicKeyVerificationRequest]:
+) -> Tuple['User', Optional['EmailVerificationToken'], 'PublicKeyVerificationRequest']:
     """Creates a new user object.
 
     If there is already a User with the same email, name, fullname or public
@@ -216,6 +221,11 @@ def register_user(
         User: a new instance of `hermes.user.models.User`.
 
     """
+    from hermes.user.models import (APIToken, BaseToken, EmailAddress,
+                                    EmailVerificationToken, PasswordResetToken,
+                                    PublicKey, PublicKeyVerificationRequest,
+                                    SessionToken, User, )
+
     if not public_key:
         raise WrongParameters()
     name = name or email or hash_value(public_key)
@@ -280,6 +290,11 @@ def deregister_user(user_uuid: str) -> None:
         user_uuid (str): The UUID of the user to be de-registered.
 
     """
+    from hermes.user.models import (APIToken, BaseToken, EmailAddress,
+                                    EmailVerificationToken, PasswordResetToken,
+                                    PublicKey, PublicKeyVerificationRequest,
+                                    SessionToken, User, )
+
     user = g.db_session.query(User).filter_by(uuid=user_uuid).first()
     if not user:
         raise UnknownUser()
@@ -295,7 +310,7 @@ def authenticate_user(
     password_plaintext: Optional[str] = '',
     proof_of_ownership_request: Optional[str] = '',
     proof_of_ownership: Optional[str] = '',
-) -> User:
+) -> 'User':
     """Authenticates a user based on their username/password.
 
     Args:
@@ -312,6 +327,11 @@ def authenticate_user(
         WrongParameters: if one of the parameters is missing.
 
     """
+    from hermes.user.models import (APIToken, BaseToken, EmailAddress,
+                                    EmailVerificationToken, PasswordResetToken,
+                                    PublicKey, PublicKeyVerificationRequest,
+                                    SessionToken, User, )
+
     if email_or_username and password_plaintext:
         user = verify_username_and_pass(email_or_username, password_plaintext)
     elif proof_of_ownership and proof_of_ownership_request:
@@ -356,7 +376,7 @@ def user_details(
     }
 
 
-def generate_api_token(user: UserLikeObj) -> APIToken:
+def generate_api_token(user: UserLikeObj) -> 'APIToken':
     """Generates an API token for a user.
 
     Args:
@@ -369,6 +389,8 @@ def generate_api_token(user: UserLikeObj) -> APIToken:
         APIToken: A new APIToken for the User.
 
     """
+    from hermes.user.models import APIToken
+
     user = resolve_user(user)
     if not user:
         raise UnknownUser()
@@ -437,7 +459,7 @@ def su(
     session.refresh()
 
 
-def exit_su(session: SessionToken) -> None:
+def exit_su(session: 'SessionToken') -> None:
     """Resets the session to its original non-impersonating state.
 
     Args:
@@ -470,6 +492,8 @@ def list_keys(user: UserLikeObj) -> List[Dict[str, str]]:
             cannot be located.
 
     """
+    from hermes.user.models import PublicKey
+
     user = resolve_user(user)
     if not user:
         raise UnknownUser()
@@ -500,6 +524,8 @@ def list_emails(user: UserLikeObj) -> List[Dict[str, str]]:
             cannot be located.
 
     """
+    from hermes.user.models import EmailAddress
+
     user = resolve_user(user)
     if not user:
         raise UnknownUser()
@@ -531,6 +557,8 @@ def list_tokens(user: UserLikeObj) -> List[Dict[str, str]]:
             cannot be located.
 
     """
+    from hermes.user.models import APIToken
+
     user = resolve_user(user)
     if not user:
         raise UnknownUser()
@@ -548,8 +576,8 @@ def list_tokens(user: UserLikeObj) -> List[Dict[str, str]]:
 
 
 def generate_email_verification_token(
-    email: EmailAddress
-) -> EmailVerificationToken:
+    email: 'EmailAddress'
+) -> 'EmailVerificationToken':
     """Creates a new token for verifying an email.
 
     If the email is already verified an exception will be thrown. If there are
@@ -564,6 +592,8 @@ def generate_email_verification_token(
         AlreadyVerified: when the email has already been verified.
 
     """
+    from hermes.user.models import EmailVerificationToken
+
     if email.verified:
         raise AlreadyVerified()
     existing_email_tokens: Iterable[EmailVerificationToken] = (
@@ -590,7 +620,7 @@ def generate_email_verification_token(
     return email_verification_token
 
 
-def generate_password_reset_token(user: User) -> PasswordResetToken:
+def generate_password_reset_token(user: 'User') -> 'PasswordResetToken':
     """Creates a new password reset token changing a password.
 
     If there is already a password reset token, it is revoked and a new
@@ -608,6 +638,8 @@ def generate_password_reset_token(user: User) -> PasswordResetToken:
         PasswordResetToken: the password reset token model.
 
     """
+    from hermes.user.models import EmailVerificationToken, PasswordResetToken
+
     user = resolve_user(user)
     if not user:
         raise NoSuchUser()
@@ -627,8 +659,8 @@ def generate_password_reset_token(user: User) -> PasswordResetToken:
 
 
 def generate_public_key_verification_request(
-    public_key: Union[PublicKey, str]
-) -> PublicKeyVerificationRequest:
+    public_key: Union['PublicKey', str]
+) -> 'PublicKeyVerificationRequest':
     """Creates a new request for verifying a public key.
 
     If there is already a non-revoked public key request it will be reused
@@ -647,6 +679,8 @@ def generate_public_key_verification_request(
         PublicKeyVerificationRequest
 
     """
+    from hermes.user.models import PublicKeyVerificationRequest
+
     public_key = resolve_public_key(some_key=public_key)
     if not public_key:
         raise UnknownPublicKey()
@@ -688,7 +722,10 @@ def verify_email(
         UnknownUser: when the user can not be located in the database.
         UnknownToken: when the token can be located in the database.
         UnknownEmail: the email id does not match the email that is verified.
+
     """
+    from hermes.user.models import EmailVerificationToken
+
     user = resolve_user(user)
     if not user:
         raise UnknownUser()
@@ -712,7 +749,7 @@ def verify_email(
 
 def reset_password(user: UserLikeObj,
                    new_password: Optional[str],
-                   password_reset_token: PasswordResetToken) -> None:
+                   password_reset_token: 'PasswordResetToken') -> None:
     """Gets a password reset token and the changes the user's password.
 
     Raises:
@@ -722,6 +759,8 @@ def reset_password(user: UserLikeObj,
         AlreadyVerified
 
     """
+    from hermes.user.models import PasswordResetToken
+
     user = resolve_user(user)
     if not user:
         raise UnknownUser()
@@ -739,7 +778,7 @@ def reset_password(user: UserLikeObj,
 
 def verify_username_and_pass(
     email_or_username: str, password_plaintext: str
-) -> User:
+) -> 'User':
     """Checks whether or not the email/password matches is valid."""
     user = resolve_user(email_or_username)
     if not user:
@@ -752,7 +791,7 @@ def verify_username_and_pass(
 def verify_public_key(
     public_key_verification_token: str,
     proof_of_ownership: str
-) -> PublicKey:
+) -> 'PublicKey':
     """Validates a response to a public key verification request token.
 
     Raises:
@@ -761,6 +800,8 @@ def verify_public_key(
         ValueError: when the signature is invalid.
 
     """
+    from hermes.user.models import PublicKeyVerificationRequest
+
     request: Optional[PublicKeyVerificationRequest] = (
         g.db_session
          .query(PublicKeyVerificationRequest)
@@ -787,6 +828,7 @@ def verify_public_key(
     return request.public_key
 
 
-def list_active_api_token() -> List[APIToken]:
+def list_active_api_token() -> List['APIToken']:
     """Return all non-expired tokens"""
+    from hermes.user.models import APIToken
     return g.db_session.query(APIToken).filter_by(expired=False)
