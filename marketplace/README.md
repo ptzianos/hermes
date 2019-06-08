@@ -12,11 +12,17 @@ you need to have Docker and Docker Compose installed.
 For deployments in production there are Ansible roles and playbooks in the
 `./ansible` directory that can be used to deploy it.
 
+All dependencies are installed using poetry. If you wish to use any database
+except sqlite in production you need to install the correct Python bindings
+through the Ansible script. In the current setup, the Ansible script will 
+install outside of poetry, psycopg2 through the package manager to be used
+for the database connection.
+
 ### Dependencies
 
 - Ansible
 - Python >= 2.7
-- A server with 1 CPU and > 2GB RAM
+- A server with at least 1 CPU and > 2GB RAM
 
 ## Development Instance
 
