@@ -14,9 +14,9 @@ For deployments in production there are Ansible roles and playbooks in the
 
 All dependencies are installed using poetry. If you wish to use any database
 except sqlite in production you need to install the correct Python bindings
-through the Ansible script. In the current setup, the Ansible script will 
-install outside of poetry, psycopg2 through the package manager to be used
-for the database connection.
+through the Ansible script. You also need to turn on the appropriate flags
+for the various components to be installed. Check the pyproject.toml file
+extras section for the flags.
 
 ### Dependencies
 
