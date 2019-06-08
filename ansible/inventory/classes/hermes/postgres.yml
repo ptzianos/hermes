@@ -1,4 +1,4 @@
 classes:
   - linux
 applications:
-  - db
+  - hermes_db
