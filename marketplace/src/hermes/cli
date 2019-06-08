@@ -137,10 +137,6 @@ def su(cli_args: argparse.Namespace):
     pass
 
 
-def list_sensors(cli_args: argparse.Namespace):
-    pass
-
-
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--verbose', action='store_true')
