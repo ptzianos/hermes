@@ -17,6 +17,7 @@ pytest-cov = "^2.6"
 SQLAlchemy-Utils = "^0.33.11"
 pycryptodome = "^3.7"
 mypy = "^0.701.0"
+gunicorn = {version = "^19.9",extras = ["production"]}
 
 [tool.poetry.dev-dependencies]
 pytest = "^4.1"
