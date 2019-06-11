@@ -38,5 +38,8 @@ android-client/captures/
 # Android app jars
 android-client/app/libs/*.jar
 
+# Android APKs inside Ansible
+ansible/roles/hermes-node/files/*.apk
+
 # MYPY
 **/.mypy_cache/

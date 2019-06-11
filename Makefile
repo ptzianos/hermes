@@ -1,6 +1,14 @@
 MARKET_POETRY=cd marketplace && poetry
 ANSIBLE_POETRY=cd ansible && poetry
 
+streamer-apk-lte-23:
+	cd android-client && ./gradlew packageMax23Release && cp ./app/build/outputs/apk/max23/release/app-max23-release-unsigned.apk ../ansible/roles/hermes-node/files/hermes_client_lte_23.apk
+
+streamer-apk-gte-24:
+	cd android-client && ./gradlew packageMin24Release && cp ./app/build/outputs/apk/min24/release/app-min24-release-unsigned.apk ../ansible/roles/hermes-node/files/hermes_client_gte_24.apk
+
+streamer-apks: streamer-apk-lte-23 streamer-apk-gte-24
+
 market-install:
 	pip3 install -r marketplace/requirementst.txt
 
