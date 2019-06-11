@@ -1,0 +1,11 @@
+[Unit]
+Description=Gunicorn instance to serve myproject
+After=network.target
+
+[Service]
+User=hermes
+WorkingDirectory=/opt/marketplace
+ExecStart=poetry run gunicorn --bind 127.0.0.1:8000 -m 007 hermes.wsgi:app
+
+[Install]
+WantedBy=multi-user.target
