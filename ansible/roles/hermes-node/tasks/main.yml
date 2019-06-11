@@ -4,21 +4,65 @@
     name: hermes 
     shell: /bin/bash
     state: present
-    create_home: no 
     remove: no
+
+- name: Install Python3 and rsync
+  apt:
+    pkg: [python3, python3-pip, python3-venv, rsync, python3-dev, libpq-dev]
+    state: present
+    force_apt_get: yes
 
 - name: copy Hermes code to the server
   synchronize:
-    dest: /opt/hermes
-    src: ../market
-    owner: hermes
+    dest: /opt/
+    src: ../marketplace
     dirs: yes
     recursive: yes
     rsync_opts:
-    - ". {{ role_path }}/files/rsync-rules"
+    - "--exclude=**/.git"
+    - "--exclude=**/.idea"
+    - "--exclude=**/.mypy_cache"
+    - "--exclude=**/.pytest_cache"
+    - "--exclude=.coverage"
+    - "--exclude=**/*.iml"
+    - "--exclude=**/*.db"
+    - "--exclude=**/__pycache__"
+    - "--exclude=marketplace/src/hermes.egg-info"
 
-- name: Install Python3
-  apt:
-    pkg: [python3, python3-pip]
-    state: present
-    force_apt_get: yes
+- name: Fix owner of /opt/marketplace directory
+  file:
+    path: /opt/marketplace
+    state: directory
+    owner: hermes
+    recurse: yes
+
+- name: Install poetry
+  pip:
+    name: poetry
+    executable: /usr/bin/pip3
+
+- name: Check that poetry pip is available
+  shell: '/bin/su -c "poetry run python3 -Im ensurepip" hermes'
+  ignore_errors: yes
+  register: poetry_pip
+  args:
+    chdir: /opt/marketplace
+
+- name: Get poetry virtualenv home
+  shell: '/bin/su -c "poetry config settings.virtualenvs.path" hermes | tr -d \"'
+  register: poetry_venv_home
+  args:
+    chdir: /opt/marketplace
+
+- debug: msg={{ poetry_venv_home.stdout }}
+
+- name: Initialize poetry venv manually so that it contains Pip
+  shell: '/bin/su -c "python3 -m venv {{ poetry_venv_home.stdout }}" hermes'
+  when: poetry_pip.rc != 0
+  args:
+    chdir: /opt/marketplace
+
+- name: Install Hermes API server
+  shell: '/bin/su -c "poetry install --no-dev --extras prod --extras pg" hermes'
+  args:
+    chdir: /opt/marketplace
