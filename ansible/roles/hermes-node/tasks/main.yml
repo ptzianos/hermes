@@ -72,7 +72,7 @@
     src: files/haproxy.cfg
     dest: /etc/haproxy/haproxy.cfg
 
-- name: Update APK for API < 23
+- name: Update APK for API <= 23
   copy:
     src: files/hermes_client_lte_23.apk
     dest: /etc/hermes/hermes_client_lte_23.apk
@@ -89,3 +89,24 @@
     src: files/hermes.cfg
     dest: /etc/hermes/hermes.cfg
     owner: hermes
+
+- name: Deploy Hermes systemd service file
+  copy:
+    src: files/marketplace.service
+    dest: /etc/hermes/marketplace.service
+    owner: hermes
+  register: hermes_service_file
+
+- name: Start Hermes service
+  systemd:
+    name: marketplace
+    state: started
+    daemon_reload: yes
+  when: not hermes_service_file.changed
+
+- name: Restart Hermes service
+  systemd:
+    name: marketplace
+    state: restarted
+    daemon_reload: yes
+  when: hermes_service_file.changed
