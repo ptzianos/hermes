@@ -10,3 +10,15 @@ def init_db():
     current_app.Base = declarative_base(bind=current_app.Engine)
     current_app.new_db_session_instance = scoped_session(
         sessionmaker(bind=current_app.Engine))
+
+    # Import all the models so that the database can be initialized.
+    # noqa: F401
+    from hermes.ad.models import Ad
+    from hermes.user.models import (APIToken, AuthenticationToken, BaseToken,
+                                    EmailAddress, EmailVerificationToken,
+                                    PasswordResetToken, PublicKey,
+                                    PublicKeyVerificationRequest, SessionToken,
+                                    User)
+
+    if current_app.config.get('RECREATE_DATABASE'):
+        current_app.Base.metadata.create_all(current_app.Engine)

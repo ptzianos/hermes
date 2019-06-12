@@ -17,6 +17,7 @@ SALT = '2sTOkalOpHhHuNmod5GrGgijXkmkUsJz'
 DATABASE = SQL_ALCHEMY_SQLITE_TEMPLATE.format(file_path='dev.db')
 
 DEBUG_DB = False
+RECREATE_DATABASE = False
 
 PUBLIC_KEY_VERIFICATION_TEXT = """
 By signing this text with your private key you verify that you are the sole rightful owner of the key pair whose
