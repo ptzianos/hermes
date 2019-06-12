@@ -19,8 +19,8 @@ if os.environ.get('HERMES_SETTINGS'):
     app.config.from_envvar('HERMES_SETTINGS')
 
 app.session_interface = HermesSession()
-log = create_logger(app)
-log.setLevel(logging.INFO)
+app.log = create_logger(app)
+app.log.setLevel(logging.INFO)
 register_signals(app)
 register_views_to_app(app)
 

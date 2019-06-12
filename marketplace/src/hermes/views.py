@@ -4,7 +4,6 @@ from typing import Any, Callable, Tuple, TYPE_CHECKING, Union
 import requests
 from flask import (Flask, make_response, redirect, request,
                    Response, session, url_for)
-# from flask.logging import create_logger
 
 from hermes.ad.controllers import (AdQuery, ad_to_json, create_ad, delete_ad,
                                    resolve_ad)
@@ -32,7 +31,6 @@ if TYPE_CHECKING:
     session: AuthenticationToken
 
 
-# log = getLogger(__name__)
 ViewResponse = Union[Response, Tuple[str, int], str]
 
 view_registry = []
