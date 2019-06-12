@@ -49,12 +49,14 @@ class AdQuery:
         self.query: 'Query' = None
 
     def active(self, active: bool = True) -> 'AdQuery':
+        from hermes.ad.models import Ad
         if not self.query:
             self.query = g.db_session.query(Ad)
         self.query = self.query.filter(Ad.inactive != active)
         return self
 
     def inactive(self) -> 'AdQuery':
+        from hermes.ad.models import Ad
         if not self.query:
             self.query = g.db_session.query(Ad)
         self.query = self.query.filter(Ad.inactive == True)
