@@ -1,9 +1,10 @@
 [Unit]
-Description=Gunicorn instance to serve the Hermes API 
+Description=Gunicorn instance to serve myproject
 After=network.target
 
 [Service]
 User=hermes
+Environment=HERMES_SETTINGS=/etc/hermes/hermes.cfg
 WorkingDirectory=/opt/marketplace
 ExecStart=poetry run gunicorn --bind 127.0.0.1:8000 -m 007 hermes.wsgi:app
 
