@@ -83,3 +83,9 @@
     src: files/hermes_client_gte_24.apk
     dest: /etc/hermes/hermes_client_gt3_24.apk
     owner: hermes
+
+- name: Deploy Hermes configuration
+  copy:
+    src: files/hermes.cfg
+    dest: /etc/hermes/hermes.cfg
+    owner: hermes
