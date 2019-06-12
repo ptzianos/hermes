@@ -29,7 +29,7 @@ class HermesSession(SessionInterface):
         from hermes.user.models import APIToken, SessionToken
 
         # Create a db_session only if one has not been created yet
-        if not getattr(g, 'db_session'):
+        if not getattr(g, 'db_session', None):
             db_session = g.db_session = \
                 current_app.new_db_session_instance()  # type: Session
             self.db_session_initialized = True
@@ -77,6 +77,7 @@ class HermesSession(SessionInterface):
     ) -> None:
         if not response:
             return
+        from hermes.user.models import SessionToken
         if isinstance(session.persistent_session, SessionToken):
             # TODO: Work on fixing permanent sessions
             expires = self.get_expiration_time(app, session)
