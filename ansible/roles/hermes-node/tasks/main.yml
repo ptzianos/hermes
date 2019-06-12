@@ -110,3 +110,24 @@
     state: restarted
     daemon_reload: yes
   when: hermes_service_file.changed
+
+- name: Deploy NGINX configuration for static files
+  copy:
+    src: files/hermes-static.conf
+    dest: /etc/nginx/sites-available/hermes-static.conf
+
+- name: Enable NGINX Hermes static files
+  file:
+    src: /etc/nginx/sites-available/hermes-static.conf
+    dest: /etc/nginx/sites-enabled/hermes-static.conf
+    state: link
+
+- name: Disable default site of NGINX
+  file:
+    dest: /etc/nginx/sites-enabled/default
+    state: absent
+
+- name: Start NGINX service
+  systemd:
+    name: nginx
+    state: started
