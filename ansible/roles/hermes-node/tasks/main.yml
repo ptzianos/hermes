@@ -75,13 +75,13 @@
 - name: Update APK for API <= 23
   copy:
     src: files/hermes_client_lte_23.apk
-    dest: /etc/hermes/hermes_client_lte_23.apk
+    dest: /var/www/hermes/apk/hermes_client_lte_23.apk
     owner: hermes
 
 - name: Update APK for API >= 24
   copy:
     src: files/hermes_client_gte_24.apk
-    dest: /etc/hermes/hermes_client_gt3_24.apk
+    dest: /var/www/hermes/apk/hermes_client_gte_24.apk
     owner: hermes
 
 - name: Deploy Hermes configuration
