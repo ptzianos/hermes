@@ -4,22 +4,12 @@ import androidx.room.*
 import androidx.annotation.NonNull
 
 
-@Entity(
-    tableName = "users",
-    foreignKeys = [
-        ForeignKey(
-            entity = Marketplace::class,
-            parentColumns = ["uid"],
-            childColumns = ["market_id"]
-        )
-    ],
-    indices = [Index(value=["market_id"], name="user_market_index")]
-)
+@Entity(tableName = "users")
 data class User(
     @NonNull @ColumnInfo(name = "uuid") var uuid: String,
-    @ColumnInfo(name = "name") var name: String? = null,
-    @ColumnInfo(name = "full_name") var fullName: String? = null,
-    @NonNull @ColumnInfo(name = "market_id") var marketId: Int
+    @NonNull @ColumnInfo(name = "name") var name: String,
+    @NonNull @ColumnInfo(name = "domain") var domain: String,
+    @NonNull @ColumnInfo(name = "token") var token: String
 ) {
     @NonNull @PrimaryKey(autoGenerate = true) @ColumnInfo(name = "uid") var uid: Int? = null
 }
