@@ -12,15 +12,18 @@ interface UserDao {
     @Query("SELECT * FROM users")
     fun getAll(): List<User>
 
-    @Query("SELECT * FROM users WHERE uid == :userId")
-    fun findByIds(userId: Int): User
+    @Query("SELECT * FROM users WHERE uid = :userId")
+    fun findById(userId: Int): User
 
-    @Query("SELECT * FROM users WHERE market_id == :marketId")
-    fun findByMarket(marketId: Int): User
+    @Query("SELECT * FROM users WHERE domain = :domain")
+    fun findByMarket(domain: String): User?
 
     @Insert
     fun insertAll(vararg users: User)
 
     @Delete
     fun delete(user: User)
+
+    @Query("DELETE FROM users WHERE domain = :domain")
+    fun deleteByDomain(domain: String)
 }
