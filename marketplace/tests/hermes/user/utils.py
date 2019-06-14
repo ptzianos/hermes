@@ -84,7 +84,7 @@ def register_user_and_get_token(
     token_endpoint = ('/api/v1/users/{user_uuid}/tokens/'
                       .format(user_uuid=user.uuid))
     resp = post(token_endpoint, data={
-        'proof_of_ownership_request': verification_request.token,
+        'proof_of_ownership_token': verification_request.token,
         'proof_of_ownership': signature.hex(),
     }, no_cookies=True)
     assert resp.status_code == requests.codes.ok

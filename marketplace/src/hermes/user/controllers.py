@@ -305,7 +305,7 @@ def deregister_user(user_uuid: str) -> None:
 def authenticate_user(
     email_or_username: Optional[str] = '',
     password_plaintext: Optional[str] = '',
-    proof_of_ownership_request: Optional[str] = '',
+    proof_of_ownership_token: Optional[str] = '',
     proof_of_ownership: Optional[str] = '',
 ) -> 'User':
     """Authenticates a user based on their username/password.
@@ -313,7 +313,7 @@ def authenticate_user(
     Args:
         email_or_username (Optional[str]): name of the user to authenticate.
         password_plaintext (Optional[str]): password in plaintext form.
-        proof_of_ownership_request (Optional[str]): password in plaintext form.
+        proof_of_ownership_token (Optional[str]): password in plaintext form.
         proof_of_ownership (Optional[str]): password in plaintext form.
 
     Returns:
@@ -326,8 +326,8 @@ def authenticate_user(
     """
     if email_or_username and password_plaintext:
         user = verify_username_and_pass(email_or_username, password_plaintext)
-    elif proof_of_ownership and proof_of_ownership_request:
-        public_key = verify_public_key(proof_of_ownership_request,
+    elif proof_of_ownership and proof_of_ownership_token:
+        public_key = verify_public_key(proof_of_ownership_token,
                                        proof_of_ownership)
         user = public_key.owner
     else:

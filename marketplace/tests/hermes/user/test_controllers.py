@@ -338,7 +338,7 @@ def test_user_authentication(
 
     authenticate_user(email_or_username=email, password_plaintext=password)
     authenticate_user(proof_of_ownership=hexed_sig,
-                      proof_of_ownership_request=pk_verification_request.token)
+                      proof_of_ownership_token=pk_verification_request.token)
 
     with pytest.raises(UnknownUser):
         authenticate_user(email_or_username='b;a', password_plaintext=password)
@@ -351,4 +351,4 @@ def test_user_authentication(
 
     with pytest.raises(ExpiredToken):
         authenticate_user(proof_of_ownership=hexed_sig,
-                          proof_of_ownership_request=pk_verification_request.token)
+                          proof_of_ownership_token=pk_verification_request.token)
