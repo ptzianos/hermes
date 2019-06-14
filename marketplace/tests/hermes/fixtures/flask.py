@@ -28,6 +28,10 @@ def flask_app():
     # because the session object will need the models of the app
     # which in turn require an initialized database.
     with hermes_test_app.app_context():
+        from flask import current_app
+        current_app.log = create_logger(current_app)
+        current_app.log.setLevel(logging.DEBUG)
+        current_app.config['RECREATE_DATABASE'] = True
         init_db()
 
         from hermes.user.session import HermesSession
@@ -35,18 +39,9 @@ def flask_app():
 
         register_signals(hermes_test_app)
 
-        from hermes.ad.models import Ad
-        from hermes.user.models import (APIToken, BaseToken, EmailAddress,
-                                        PublicKey, SessionToken, User)
-        hermes_test_app.Base.metadata.create_all()
-
         from hermes.views import register_views_to_app
         register_views_to_app(hermes_test_app)
 
-    log = create_logger(hermes_test_app)
-    log.setLevel(logging.DEBUG)
-
-    with hermes_test_app.app_context():
         yield hermes_test_app
 
     os.close(db_fd)

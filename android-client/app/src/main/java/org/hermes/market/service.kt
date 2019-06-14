@@ -3,6 +3,7 @@ package org.hermes.market
 import retrofit2.Call
 import retrofit2.http.*
 
+
 interface HermesMarketV1 {
     @GET("/api/v1/users/me")
     fun getMyUser(): Call<User>
