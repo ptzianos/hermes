@@ -32,7 +32,7 @@ class MarketRepository @Inject constructor(
             .execute()
         if (!registrationResp.isSuccessful) {
             Log.e(loggingTag, "Could not register user with marketplace: " +
-                    "${registrationResp.errorBody()}")
+                    "${registrationResp.code()}")
             return false
         } else {
             val registrationResponse = registrationResp.body()!!
