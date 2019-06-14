@@ -5,8 +5,8 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 
 
 def init_db():
-    current_app.log('Creating engine with uri {database}'
-                    .format(database=current_app.config['DATABASE']))
+    current_app.log.info('Creating engine with uri {database}'
+                         .format(database=current_app.config['DATABASE']))
     current_app.Engine = create_engine(current_app.config['DATABASE'],
                                        echo=current_app.config['DEBUG'])
     current_app.Base = declarative_base(bind=current_app.Engine)
