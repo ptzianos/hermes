@@ -28,6 +28,7 @@
     - "--exclude=**/*.db"
     - "--exclude=**/__pycache__"
     - "--exclude=marketplace/src/hermes.egg-info"
+  register: hermes_code
 
 - name: Fix owner of /opt/marketplace directory
   file:
@@ -109,7 +110,7 @@
     name: marketplace
     state: restarted
     daemon_reload: yes
-  when: hermes_service_file.changed
+  when: hermes_service_file.changed or hermes_code.changed
 
 - name: Deploy NGINX configuration for static files
   copy:
