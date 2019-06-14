@@ -1,24 +1,26 @@
 package org.hermes.market
 
 import retrofit2.Call
-import retrofit2.http.DELETE
-import retrofit2.http.GET
-import retrofit2.http.POST
-import retrofit2.http.Path
+import retrofit2.http.*
 
-interface HermesMarketService {
+interface HermesMarketV1 {
     @GET("/api/v1/users/me")
     fun getMyUser(): Call<User>
 
-    @GET("/api/v1/users/register")
-    fun register(): Call<RegistrationResponse>
+    @FormUrlEncoded
+    @POST("/api/v1/users/register")
+    fun register(@Field("public_key") publicKey: String,
+                 @Field("public_key_type") publicKeyType: String): Call<RegistrationResponse>
 
     @GET("/api/v1/users/{user_id}/keys/{key_id}/message")
     fun getVerificationMessage(@Path("user_id") userId: String,
                                @Path("key_id") keyId: String): Call<PublicKeyVerificationRequest>
 
+    @FormUrlEncoded
     @POST("/api/v1/users/{user_id}/tokens")
-    fun createToken(@Path("user_id") userId: String): Call<APIToken>
+    fun createToken(@Path("user_id") userId: String,
+                    @Field("proof_of_ownership_token") proofOfOwnershipToken: String,
+                    @Field("proof_of_ownership") proofOfOwnershipMessage: String): Call<APIToken>
 
     @DELETE("/api/v1/users/{user_id}/tokens/{token_id}")
     fun revokeToken(@Path("user_id") userId: String,
@@ -36,3 +38,6 @@ interface HermesMarketService {
     @DELETE("/api/v1/ads/{ad_id}")
     fun deleteAd(@Path("ad_id") adId: String): Call<Void>
 }
+
+//@GET("user")
+//Call<UserDetails> getUserDetails(@Header("Authorization") String credentials)
