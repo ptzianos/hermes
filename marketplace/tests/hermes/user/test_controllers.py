@@ -37,8 +37,7 @@ def test_resolve_user_helper(
     assert_user(resolve_user(test_user.name), test_user)
     assert_user(resolve_user(test_user.uuid), test_user)
     assert_user(resolve_user(test_email.address), test_user)
-    with pytest.raises(Exception):
-        resolve_user('1')
+    assert resolve_user('1') is None
     assert resolve_user('bla') is None
 
 
@@ -61,8 +60,7 @@ def test_resolve_token_helper(
         'Wrong token resolved'
     assert resolve_token(test_session.token).id == test_session.id, \
         'Wrong token resolved'
-    with pytest.raises(UnknownToken):
-        resolve_token('1')
+    assert resolve_token('1') is None
 
 
 @pytest.mark.usefixtures('sqlalchemy_test_session')
