@@ -3,13 +3,6 @@ package org.hermes
 import android.app.Application
 import android.content.SharedPreferences
 import android.util.Log
-import org.bouncycastle.asn1.ASN1InputStream
-import org.bouncycastle.asn1.DEROutputStream
-import org.bouncycastle.asn1.x500.X500Name
-import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter
-import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder
-import org.bouncycastle.jcajce.provider.digest.SHA3.Digest512
-import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder
 import java.io.UnsupportedEncodingException
 import java.security.KeyPair
 import java.security.KeyPairGenerator
@@ -19,11 +12,15 @@ import java.util.*
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
+import org.bouncycastle.asn1.x500.X500Name
+import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter
+import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder
+import org.bouncycastle.jcajce.provider.digest.SHA3.Digest512
+import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder
+import org.bouncycastle.util.encoders.Base64
 
 import org.hermes.crypto.PasswordHasher
 import org.hermes.iota.Seed
-import java.io.OutputStream
-import java.io.ByteArrayOutputStream
 
 
 
@@ -163,10 +160,6 @@ class CryptoRepository @Inject constructor(val application: Application,
     }
 
     fun publicKeyDER(): String {
-        val out = ByteArrayOutputStream()
-        DEROutputStream(out).apply {
-            writeObject(ASN1InputStream(keypair.public.encoded).readObject())
-        }
-        return out.toByteArray().toString()
+        return "-----BEGIN EC PRIVATE KEY-----\n" + Base64.toBase64String(keypair.public.encoded) + "\n-----END EC PRIVATE KEY-----\n"
     }
 }
