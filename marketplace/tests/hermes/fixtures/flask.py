@@ -31,7 +31,7 @@ def flask_app():
         from flask import current_app
         current_app.log = create_logger(current_app)
         current_app.log.setLevel(logging.DEBUG)
-        current_app.config['RECREATE_DATABASE'] = True
+
         init_db()
 
         from hermes.user.session import HermesSession
@@ -55,8 +55,12 @@ def api_client(flask_app: Flask) -> FlaskClient:
 
 @pytest.fixture()
 def sqlalchemy_test_session(flask_app: Flask):
-    from flask import current_app, g
-    current_app.Base.metadata.create_all(current_app.Engine)
+    from flask import g
+
+    flask_app.Base.metadata.create_all(flask_app.Engine)
     g.db_session = flask_app.new_db_session_instance()
+
     yield
+
     g.db_session.close()
+    flask_app.Base.metadata.drop_all(flask_app.Engine)
