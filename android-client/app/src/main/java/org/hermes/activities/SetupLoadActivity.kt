@@ -42,10 +42,10 @@ class SetupLoadActivity : BaseActivity() {
         CoroutineScope(BACKGROUND.asCoroutineDispatcher()).launch {
             generateCredentials(pin)
             setupLoaderMessage.text = "Registering agent with the marketplace. Please don't close the app"
-            if (marketRepository.registerUser()) {
+            if (!marketRepository.registerUser()) {
                 showErrorMessage()
                 rollbackCredentials()
-                delay(1000)
+                delay(5 * 1000)
                 goToSetupPage()
             } else {
                 setupLoaderMessage.text = "Done with the registration. Have fun!"
