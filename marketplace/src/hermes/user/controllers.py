@@ -150,7 +150,9 @@ def hash_password(passwd: str) -> str:
         str: the password in hashed form.
 
     """
-    return SHA3_512.new(data=passwd.encode(encoding='utf-8', errors='ignore')).digest().hex()
+    return (SHA3_512.new(data=passwd.encode(encoding='utf-8', errors='ignore'))
+            .digest()
+            .hex())
 
 
 def hash_value(some_str: str) -> str:
@@ -221,15 +223,13 @@ def register_user(
         User: a new instance of `hermes.user.models.User`.
 
     """
-    from hermes.user.models import (APIToken, BaseToken, EmailAddress,
-                                    EmailVerificationToken, PasswordResetToken,
-                                    PublicKey, PublicKeyVerificationRequest,
-                                    SessionToken, User, )
+    from hermes.user.models import (EmailAddress, PublicKey, User, )
 
     if not public_key:
         raise WrongParameters()
     name = name or email or hash_value(public_key)
     fullname = fullname or name
+    public_key_type = public_key_type.lower()
     if (public_key_type == 'ecdsa'
             and not valid_ecdsa_public_key(public_key)):
         raise WrongParameters()
@@ -290,10 +290,7 @@ def deregister_user(user_uuid: str) -> None:
         user_uuid (str): The UUID of the user to be de-registered.
 
     """
-    from hermes.user.models import (APIToken, BaseToken, EmailAddress,
-                                    EmailVerificationToken, PasswordResetToken,
-                                    PublicKey, PublicKeyVerificationRequest,
-                                    SessionToken, User, )
+    from hermes.user.models import (APIToken, SessionToken, User, )
 
     user = g.db_session.query(User).filter_by(uuid=user_uuid).first()
     if not user:
@@ -327,11 +324,6 @@ def authenticate_user(
         WrongParameters: if one of the parameters is missing.
 
     """
-    from hermes.user.models import (APIToken, BaseToken, EmailAddress,
-                                    EmailVerificationToken, PasswordResetToken,
-                                    PublicKey, PublicKeyVerificationRequest,
-                                    SessionToken, User, )
-
     if email_or_username and password_plaintext:
         user = verify_username_and_pass(email_or_username, password_plaintext)
     elif proof_of_ownership and proof_of_ownership_request:
