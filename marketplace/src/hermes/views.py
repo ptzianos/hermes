@@ -91,6 +91,8 @@ def register() -> ViewResponse:
         return make_response('already_registered', requests.codes.bad_request)
     except WrongParameters:
         return make_response('', requests.codes.bad_request)
+    except UnsupportedPublicKeyType:
+        return make_response('', requests.codes.bad_request)
 
 
 @post('/api/v1/users/<string:user_id>/deregister')
