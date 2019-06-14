@@ -74,14 +74,14 @@ def test_generate_api_token_view(
 
     # Request a new api token with wrong signed message
     resp = post(token_endpoint, data={
-        'proof_of_ownership_request': verification_request.token,
+        'proof_of_ownership_token': verification_request.token,
         'proof_of_ownership': 'fffffff',
     }, no_cookies=True)
     assert resp.status_code == requests.codes.bad_request
 
     # Request a new api token with the correct signed message
     verification_data = {
-        'proof_of_ownership_request': verification_request.token,
+        'proof_of_ownership_token': verification_request.token,
         'proof_of_ownership': signature.hex(),
     }
     resp = post(token_endpoint, data=verification_data, no_cookies=True)
@@ -114,7 +114,7 @@ def test_cant_generate_token_twice_with_same_verification_request(
     token_endpoint = ('/api/v1/users/{user_uuid}/tokens/'
                       .format(user_uuid=user.uuid))
     post_data = {
-        'proof_of_ownership_request': verification_request.token,
+        'proof_of_ownership_token': verification_request.token,
         'proof_of_ownership': signature.hex(),
     }
     # Get a new api token
@@ -151,7 +151,7 @@ def test_new_verification_request_expires_old_one(
     token_endpoint = ('/api/v1/users/{user_uuid}/tokens/'
                       .format(user_uuid=user.uuid))
     resp = post(token_endpoint, data={
-        'proof_of_ownership_request': verification_request.token,
+        'proof_of_ownership_token': verification_request.token,
         'proof_of_ownership': signature.hex(),
     }, no_cookies=True)
     assert resp.status_code == requests.codes.bad_request
@@ -169,7 +169,7 @@ def test_new_verification_request_expires_old_one(
 
     # Request a new api token with latest verification request
     resp = post(token_endpoint, data={
-        'proof_of_ownership_request':
+        'proof_of_ownership_token':
             verification_request_resp.json.get('public_key_verification_token'),
         'proof_of_ownership': signature.hex(),
     }, no_cookies=True)
@@ -240,7 +240,7 @@ def test_list_and_revoke_token_endpoints(
     token_endpoint = ('/api/v1/users/{user_uuid}/tokens/'
                       .format(user_uuid=user.uuid))
     resp = post(token_endpoint, data={
-        'proof_of_ownership_request':
+        'proof_of_ownership_token':
             verification_request_resp.json.get('public_key_verification_token'),
         'proof_of_ownership': signature.hex(),
     }, no_cookies=True)

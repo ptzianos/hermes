@@ -256,7 +256,7 @@ def create_token(user_id: str) -> ViewResponse:
             user = authenticate_user(
                 request.form.get('username'),
                 request.form.get('password'),
-                request.form.get('proof_of_ownership_request'),
+                request.form.get('proof_of_ownership_token'),
                 request.form.get('proof_of_ownership'),
             )
             session.owner = user
