@@ -55,7 +55,8 @@ def api_client(flask_app: Flask) -> FlaskClient:
 
 @pytest.fixture()
 def sqlalchemy_test_session(flask_app: Flask):
-    from flask import g
+    from flask import current_app, g
+    current_app.Base.metadata.create_all(current_app.Engine)
     g.db_session = flask_app.new_db_session_instance()
     yield
     g.db_session.close()
