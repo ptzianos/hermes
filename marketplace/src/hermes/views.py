@@ -114,11 +114,32 @@ def login() -> ViewResponse:
         return make_response('', requests.codes.bad_request)
 
 
+@post('/api/v1/users/logout')
+@authenticated_only
+def logout() -> ViewResponse:
+    session.revoke()
+    return make_response('', requests.codes.ok)
+
+
 @get('/api/v1/users/<string:user_id>/emails')
 @authenticated_only
 @owner_or_admin
 def get_emails(user_id: str):
     return make_response('', requests.codes.ok, list_emails(user_id))
+
+
+@delete('/api/v1/users/<string:user_id>/emails/<string:email_id>')
+@authenticated_only
+@owner_or_admin
+# TODO: Implement me
+def delete_email_view(user_id: str, email_id: str):
+    # try:
+    #     # TODO: implement this
+    #     delete_email(email_id)
+    #     return make_response('', requests.codes.ok)
+    # except UnknownEmail:
+    #     return make_response('', requests.codes.not_found)
+    return make_response('', requests.codes.not_implemented)
 
 
 @get('/api/v1/users/<string:user_id>/emails/<string:email_id>/verify')
@@ -140,41 +161,6 @@ def verify_email_view(user_id: str, email_id: str):
         return make_response('', requests.codes.bad_request)
 
 
-@get('/api/v1/users/<string:user_id>/keys/<string:key_id>/message')
-def get_key_verification_message(user_id: str, key_id: str):
-    try:
-        resolve_user(user_id)
-        public_key_verification_request = \
-            generate_public_key_verification_request(key_id)
-        return make_json_response(
-            status_code=requests.codes.ok, **{
-                "public_key_verification_token":
-                    public_key_verification_request.token,
-                "public_key_verification_message":
-                    public_key_verification_request.original_message,
-            })
-    except UnknownUser:
-        return make_response('', requests.codes.forbidden)
-    except UnknownEmail:
-        return make_response('', requests.codes.not_found)
-    except (AlreadyVerified, UnknownPublicKey):
-        return make_response('', requests.codes.bad_request)
-
-
-@delete('/api/v1/users/<string:user_id>/emails/<string:email_id>')
-@authenticated_only
-@owner_or_admin
-# TODO: Implement me
-def delete_email_view(user_id: str, email_id: str):
-    # try:
-    #     # TODO: implement this
-    #     delete_email(email_id)
-    #     return make_response('', requests.codes.ok)
-    # except UnknownEmail:
-    #     return make_response('', requests.codes.not_found)
-    return make_response('', requests.codes.not_implemented)
-
-
 @get('/api/v1/users/<string:user_id>/keys/')
 @authenticated_only
 @owner_or_admin
@@ -183,13 +169,6 @@ def list_public_keys(user_id: str) -> ViewResponse:
     if not session.owner.admin and not user_id == session.owner.uuid:
         return make_response('', requests.codes.forbidden)
     return make_json_response(requests.codes.ok, keys=list_keys(user_id))
-
-
-@post('/api/v1/users/logout')
-@authenticated_only
-def logout() -> ViewResponse:
-    session.revoke()
-    return make_response('', requests.codes.ok)
 
 
 @post('/api/v1/users/<string:user_id>/su')
@@ -240,6 +219,27 @@ def get_user_details(user_id: str) -> ViewResponse:
 # TODO: Implement me
 def patch_user(user_id: str) -> ViewResponse:
     return make_response('', requests.codes.not_implemented)
+
+
+@get('/api/v1/users/<string:user_id>/keys/<string:key_id>/message')
+def get_key_verification_message(user_id: str, key_id: str):
+    try:
+        resolve_user(user_id)
+        public_key_verification_request = \
+            generate_public_key_verification_request(key_id)
+        return make_json_response(
+            status_code=requests.codes.ok, **{
+                "public_key_verification_token":
+                    public_key_verification_request.token,
+                "public_key_verification_message":
+                    public_key_verification_request.original_message,
+            })
+    except UnknownUser:
+        return make_response('', requests.codes.forbidden)
+    except UnknownEmail:
+        return make_response('', requests.codes.not_found)
+    except (AlreadyVerified, UnknownPublicKey):
+        return make_response('', requests.codes.bad_request)
 
 
 @get('/api/v1/users/<string:user_id>/tokens/')
