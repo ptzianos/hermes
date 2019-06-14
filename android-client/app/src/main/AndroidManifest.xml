@@ -7,7 +7,7 @@
     <uses-permission android:name="android.permission.INTERNET"/>
 
     <application
-            android:name="org.hermes.HermesClientApp"
+            android:name=".HermesClientApp"
             android:allowBackup="true"
             android:exported="false"
             android:fullBackupContent="@xml/backup_rules"
@@ -18,42 +18,53 @@
             android:supportsRtl="true"
             android:theme="@style/HermesAppTheme"
             tools:ignore="GoogleAppIndexingWarning">
+        <activity
+                android:name=".activities.SetupLoadActivity"
+                android:label="@string/title_activity_setup_load"
+                android:theme="@style/HermesAppTheme.NoActionBar">
+        </activity>
+
         <service
-                android:name="org.hermes.LedgerService"
+                android:name=".LedgerService"
                 android:enabled="true"
                 android:exported="true"
                 tools:ignore="ExportedService">
         </service>
+
         <activity
-                android:name="org.hermes.activities.DrawerActivity"
+                android:name=".activities.DrawerActivity"
                 android:label="@string/title_activity_drawer">
         </activity>
         <activity
-                android:name="org.hermes.activities.LoginActivity"
+                android:name=".activities.LoginActivity"
                 android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
+
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
         <activity
-                android:name="org.hermes.activities.SetupActivity"
+                android:name=".activities.SetupActivity"
                 android:label="@string/title_activity_setup">
         </activity>
         <activity
-                android:name="org.hermes.activities.EventLogActivity"
+                android:name=".activities.EventLogActivity"
                 android:label="@string/title_activity_event_log">
         </activity>
         <activity android:name=".activities.EventActivity"/>
         <activity
-                android:name="org.hermes.activities.SensorListActivity"
+                android:name=".activities.SensorListActivity"
                 android:label="@string/title_activity_sensor_list">
         </activity>
         <activity
-                android:name="org.hermes.activities.SensorActivity"
+                android:name=".activities.SensorActivity"
                 android:label="@string/title_activity_sensor">
         </activity>
-        <meta-data android:name="preloaded_fonts" android:resource="@array/preloaded_fonts"/>
+
+        <meta-data
+                android:name="preloaded_fonts"
+                android:resource="@array/preloaded_fonts"/>
     </application>
 
 </manifest>

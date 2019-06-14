@@ -51,8 +51,11 @@ class SetupActivity : BaseActivity() {
         setupButton.setOnClickListener { checkSetupForm() }
     }
 
-    private fun goToDashBoard() {
-        startActivity(Intent(this, DrawerActivity::class.java))
+    private fun goToLoader(pin: String) {
+        val intent = Intent()
+            .putExtra("pin", pin)
+            .setClass(this, SetupLoadActivity::class.java)
+        startActivity(intent)
     }
 
     private fun checkSetupForm() {
@@ -75,7 +78,7 @@ class SetupActivity : BaseActivity() {
         }
         if (!errorsInForm && repository.generateCredentials(pinSetupInput.text.toString())) {
             repository.unseal(pinSetupInput.text.toString())
-            goToDashBoard()
+            goToLoader(pinSetupInput.text.toString())
         }
     }
 }
