@@ -3,21 +3,29 @@ package org.hermes
 import android.app.Application
 import android.content.SharedPreferences
 import android.util.Log
+import org.bouncycastle.asn1.ASN1InputStream
+import org.bouncycastle.asn1.DEROutputStream
 import org.bouncycastle.asn1.x500.X500Name
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter
 import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder
+import org.bouncycastle.jcajce.provider.digest.SHA3.Digest512
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder
-import org.hermes.crypto.PasswordHasher
+import java.io.UnsupportedEncodingException
 import java.security.KeyPair
-import javax.inject.Inject
-import javax.inject.Singleton
-
-import org.hermes.iota.Seed
 import java.security.KeyPairGenerator
 import java.security.KeyStore
 import java.security.SecureRandom
 import java.util.*
+import javax.inject.Inject
 import javax.inject.Named
+import javax.inject.Singleton
+
+import org.hermes.crypto.PasswordHasher
+import org.hermes.iota.Seed
+import java.io.OutputStream
+import java.io.ByteArrayOutputStream
+
+
 
 
 @Singleton
@@ -145,4 +153,20 @@ class CryptoRepository @Inject constructor(val application: Application,
             .remove(application.getString(R.string.auth_hashed_pin))
             .remove(application.getString(R.string.auth_private_key))
             .commit()
+
+    fun signMessage(message: String): String {
+        val md = Digest512()
+        try {
+            md.update(message.toByteArray(Charsets.UTF_8))
+        } catch (ex: UnsupportedEncodingException) { }
+        return md.digest().toString()
+    }
+
+    fun publicKeyDER(): String {
+        val out = ByteArrayOutputStream()
+        DEROutputStream(out).apply {
+            writeObject(ASN1InputStream(keypair.public.encoded).readObject())
+        }
+        return out.toByteArray().toString()
+    }
 }
