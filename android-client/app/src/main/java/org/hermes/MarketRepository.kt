@@ -1,20 +1,23 @@
 package org.hermes
 
 import android.util.Log
+import java.lang.Exception
 import javax.inject.Inject
 import javax.inject.Singleton
+import retrofit2.Response
 import retrofit2.Retrofit
 
 import org.hermes.entities.User
 import org.hermes.market.APIToken
 import org.hermes.market.HermesMarketV1
+import org.hermes.market.RegistrationResponse
 
 
 @Singleton
 class MarketRepository @Inject constructor(
-    private val cryptoRepository: CryptoRepository,
     private val db: HermesRoomDatabase,
-    private val retroBuilder: Retrofit.Builder
+    private val retroBuilder: Retrofit.Builder,
+    private val cryptoRepository: CryptoRepository
 ) {
 
     private val loggingTag = "MarketRepository"
@@ -27,9 +30,15 @@ class MarketRepository @Inject constructor(
             .build()
             .create(HermesMarketV1::class.java)
         val publicKeyDer = cryptoRepository.publicKeyDER()
-        val registrationResp = apiService
-            .register(publicKeyDer, "ECDSA")
-            .execute()
+        val registrationResp: Response<RegistrationResponse>
+        try {
+            registrationResp = apiService
+                .register(publicKeyDer, "ECDSA")
+                .execute()
+        } catch (e: Exception) {
+            Log.e(loggingTag, "$e")
+            return false
+        }
         if (!registrationResp.isSuccessful) {
             Log.e(loggingTag, "Could not register user with marketplace: " +
                     "${registrationResp.code()}")
