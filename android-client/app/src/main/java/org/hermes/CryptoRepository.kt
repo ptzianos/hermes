@@ -2,12 +2,10 @@ package org.hermes
 
 import android.app.Application
 import android.content.SharedPreferences
+import android.security.keystore.KeyProperties
 import android.util.Log
-import java.io.UnsupportedEncodingException
-import java.security.KeyPair
-import java.security.KeyPairGenerator
-import java.security.KeyStore
-import java.security.SecureRandom
+import java.security.*
+import java.security.interfaces.ECPrivateKey
 import java.util.*
 import javax.inject.Inject
 import javax.inject.Named
@@ -15,21 +13,25 @@ import javax.inject.Singleton
 import org.bouncycastle.asn1.x500.X500Name
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter
 import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder
-import org.bouncycastle.jcajce.provider.digest.SHA3.Digest512
+import org.bouncycastle.crypto.digests.SHA1Digest
+import org.bouncycastle.crypto.params.ECPrivateKeyParameters
+import org.bouncycastle.crypto.signers.ECDSASigner
+import org.bouncycastle.crypto.signers.HMacDSAKCalculator
+import org.bouncycastle.jce.provider.BouncyCastleProvider
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder
 import org.bouncycastle.util.encoders.Base64
+import org.bouncycastle.util.encoders.Hex
 
 import org.hermes.crypto.PasswordHasher
+import org.hermes.crypto.Secp256K1Curve
 import org.hermes.iota.Seed
-
-
-
 
 @Singleton
 class CryptoRepository @Inject constructor(val application: Application,
                                            val db: HermesRoomDatabase,
                                            @param:Named("auth") val sharedPref: SharedPreferences,
-                                           private val ks: KeyStore) {
+                                           private val ks: KeyStore
+) {
 
     private val loggingTag = "CryptoRepository"
 
@@ -40,6 +42,10 @@ class CryptoRepository @Inject constructor(val application: Application,
     private var credentialsLoaded: Boolean = false
 
     fun sealed(): Boolean = !unsealed
+
+    init {
+        Security.addProvider(BouncyCastleProvider())
+    }
 
     /**
      * Returns true if the PIN matches the stored hash, false otherwise.
@@ -69,20 +75,19 @@ class CryptoRepository @Inject constructor(val application: Application,
      */
     fun generateCredentials(pin: String): Boolean {
         val hashedPin = PasswordHasher.hashPassword(pin.toCharArray()).toString()
-
+        val secureRandom = SecureRandom.getInstance("SHA1PRNG")
         seed = Seed.new()
 
-        // Generate the EC KeyPair
-        keypair = KeyPairGenerator.getInstance("EC")
-            .apply { initialize(256, SecureRandom.getInstance("SHA1PRNG")) }
-            .generateKeyPair()
+        keypair = KeyPairGenerator.getInstance(KeyProperties.KEY_ALGORITHM_EC, "AndroidOpenSSL")
+            .apply {initialize(256, secureRandom) }
+            .genKeyPair()
 
         // Generate a self-signed cert for the newly created key
         val issuerString = "C=DE, O=hermes"
         // Issues and subject will be the same because it's a self-signed certificate
         val issuer = X500Name(issuerString)
         val subject = X500Name(issuerString)
-        val serial = SecureRandom.getInstance("SHA1PRNG").nextLong().toBigInteger()
+        val serial = secureRandom.nextLong().toBigInteger()
         val notBefore = Date()
         val notAfter = Date(System.currentTimeMillis() + (1000L * 24L * 60L * 60L * 1000L))
         val v3CertificateBuilder = JcaX509v3CertificateBuilder(issuer, serial, notBefore,
@@ -151,15 +156,17 @@ class CryptoRepository @Inject constructor(val application: Application,
             .remove(application.getString(R.string.auth_private_key))
             .commit()
 
-    fun signMessage(message: String): String {
-        val md = Digest512()
-        try {
-            md.update(message.toByteArray(Charsets.UTF_8))
-        } catch (ex: UnsupportedEncodingException) { }
-        return md.digest().toString()
+    fun publicKeyPEM(): String {
+        return "-----BEGIN EC PRIVATE KEY-----\n" + Base64.toBase64String(keypair.public.encoded) + "\n-----END EC PRIVATE KEY-----\n"
     }
 
-    fun publicKeyDER(): String {
-        return "-----BEGIN EC PRIVATE KEY-----\n" + Base64.toBase64String(keypair.public.encoded) + "\n-----END EC PRIVATE KEY-----\n"
+    fun signMessage(msg: String): String {
+        val signer = ECDSASigner(HMacDSAKCalculator(SHA1Digest())).apply {
+            init(true,
+                ECPrivateKeyParameters((keypair.private as ECPrivateKey).s, Secp256K1Curve.ecDomainParameters)
+            )
+        }
+        val components = signer.generateSignature(msg.toByteArray())
+        return Hex.toHexString(components[0].toByteArray() + components[1].toByteArray())
     }
 }
