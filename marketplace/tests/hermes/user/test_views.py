@@ -2,7 +2,8 @@ from typing import Iterator
 
 import pytest
 import requests
-from Crypto.Hash import SHA3_512
+from bitcoin import ecdsa_sign, privkey_to_pubkey
+from Crypto.Hash import SHA1, SHA3_512
 from Crypto.PublicKey.ECC import EccKey, import_key as import_ecdsa_key
 from Crypto.PublicKey.RSA import RsaKey
 from Crypto.Signature.DSS import new as new_dss_sig_scheme
@@ -64,8 +65,8 @@ def test_generate_api_token_view(
     user, pk, _, verification_request = register_user(next(ecdsa_key_pair))
 
     # Sign the message of the verification request
-    msg_hash = (SHA3_512.new()
-                .update(verification_request.original_message.encode()))
+    msg_hash = SHA1.new()
+    msg_hash.update(verification_request.original_message.encode())
     sig_scheme = new_dss_sig_scheme(import_ecdsa_key(pk.value),
                                     mode='deterministic-rfc6979')
     signature = sig_scheme.sign(msg_hash)
@@ -106,8 +107,8 @@ def test_cant_generate_token_twice_with_same_verification_request(
 ) -> None:
     user, pk, _, verification_request = register_user(next(ecdsa_key_pair))
 
-    msg_hash = (SHA3_512.new()
-                .update(verification_request.original_message.encode()))
+    msg_hash = SHA1.new()
+    msg_hash.update(verification_request.original_message.encode())
     sig_scheme = new_dss_sig_scheme(import_ecdsa_key(pk.value),
                                     mode='deterministic-rfc6979')
     signature = sig_scheme.sign(msg_hash)
@@ -143,8 +144,8 @@ def test_new_verification_request_expires_old_one(
     assert verification_request.is_expired
 
     # Old verification request should be useless now
-    msg_hash = (SHA3_512.new()
-                .update(verification_request.original_message.encode()))
+    msg_hash = SHA1.new()
+    msg_hash.update(verification_request.original_message.encode())
     sig_scheme = new_dss_sig_scheme(import_ecdsa_key(pk.value),
                                     mode='deterministic-rfc6979')
     signature = sig_scheme.sign(msg_hash)
@@ -157,10 +158,10 @@ def test_new_verification_request_expires_old_one(
     assert resp.status_code == requests.codes.bad_request
 
     # New verification request must be usable now
-    msg_hash = (SHA3_512.new()
-                .update(verification_request_resp.json
-                        .get('public_key_verification_message')
-                        .encode()))
+    msg_hash = SHA1.new()
+    msg_hash.update(verification_request_resp.json
+                    .get('public_key_verification_message')
+                    .encode())
     sig_scheme = new_dss_sig_scheme(import_ecdsa_key(pk.value),
                                     mode='deterministic-rfc6979')
     signature = sig_scheme.sign(msg_hash)
@@ -230,10 +231,10 @@ def test_list_and_revoke_token_endpoints(
     msg_endpoint = ('/api/v1/users/{user_uuid}/keys/{key_id}/message'
                     .format(user_uuid=user.uuid, key_id=pk.uuid))
     verification_request_resp = get(msg_endpoint, no_cookies=True)
-    msg_hash = (SHA3_512.new()
-                .update(verification_request_resp.json
-                        .get('public_key_verification_message')
-                        .encode()))
+    msg_hash = SHA1.new()
+    msg_hash.update(verification_request_resp.json
+                    .get('public_key_verification_message')
+                    .encode())
     sig_scheme = new_dss_sig_scheme(import_ecdsa_key(pk.value),
                                     mode='deterministic-rfc6979')
     signature = sig_scheme.sign(msg_hash)
@@ -297,3 +298,42 @@ def test_list_and_revoke_token_endpoints(
     # Fail if you try to get user's details with revoked token
     resp = get('/api/v1/users/me', api_token=api_token.token, no_cookies=True)
     assert resp.status_code == requests.codes.forbidden
+
+
+@pytest.mark.usefixtures('sqlalchemy_test_session')
+def test_electrum_sigs():
+    priv = '0C28FCA386C7A227600B2FE50B7CAE11EC86D3BF1FBE471BE89827E19D72AA1D'
+    pub = privkey_to_pubkey(priv)
+    user, pk, _, verification_request = register_user(pub)
+
+    # Sign the message of the verification request
+    signature = ecdsa_sign(verification_request.original_message, priv)
+    token_endpoint = ('/api/v1/users/{user_uuid}/tokens/'
+                      .format(user_uuid=user.uuid))
+
+    # Request a new api token with wrong signed message
+    resp = post(token_endpoint, data={
+        'proof_of_ownership_token': verification_request.token,
+        'proof_of_ownership': 'ffff',
+    }, no_cookies=True)
+    assert resp.status_code == requests.codes.bad_request
+
+    # Request a new api token with the correct signed message
+    verification_data = {
+        'proof_of_ownership_token': verification_request.token,
+        'proof_of_ownership': signature,
+    }
+    resp = post(token_endpoint, data=verification_data, no_cookies=True)
+    assert resp.status_code == requests.codes.ok
+    assert resp.json.get('token') is not None
+
+    api_token = resp.json.get('token')
+
+    # Ensure the same verification request can not be used twice
+    resp = post(token_endpoint, data=verification_data, no_cookies=True)
+    assert resp.status_code == requests.codes.bad_request
+
+    # Ensure that the api token is working
+    resp = get('/api/v1/users/me', api_token=api_token, no_cookies=True)
+    assert resp.status_code == requests.codes.ok
+    assert resp.json['uuid'] == user.uuid

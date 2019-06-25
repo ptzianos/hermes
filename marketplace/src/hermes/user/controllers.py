@@ -3,7 +3,8 @@ from itertools import chain
 from logging import getLogger
 from typing import Dict, Iterable, List, Optional, Tuple, TYPE_CHECKING, Union
 
-from Crypto.Hash import SHA3_512
+from bitcoin import decode_pubkey, ecdsa_verify as electrum_sig_verify
+from Crypto.Hash import SHA1, SHA3_512
 from Crypto.PublicKey.ECC import import_key as import_ecdsa_key
 from Crypto.PublicKey.RSA import import_key as import_rsa_key
 from Crypto.Signature.DSS import new as new_dss_sig_scheme
@@ -233,10 +234,12 @@ def register_user(
     if (public_key_type == 'ecdsa'
             and not valid_ecdsa_public_key(public_key)):
         raise WrongParameters()
+    elif public_key_type == 'ecdsa+electrum':
+        decode_pubkey(public_key, formt='hex')
     elif (public_key_type == 'rsa'
             and not check_rsa_public_key(public_key)):
         raise WrongParameters()
-    elif public_key_type not in ['ecdsa', 'rsa']:
+    elif public_key_type not in ['ecdsa', 'ecdsa+electrum', 'rsa']:
         raise UnsupportedPublicKeyType()
     if (resolve_user(email) or resolve_user(name) or resolve_user(fullname)
             or resolve_user(public_key)):
@@ -804,7 +807,8 @@ def verify_public_key(
         raise UnknownToken()
     if request.is_expired:
         raise ExpiredToken()
-    msg_hash = SHA3_512.new().update(request.original_message.encode())
+    msg_hash = SHA1.new()
+    msg_hash.update(request.original_message.encode())
     if request.public_key.type == 'rsa':
         sig_scheme = new_pkcs_115_scheme(import_rsa_key(
             request.public_key.value
@@ -815,6 +819,10 @@ def verify_public_key(
             request.public_key.value
         ), mode='deterministic-rfc6979')
         sig_scheme.verify(msg_hash, bytes.fromhex(proof_of_ownership))
+    elif request.public_key.type == 'ecdsa+electrum':
+        if not electrum_sig_verify(request.original_message, proof_of_ownership,
+                                   request.public_key.value):
+            raise ValueError()
 
     request.revoke()
     return request.public_key

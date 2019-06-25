@@ -5,7 +5,9 @@ from typing import Callable, Iterator, Tuple
 
 import pytest
 from Crypto.Hash import SHA3_512
+from Crypto.PublicKey.ECC import EccKey
 from Crypto.PublicKey.RSA import RsaKey
+from Crypto.Signature.DSS import new as new_dss_sig_scheme
 from Crypto.Signature.pkcs1_15 import new as new_pkcs115
 
 from hermes.exceptions import (AlreadyRegistered, AlreadyVerified,
@@ -289,6 +291,39 @@ def test_public_key_verification(
                       public_key_type='rsa')
 
     sig_scheme = new_pkcs115(rsa_key)
+    msg_hash = (SHA3_512
+                .new()
+                .update(pk_verification_request.original_message.encode()))
+    hexed_sig = sig_scheme.sign(msg_hash).hex()
+
+    with pytest.raises(UnknownToken):
+        verify_public_key('bla', hexed_sig)
+
+    with pytest.raises(ValueError):
+        verify_public_key(pk_verification_request.token, 'aaaaaaaaaaa')
+
+    pk_verification_request.expiry = datetime.now() - timedelta(hours=1)
+    with pytest.raises(ExpiredToken):
+        verify_public_key(pk_verification_request.token, hexed_sig)
+
+    pk_verification_request.expiry = datetime.now() + timedelta(hours=1)
+    pk_verification_request.expired = False
+    verify_public_key(pk_verification_request.token, hexed_sig)
+
+
+@pytest.mark.usefixtures('sqlalchemy_test_session')
+def test_public_key_verification_for_ecdsa(
+    ecdsa_key_pair: Iterator[EccKey],
+) -> None:
+    from hermes.user.controllers import register_user, verify_public_key
+
+    ecdsa_key = next(ecdsa_key_pair)  # type: EccKey
+
+    new_user, _, pk_verification_request = \
+        register_user(public_key=ecdsa_key.export_key(format='PEM'),
+                      public_key_type='ecdsa')
+
+    sig_scheme = new_dss_sig_scheme(ecdsa_key, mode='deterministic-rfc6979')
     msg_hash = (SHA3_512
                 .new()
                 .update(pk_verification_request.original_message.encode()))

@@ -63,6 +63,7 @@ class PublicKey(current_app.Base):
 
     PUBLIC_KEY_TYPES = [
         ('ecdsa', 'ECDSA'),
+        ('ecdsa+electrum', 'ECDSA_ELECTRUM'),
         ('rsa', 'RSA')
     ]
 
