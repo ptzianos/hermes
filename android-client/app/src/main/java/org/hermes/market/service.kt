@@ -18,7 +18,7 @@ interface HermesMarketV1 {
                                @Path("key_id") keyId: String): Call<PublicKeyVerificationRequest>
 
     @FormUrlEncoded
-    @POST("/api/v1/users/{user_id}/tokens")
+    @POST("/api/v1/users/{user_id}/tokens/")
     fun createToken(@Path("user_id") userId: String,
                     @Field("proof_of_ownership_token") proofOfOwnershipToken: String,
                     @Field("proof_of_ownership") proofOfOwnershipMessage: String): Call<APIToken>
