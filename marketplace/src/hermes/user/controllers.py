@@ -813,7 +813,7 @@ def verify_public_key(
     elif request.public_key.type == 'ecdsa':
         sig_scheme = new_dss_sig_scheme(import_ecdsa_key(
             request.public_key.value
-        ), mode='fips-186-3')
+        ), mode='deterministic-rfc6979')
         sig_scheme.verify(msg_hash, bytes.fromhex(proof_of_ownership))
 
     request.revoke()
