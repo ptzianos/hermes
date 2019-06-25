@@ -26,9 +26,6 @@ class LoginActivity: BaseActivity() {
     lateinit var viewModel: LoginViewModel
 
     @Inject
-    lateinit var repository: HermesRepository
-
-    @Inject
     lateinit var hermesApplication: HermesClientApp
 
     override fun onCreate(savedInstanceState: Bundle?) {
