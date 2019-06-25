@@ -67,7 +67,7 @@ def test_generate_api_token_view(
     msg_hash = (SHA3_512.new()
                 .update(verification_request.original_message.encode()))
     sig_scheme = new_dss_sig_scheme(import_ecdsa_key(pk.value),
-                                    mode='fips-186-3')
+                                    mode='deterministic-rfc6979')
     signature = sig_scheme.sign(msg_hash)
     token_endpoint = ('/api/v1/users/{user_uuid}/tokens/'
                       .format(user_uuid=user.uuid))
@@ -109,7 +109,7 @@ def test_cant_generate_token_twice_with_same_verification_request(
     msg_hash = (SHA3_512.new()
                 .update(verification_request.original_message.encode()))
     sig_scheme = new_dss_sig_scheme(import_ecdsa_key(pk.value),
-                                    mode='fips-186-3')
+                                    mode='deterministic-rfc6979')
     signature = sig_scheme.sign(msg_hash)
     token_endpoint = ('/api/v1/users/{user_uuid}/tokens/'
                       .format(user_uuid=user.uuid))
@@ -146,7 +146,7 @@ def test_new_verification_request_expires_old_one(
     msg_hash = (SHA3_512.new()
                 .update(verification_request.original_message.encode()))
     sig_scheme = new_dss_sig_scheme(import_ecdsa_key(pk.value),
-                                    mode='fips-186-3')
+                                    mode='deterministic-rfc6979')
     signature = sig_scheme.sign(msg_hash)
     token_endpoint = ('/api/v1/users/{user_uuid}/tokens/'
                       .format(user_uuid=user.uuid))
@@ -162,7 +162,7 @@ def test_new_verification_request_expires_old_one(
                         .get('public_key_verification_message')
                         .encode()))
     sig_scheme = new_dss_sig_scheme(import_ecdsa_key(pk.value),
-                                    mode='fips-186-3')
+                                    mode='deterministic-rfc6979')
     signature = sig_scheme.sign(msg_hash)
     token_endpoint = ('/api/v1/users/{user_uuid}/tokens/'
                       .format(user_uuid=user.uuid))
@@ -235,7 +235,7 @@ def test_list_and_revoke_token_endpoints(
                         .get('public_key_verification_message')
                         .encode()))
     sig_scheme = new_dss_sig_scheme(import_ecdsa_key(pk.value),
-                                    mode='fips-186-3')
+                                    mode='deterministic-rfc6979')
     signature = sig_scheme.sign(msg_hash)
     token_endpoint = ('/api/v1/users/{user_uuid}/tokens/'
                       .format(user_uuid=user.uuid))
