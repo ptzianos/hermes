@@ -30,9 +30,9 @@ class EventActivity : BaseActivity() {
     private lateinit var eventIdWidget: TextView
     private lateinit var eventResource: TextView
     private lateinit var eventAction: TextView
-    private lateinit var eventResourceId: EditText
-    private lateinit var eventDate: EditText
-    private lateinit var eventExtraInfo: EditText
+    private lateinit var eventResourceId: TextView
+    private lateinit var eventDate: TextView
+    private lateinit var eventExtraInfo: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         AndroidInjection.inject(this)
