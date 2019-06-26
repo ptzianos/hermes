@@ -22,6 +22,8 @@ class MarketRepository @Inject constructor(
 
     private val loggingTag = "MarketRepository"
 
+    private var token: String? = null
+
     fun registerUser(domain: String = "hermes-data.io"): Boolean {
         Log.i(loggingTag, "Deleting any user in the database for domain $domain")
         db.userDao().deleteByDomain(domain)
@@ -29,11 +31,11 @@ class MarketRepository @Inject constructor(
         val apiService = retroBuilder.baseUrl("https://$domain")
             .build()
             .create(HermesMarketV1::class.java)
-        val publicKeyDer = cryptoRepository.publicKeyDER()
+        val publicKeyHex = cryptoRepository.publicKeyHex()
         val registrationResp: Response<RegistrationResponse>
         try {
             registrationResp = apiService
-                .register(publicKeyDer, "ECDSA")
+                .register(publicKeyHex, "ecdsa+electrum")
                 .execute()
         } catch (e: Exception) {
             Log.e(loggingTag, "$e")
@@ -58,6 +60,7 @@ class MarketRepository @Inject constructor(
                     marketUUID = registrationResponse.uuid, name = registrationResponse.name,
                     domain = domain, token = apiToken.token
                 ))
+                token = apiToken.token
             }
             return apiToken != null
         }
@@ -70,5 +73,10 @@ class MarketRepository @Inject constructor(
             .createToken(userId, proofOfOwnershipToken, signedMessage)
             .execute()
         return verificationResp.body()
+    }
+
+    fun loadToken(domain: String = "hermes-data.io") {
+        val user: User? = db.userDao().findByMarket(domain = domain)
+        token = user?.token
     }
 }
