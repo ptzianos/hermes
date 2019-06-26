@@ -11,7 +11,6 @@ import org.hermes.MetadataRepository
 class DashboardViewModel @Inject constructor(application: Application,
                                              metadataRepository: MetadataRepository
 ): AndroidViewModel(application) {
-    // TODO: Move this to the MetadataRepository when the wallet functionality has been finished
     val iotaReceived = MutableLiveData<Int>().apply {
         value = 0
     }
