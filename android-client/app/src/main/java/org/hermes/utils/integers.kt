@@ -18,3 +18,11 @@ object Integers {
 }
 
 fun Int.toMutableLiveData() = MutableLiveData<Int>().apply { value = 0 }
+
+
+fun Int.toByteArray(): ByteArray {
+    return when {
+        this < 256 -> byteArrayOf(this.toByte())
+        else -> (this / 256).toByteArray() + (this % 256).toByteArray()
+    }
+}
