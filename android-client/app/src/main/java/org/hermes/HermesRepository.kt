@@ -12,6 +12,7 @@ import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.launch
 import java.security.*
 import java.util.*
+import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
@@ -25,7 +26,7 @@ import org.bouncycastle.util.encoders.Hex
 import org.hermes.crypto.PasswordHasher
 import org.hermes.entities.Event
 import org.hermes.iota.Seed
-import java.util.concurrent.atomic.AtomicBoolean
+import org.hermes.utils.LinuxSecureRandom
 
 
 @Singleton
