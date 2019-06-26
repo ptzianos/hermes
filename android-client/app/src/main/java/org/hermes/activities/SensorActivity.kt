@@ -8,12 +8,8 @@ import android.widget.Toast
 import androidx.core.content.res.ResourcesCompat
 import dagger.Module
 import dagger.android.AndroidInjection
+import org.hermes.*
 import javax.inject.Inject
-
-import org.hermes.BaseActivity
-import org.hermes.HermesRepository
-import org.hermes.LedgerService
-import org.hermes.R
 
 
 class SensorActivity : BaseActivity() {
@@ -24,7 +20,7 @@ class SensorActivity : BaseActivity() {
     private val loggingTag = "SensorActivity"
 
     @Inject
-    lateinit var repository: HermesRepository
+    lateinit var metadataRepository: MetadataRepository
 
     private lateinit var sensorUUID: TextView
     private lateinit var sensorID: TextView
@@ -55,7 +51,7 @@ class SensorActivity : BaseActivity() {
                     .show()
                 startActivity(Intent(this, SensorListActivity::class.java))
             } else {
-                repository.fetchSensor(sensorId) { bind(it) }
+                metadataRepository.fetchSensor(sensorId) { bind(it) }
             }
         }
     }
@@ -86,13 +82,13 @@ class SensorActivity : BaseActivity() {
                     sensor.active.compareAndSet(false, true)
                     sensorActivateButton.text = deActivateText
                     sensorActivateButton.setBackgroundColor(green)
-                    repository.refreshSensorList()
+                    metadataRepository.refreshSensorList()
                 }
                 deActivateText -> {
                     sensor.active.compareAndSet(true, false)
                     sensorActivateButton.text = activateText
                     sensorActivateButton.setBackgroundColor(red)
-                    repository.refreshSensorList()
+                    metadataRepository.refreshSensorList()
                 }
             }
         }

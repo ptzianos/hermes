@@ -12,7 +12,6 @@ import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import dagger.Module
 import dagger.android.AndroidInjection
-import java.security.KeyPair
 import java.security.SecureRandom
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
@@ -24,7 +23,6 @@ import kotlin.concurrent.withLock
 import kotlinx.coroutines.*
 
 import org.hermes.activities.LoginActivity
-import org.hermes.iota.Seed
 import org.hermes.ledgers.IOTAConnector
 
 
@@ -92,7 +90,7 @@ class LedgerService : Service() {
                         uuid = UUID.randomUUID().toString()
                         val newSensor = Sensor(dataId, unit, mtype, what, device).apply { this.uuid = uuid }
                         sensorRegistry[uuid] = newSensor
-                        repository.addSensor(newSensor)
+                        metadataRepository.addSensor(newSensor)
                         reverseSensorRegistry[newSensor] = uuid
                         Log.i(loggingTag, "A new sensor has registered with the application with uuid $uuid")
                     }
@@ -105,7 +103,7 @@ class LedgerService : Service() {
                 null -> ErrorCode.NO_UUID.errorStr
                 else -> {
                     val sensor = sensorRegistry.remove(uuid)
-                    if (sensor != null) repository.removeSensor(sensor)
+                    if (sensor != null) metadataRepository.removeSensor(sensor)
                     ""
                 }
             }
@@ -116,12 +114,12 @@ class LedgerService : Service() {
             when {
                 uuid == null -> ErrorCode.NO_UUID.errorStr
                 !sensorRegistry.containsKey(uuid) -> ErrorCode.NOT_REGISTERED.errorStr
-                !repository.unsealed() -> ErrorCode.SEALED.errorStr
+                cryptoRepository.sealed() -> ErrorCode.SEALED.errorStr
                 else -> {
                     Log.d(loggingTag, "Got a new sample from client with uuid $uuid")
                     // TODO: Add a check to ensure that the data are in the expected form
                     val client = sensorRegistry[uuid] as Sensor
-                    val newSample = Metric20("${repository.pkHash}.${client.dataId}", value)
+                    val newSample = Metric20("${cryptoRepository.pkHash}.${client.dataId}", value)
                         .setData(Metric20.TagKey.MTYPE, client.mtype)
                         .setData(Metric20.TagKey.UNIT, client.unit)
                     client.putSample(newSample)
@@ -135,12 +133,12 @@ class LedgerService : Service() {
             when {
                 uuid == null -> ErrorCode.NO_UUID.errorStr
                 !sensorRegistry.containsKey(uuid) -> ErrorCode.NOT_REGISTERED.errorStr
-                !repository.unsealed() -> ErrorCode.SEALED.errorStr
+                cryptoRepository.sealed() -> ErrorCode.SEALED.errorStr
                 else -> {
                     Log.d(loggingTag, "Got a new sample from client with uuid $uuid")
                     // TODO: Add a check to ensure that the data are in the expected form
                     val client = sensorRegistry[uuid] as Sensor
-                    val newSample = Metric20("${repository.pkHash}.${client.dataId}", value.toString())
+                    val newSample = Metric20("${cryptoRepository.pkHash}.${client.dataId}", value.toString())
                         .setData(Metric20.TagKey.MTYPE, client.mtype)
                         .setData(Metric20.TagKey.UNIT, client.unit)
                     client.putSample(newSample)
@@ -180,13 +178,19 @@ class LedgerService : Service() {
     lateinit var db: HermesRoomDatabase
 
     @Inject
-    lateinit var repository: HermesRepository
+    lateinit var cryptoRepository: CryptoRepository
+
+    @Inject
+    lateinit var marketRepository: MarketRepository
+
+    @Inject
+    lateinit var metadataRepository: MetadataRepository
 
     @Inject
     lateinit var app: HermesClientApp
 
     private val iotaConnector by lazy {
-        IOTAConnector(repository.getSeed() as Seed, repository.getKeyPair() as KeyPair, app)
+        IOTAConnector(cryptoRepository.IOTASeed(), cryptoRepository.privateKey(), app)
     }
 
     override fun onCreate() {
@@ -303,16 +307,16 @@ class LedgerService : Service() {
 
     private suspend fun broadcastData() {
         while (true) {
-            if (!repository.ledgerServiceRunning.get()) {
+            if (!metadataRepository.ledgerServiceRunning.get()) {
                 Log.d(loggingTag, "Ledger service skipping broadcasting data for now")
                 broadcastStart = null
             } else {
                 Log.d(loggingTag, "Hermes service looking at the registered client data")
                 if (broadcastStart == null) {
                     broadcastStart = System.currentTimeMillis()
-                    repository.ledgerServiceUptime.postValue(0)
+                    metadataRepository.ledgerServiceUptime.postValue(0)
                 } else {
-                    repository.ledgerServiceUptime.postValue(((System.currentTimeMillis() - broadcastStart as Long) / (60 * 1000)).toInt())
+                    metadataRepository.ledgerServiceUptime.postValue(((System.currentTimeMillis() - broadcastStart as Long) / (60 * 1000)).toInt())
                 }
                 for ((uuid, client) in sensorRegistry.filter { it.value.active.get() }) {
                     Log.d(loggingTag, "Broadcasting data of client with id $uuid")
@@ -320,7 +324,7 @@ class LedgerService : Service() {
                         if (isNotEmpty()) iotaConnector.sendData(
                             *this, clientUUID = uuid,
                             blockUntilConfirmation = true, asyncConfirmation = true,
-                            packetCounter = repository.packetBroadcastNum
+                            packetCounter = metadataRepository.packetBroadcastNum
                         )
                     }
                 }

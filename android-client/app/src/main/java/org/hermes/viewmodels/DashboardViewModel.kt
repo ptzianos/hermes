@@ -5,22 +5,24 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import javax.inject.Inject
 
-import org.hermes.HermesRepository
+import org.hermes.MetadataRepository
 
 
 class DashboardViewModel @Inject constructor(application: Application,
-                                             hermesRepository: HermesRepository
+                                             metadataRepository: MetadataRepository
 ): AndroidViewModel(application) {
-    // TODO: Move this to the HermesRepository when the wallet functionality has been finished
+    // TODO: Move this to the MetadataRepository when the wallet functionality has been finished
     val iotaReceived = MutableLiveData<Int>().apply {
         value = 0
     }
 
-    val uptime = hermesRepository.getLedgerServiceUptime()
+    val uptime = metadataRepository.getLedgerServiceUptime()
 
-    val activeSensors = hermesRepository.getActiveSensorNumLiveData()
+    val activeSensors = metadataRepository.getActiveSensorNumLiveData()
 
-    val packetsBroadcast = hermesRepository.getPacketsBroadcast()
+    val packetsBroadcast = metadataRepository.getPacketsBroadcast()
 
-    val activeService = hermesRepository.ledgerServiceRunningLiveData
+    val activeService = metadataRepository.ledgerServiceRunningLiveData
+
+    val rootAddress = metadataRepository.getRootAddress()
 }

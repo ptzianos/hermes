@@ -4,15 +4,9 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import javax.inject.Inject
-
-import org.hermes.HermesRepository
 
 
 class SetupViewModel(application: Application): AndroidViewModel(application) {
-
-    @Inject
-    lateinit var hermesRepository: HermesRepository
 
     private val _isFormValid = MutableLiveData<Boolean>()
 

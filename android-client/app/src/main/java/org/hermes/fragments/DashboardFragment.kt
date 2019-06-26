@@ -15,7 +15,7 @@ import dagger.android.support.AndroidSupportInjection
 import javax.inject.Inject
 
 import org.hermes.HermesClientApp
-import org.hermes.HermesRepository
+import org.hermes.MetadataRepository
 import org.hermes.R
 import org.hermes.viewmodels.DashboardViewModel
 
@@ -32,7 +32,7 @@ class DashboardFragment @Inject constructor() : Fragment() {
     lateinit var dashboardViewModel: DashboardViewModel
 
     @Inject
-    lateinit var hermesRepository: HermesRepository
+    lateinit var metadataRepository: MetadataRepository
 
     private lateinit var mView: View
 
@@ -82,8 +82,8 @@ class DashboardFragment @Inject constructor() : Fragment() {
 
         })
         button.setOnClickListener {
-            hermesRepository.ledgerServiceRunning.set(dashboardViewModel.activeService.value == null || !dashboardViewModel.activeService.value!!)
-            dashboardViewModel.activeService.value = hermesRepository.ledgerServiceRunning.get()
+            metadataRepository.ledgerServiceRunning.set(dashboardViewModel.activeService.value == null || !dashboardViewModel.activeService.value!!)
+            dashboardViewModel.activeService.value = metadataRepository.ledgerServiceRunning.get()
         }
     }
 }

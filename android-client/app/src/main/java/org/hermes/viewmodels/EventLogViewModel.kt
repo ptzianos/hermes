@@ -6,13 +6,13 @@ import androidx.paging.Config
 import androidx.paging.toLiveData
 import javax.inject.Inject
 
-import org.hermes.HermesRepository
+import org.hermes.MetadataRepository
 
 
 class EventLogViewModel @Inject constructor(application: Application,
-                                            hermesRepository: HermesRepository): AndroidViewModel(application) {
+                                            metadataRepository: MetadataRepository): AndroidViewModel(application) {
 
-    val allEvents = hermesRepository.db.eventDao().getAllLivePaged().toLiveData(Config(
+    val allEvents = metadataRepository.eventDao.getAllLivePaged().toLiveData(Config(
         /**
          * A good page size is a value that fills at least a screen worth of content on a large
          * device so the User is unlikely to see a null item.

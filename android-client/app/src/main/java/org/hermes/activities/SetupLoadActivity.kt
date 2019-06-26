@@ -21,7 +21,7 @@ class SetupLoadActivity : BaseActivity() {
     private val loggingTag = "SetupLoadActivity"
 
     @Inject
-    lateinit var repository: HermesRepository
+    lateinit var metadataRepository: MetadataRepository
 
     @Inject
     lateinit var marketRepository: MarketRepository
@@ -50,6 +50,7 @@ class SetupLoadActivity : BaseActivity() {
             } else {
                 setupLoaderMessage.text = "Done with the registration. Have fun!"
                 delay(1000)
+                metadataRepository.startLedgerService()
                 goToDashboard()
             }
         }

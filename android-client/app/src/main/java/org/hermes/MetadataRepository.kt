@@ -6,6 +6,12 @@ import android.os.Build
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.asCoroutineDispatcher
+import kotlinx.coroutines.launch
+import org.hermes.daos.EventDao
+import org.hermes.daos.UserDao
+import org.hermes.entities.Event
 import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
@@ -13,10 +19,14 @@ import javax.inject.Singleton
 
 
 @Singleton
-class MetadataRepository @Inject constructor(val application: Application) {
+class MetadataRepository @Inject constructor(
+    private val db: HermesRoomDatabase,
+    private val application: Application
+) {
 
     private val loggingTag = "MetadataRepository"
 
+    val eventDao: EventDao = db.eventDao()
     private var ledgerServiceBootstrapped: Boolean = false
     var ledgerServiceRunning: AtomicBoolean = AtomicBoolean(true)
     private var sensorList: LinkedList<LedgerService.Sensor> = LinkedList()
@@ -96,6 +106,23 @@ class MetadataRepository @Inject constructor(val application: Application) {
             ledgerServiceBootstrapped = true
         } else {
             Log.i(loggingTag, "Ledger service is already running")
+        }
+    }
+
+    fun getRootAddress(): String = ""
+
+    fun fetchEvent(id: Int, callback: (event: Event) -> Unit) {
+        CoroutineScope(BACKGROUND.asCoroutineDispatcher()).launch {
+            callback(db.eventDao().findById(id))
+        }
+    }
+
+    fun fetchSensor(id: String, callback: (sensor: LedgerService.Sensor) -> Unit) {
+        for (sensor in sensorList) {
+            if (sensor.dataId == id) {
+                callback(sensor)
+                return
+            }
         }
     }
 }

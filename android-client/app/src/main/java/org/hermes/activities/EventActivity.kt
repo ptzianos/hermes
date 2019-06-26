@@ -9,12 +9,12 @@ import dagger.Module
 import dagger.android.AndroidInjection
 import java.util.regex.Pattern
 import javax.inject.Inject
+import org.threeten.bp.format.DateTimeFormatter
 
 import org.hermes.BaseActivity
-import org.hermes.HermesRepository
+import org.hermes.MetadataRepository
 import org.hermes.R
 import org.hermes.entities.Event
-import org.threeten.bp.format.DateTimeFormatter
 
 
 class EventActivity : BaseActivity() {
@@ -25,7 +25,7 @@ class EventActivity : BaseActivity() {
     private val loggingTag = "EventActivity"
 
     @Inject
-    lateinit var repository: HermesRepository
+    lateinit var metadataRepository: MetadataRepository
 
     private lateinit var eventIdWidget: TextView
     private lateinit var eventResource: TextView
@@ -54,7 +54,7 @@ class EventActivity : BaseActivity() {
                     .show()
                 startActivity(Intent(this, EventLogActivity::class.java))
             } else {
-                repository.fetchEvent(eventId) { bind(it) }
+                metadataRepository.fetchEvent(eventId) { bind(it) }
             }
         }
     }

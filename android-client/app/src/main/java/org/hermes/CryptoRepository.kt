@@ -27,7 +27,6 @@ class CryptoRepository @Inject constructor(val application: Application,
     private val loggingTag = "CryptoRepository"
 
     private lateinit var seed: Seed
-    private lateinit var keypair: KeyPair
     private lateinit var privateKey: SecP256K1PrivKey
     private lateinit var publicKey: SecP256K1PubKey
 
@@ -41,7 +40,7 @@ class CryptoRepository @Inject constructor(val application: Application,
     }
 
     private val pkHashString by lazy {
-        val sha3512 = SHA3.Digest512().apply { update(keypair.public.encoded) }
+        val sha3512 = SHA3.Digest512().apply { update(publicKey.encoded) }
         Hex.toHexString(sha3512.digest())
     }
     val pkHash: String
@@ -171,11 +170,11 @@ class CryptoRepository @Inject constructor(val application: Application,
             .remove(application.getString(R.string.auth_private_key))
             .commit()
 
-    fun publicKeyHex(): String {
-        return publicKey.encodedHex
-    }
+    fun publicKeyHex(): String = publicKey.encodedHex
 
-    fun signMessage(msg: String): String {
-        return privateKey.electrumSign(msg)
-    }
+    fun signMessage(msg: String): String = privateKey.electrumSign(msg)
+
+    fun IOTASeed(): Seed = seed
+
+    fun privateKey(): PrivateKey = privateKey
 }

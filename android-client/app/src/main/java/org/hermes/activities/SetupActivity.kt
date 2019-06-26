@@ -9,7 +9,7 @@ import dagger.Module
 import javax.inject.Inject
 
 import org.hermes.BaseActivity
-import org.hermes.HermesRepository
+import org.hermes.CryptoRepository
 import org.hermes.R
 
 
@@ -21,7 +21,7 @@ class SetupActivity : BaseActivity() {
     private val loggingTag = "SetupActivity"
 
     @Inject
-    lateinit var repository: HermesRepository
+    lateinit var cryptoRepository: CryptoRepository
 
     override fun onCreate(savedInstanceState: Bundle?) {
         AndroidInjection.inject(this)
@@ -32,7 +32,7 @@ class SetupActivity : BaseActivity() {
 
     override fun onResume() {
         super.onResume()
-        if (repository.credentialsSet()) {
+        if (cryptoRepository.credentialsGenerated()) {
             startActivity(Intent(this, LoginActivity::class.java))
         } else {
             initForm()
@@ -76,8 +76,8 @@ class SetupActivity : BaseActivity() {
             errorsInForm = true
             pinSetupInputVerify.error = "The two fields must be equal"
         }
-        if (!errorsInForm && repository.generateCredentials(pinSetupInput.text.toString())) {
-            repository.unseal(pinSetupInput.text.toString())
+        if (!errorsInForm && cryptoRepository.generateCredentials(pinSetupInput.text.toString())) {
+            cryptoRepository.unseal(pinSetupInput.text.toString())
             goToLoader(pinSetupInput.text.toString())
         }
     }
