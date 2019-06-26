@@ -1,14 +1,13 @@
 package org.hermes.crypto
 
-import kotlinx.io.IOException
-import kotlinx.io.StringWriter
 import java.math.BigInteger
 import java.security.MessageDigest
 import java.security.PrivateKey
 import java.security.SecureRandom
 import java.util.*
+import kotlinx.io.IOException
+import kotlinx.io.StringWriter
 import org.bitcoinj.core.Base58
-import org.bouncycastle.asn1.ASN1Encoding
 import org.bouncycastle.asn1.ASN1Object
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier
@@ -23,9 +22,7 @@ import org.bouncycastle.math.ec.ECPoint
 import org.bouncycastle.math.ec.FixedPointCombMultiplier
 import org.bouncycastle.util.encoders.Hex
 import org.bouncycastle.util.io.pem.PemObject
-import org.bouncycastle.util.io.pem.PemObjectGenerator
 import org.bouncycastle.util.io.pem.PemWriter
-import java.io.OutputStreamWriter
 
 
 class SecP256K1PrivKey : PrivateKey {
@@ -63,8 +60,7 @@ class SecP256K1PrivKey : PrivateKey {
      * Signs a message according to RFC 6979 with a deterministic K.
      * The message is not check-summed, whatever bytes are fed to the function will be the ones
      * that will be signed.
-     * Modified version of: /home/pavlos/.gradle/caches/modules-2/files-2.1/org.bouncycastle/bcprov-jdk15on/1.61/3bf88046a16098ea6cc41576dd50d512854d39e1/bcprov-jdk15on-1.61-sources.jar!/org/bouncycastle/crypto/signers/ECDSASigner.java
-     * TODO: Fix the repo
+     * Modified version of: @see <a href="https://github.com/bcgit/bc-java/blob/master/core/src/main/java/org/bouncycastle/crypto/signers/ECDSASigner.java">ECDSASigner.java</a>
      */
     fun rawSign(message: ByteArray): Triple<BigInteger, BigInteger, BigInteger> {
         val ec: ECDomainParameters = Secp256K1Curve.ecDomainParameters
