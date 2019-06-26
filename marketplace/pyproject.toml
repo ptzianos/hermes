@@ -20,7 +20,7 @@ mypy = "^0.701.0"
 gunicorn = {version = "^19.9",optional = true}
 psycopg2 = {version = "^2.8",optional = true}
 web3 = "^4.9"
-bitcoin = {git = "git@github.com:sylvandb/pybitcointools.git"}
+bitcoin = {git = "https://github.com/sylvandb/pybitcointools.git"}
 
 [tool.poetry.dev-dependencies]
 pytest = "^4.1"
