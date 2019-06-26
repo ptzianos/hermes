@@ -3,6 +3,7 @@ package org.hermes.crypto
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.Assertions.*
 
+
 internal class SecP256K1PrivKeyTest {
 
     @Test
@@ -32,10 +33,11 @@ internal class SecP256K1PrivKeyTest {
     @Test
     fun producePublicKey() {
         // TODO: Implement this
-        val privateKey = SecP256K1PrivKey("57c617d9b4e1f7af6ec97ca2ff57e94a28279a7eedd4d12a99fa11170e94f5a4")
-        // pubKey: 14903880589752143041982648392150622260876031794510409801157403400876048842930, 49005791221922006887990349039963577247542408960238324899212392709157895456489
-        // pub hex: 0420f34c2786b4bae593e22596631b025f3ff46e200fc1d4b52ef49bbdc2ed00b26c584b7e32523fb01be2294a1f8a5eb0cf71a203cc034ced46ea92a8df16c6e9
-        // pub points: 14903880589752143041982648392150622260876031794510409801157403400876048842930, 49005791221922006887990349039963577247542408960238324899212392709157895456489
+        val privateKey = SecP256K1PrivKey("0x0c28fca386c7a227600b2fe50b7cae11ec86d3bf1fbe471be89827e19d72aa1d")
+        val publicKey = SecP256K1PubKey.fromPrivateKey(privateKey)
+        assertEquals(
+            "04d0de0aaeaefad02b8bdc8a01a1b8b11c696bd3d66a2c5f10780d95b7df42645cd85228a6fb29940e858e7e55842ae2bd115d1ed7cc0e82d934e929c97648cb0a",
+            publicKey.encodedHex)
     }
 
     @Test
