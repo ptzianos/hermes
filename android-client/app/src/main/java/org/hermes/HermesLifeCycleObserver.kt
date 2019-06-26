@@ -11,7 +11,7 @@ import org.hermes.activities.SetupActivity
 
 
 @Singleton
-class HermesLifeCycleObserver @Inject constructor(val repository: HermesRepository) {
+class HermesLifeCycleObserver @Inject constructor(val repository: CryptoRepository) {
 
     private val loggingTag = "HermesLifeCycleObserver"
     private var onScreenActivity: String? = null
@@ -20,9 +20,9 @@ class HermesLifeCycleObserver @Inject constructor(val repository: HermesReposito
         Log.d(loggingTag, "resuming: ${activity.javaClass.name}")
         if (onScreenActivity == null) {
             Log.d(loggingTag, "Starting application")
-            if (repository.credentialsSet() && activity.javaClass != LoginActivity::class.java) {
+            if (repository.credentialsGenerated() && activity.javaClass != LoginActivity::class.java) {
                 activity.startActivity(Intent(activity, LoginActivity::class.java))
-            } else if (!repository.credentialsSet() && activity.javaClass != SetupActivity::class.java) {
+            } else if (!repository.credentialsGenerated() && activity.javaClass != SetupActivity::class.java) {
                 activity.startActivity(Intent(activity, SetupActivity::class.java))
             }
         }
