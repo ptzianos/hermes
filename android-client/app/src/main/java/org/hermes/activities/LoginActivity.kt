@@ -28,6 +28,9 @@ class LoginActivity: BaseActivity() {
     @Inject
     lateinit var hermesApplication: HermesClientApp
 
+    @Inject
+    lateinit var metadataRepository: MetadataRepository
+
     override fun onCreate(savedInstanceState: Bundle?) {
         AndroidInjection.inject(this)
         viewModel = hermesApplication.daggerHermesComponent.getLoginViewModel()
@@ -38,6 +41,7 @@ class LoginActivity: BaseActivity() {
         viewModel.isFormValid.observe(this, Observer { valid ->
             if (valid) {
                 login_pin_input.error = null
+                metadataRepository.startLedgerService()
                 startActivity(Intent(this, DrawerActivity::class.java))
             }
         })
