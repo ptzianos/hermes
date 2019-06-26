@@ -9,6 +9,7 @@ import androidx.core.content.res.ResourcesCompat
 import dagger.Module
 import dagger.android.AndroidInjection
 import org.hermes.*
+import org.hermes.utils.addBackButton
 import javax.inject.Inject
 
 
@@ -53,6 +54,12 @@ class SensorActivity : BaseActivity() {
             } else {
                 metadataRepository.fetchSensor(sensorId) { bind(it) }
             }
+        }
+
+        addBackButton(findViewById(R.id.toolbar), resources) {
+            val intent = Intent(this, DrawerActivity::class.java)
+            intent.putExtra("tile", DrawerActivity.Tile.SENSOR_LIST.i)
+            startActivity(intent)
         }
     }
 

@@ -2,6 +2,7 @@ package org.hermes.fragments
 
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -27,6 +28,8 @@ class EventLogFragment @Inject constructor() : Fragment() {
     abstract class DaggerModule
 
     private var columnCount = 1
+
+    private val loggingTag = "EventLogFragment"
 
     @Inject
     lateinit var application: HermesClientApp
@@ -56,6 +59,18 @@ class EventLogFragment @Inject constructor() : Fragment() {
         eventLogViewModel.allEvents.observe(this, Observer<PagedList<Event>?> {
             (mView.findViewById<RecyclerView>(R.id.eventRecyclerView).adapter as PagedEventViewAdapter).submitList(it)
         })
+    }
+
+    override fun onPause() {
+        super.onPause()
+        Log.d(loggingTag, "Removing observers from events")
+        eventLogViewModel.allEvents.removeObservers(this)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        Log.d(loggingTag, "Removing observers from events")
+        eventLogViewModel.allEvents.removeObservers(this)
     }
 
     override fun onAttach(context: Context) {

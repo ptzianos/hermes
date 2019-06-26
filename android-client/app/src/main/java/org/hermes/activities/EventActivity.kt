@@ -15,6 +15,7 @@ import org.hermes.BaseActivity
 import org.hermes.MetadataRepository
 import org.hermes.R
 import org.hermes.entities.Event
+import org.hermes.utils.addBackButton
 
 
 class EventActivity : BaseActivity() {
@@ -56,6 +57,11 @@ class EventActivity : BaseActivity() {
             } else {
                 metadataRepository.fetchEvent(eventId) { bind(it) }
             }
+        }
+        addBackButton(findViewById(R.id.toolbar), resources) {
+            val intent = Intent(this, DrawerActivity::class.java)
+            intent.putExtra("tile", DrawerActivity.Tile.EVENT_LOG.i)
+            startActivity(intent)
         }
     }
 

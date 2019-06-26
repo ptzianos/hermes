@@ -21,6 +21,12 @@ import org.hermes.fragments.SensorListFragment
 
 class DrawerActivity : BaseActivity(), NavigationDrawerFragment.NavigationDrawerCallbacks {
 
+    enum class Tile(val i: Int) {
+        DASHBOARD(0),
+        EVENT_LOG(1),
+        SENSOR_LIST(2)
+    }
+
     @Module
     abstract class DaggerModule
 
@@ -46,20 +52,25 @@ class DrawerActivity : BaseActivity(), NavigationDrawerFragment.NavigationDrawer
             R.id.navigation_drawer,
             findViewById<View>(R.id.drawer_layout) as DrawerLayout
         )
+
+        val extras = intent.extras
+        if (extras != null && extras.containsKey("tile")) {
+            onNavigationDrawerItemSelected(extras.getInt("tile"))
+        }
     }
 
     override fun onNavigationDrawerItemSelected(position: Int) {
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         val fragment: Fragment = when (position) {
-            0 -> {
+            DrawerActivity.Tile.DASHBOARD.i -> {
                 toolbar.title = getString(R.string.title_activity_dashboard)
                 dashboardFragment
             }
-            1 -> {
+            DrawerActivity.Tile.EVENT_LOG.i -> {
                 toolbar.title = getString(R.string.title_activity_event_log)
                 eventLogFragment
             }
-            2 -> {
+            DrawerActivity.Tile.SENSOR_LIST.i -> {
                 toolbar.title = getString(R.string.title_activity_sensor_list)
                 sensorListFragment
             }
