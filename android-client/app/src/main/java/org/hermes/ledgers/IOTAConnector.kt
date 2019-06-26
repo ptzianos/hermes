@@ -3,11 +3,10 @@ package org.hermes.ledgers
 
 import android.content.SharedPreferences
 import android.util.Log
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import java.lang.Exception
 import java.lang.StringBuilder
-import java.security.KeyPair
+import java.security.PrivateKey
 import javax.inject.Inject
 import javax.inject.Named
 import kotlinx.coroutines.*
@@ -34,7 +33,7 @@ import org.hermes.utils.splitInChunks
 import org.hermes.utils.toTrytes
 
 
-class IOTAConnector(val seed: Seed, val keyPair: KeyPair, app: HermesClientApp) {
+class IOTAConnector(val seed: Seed, val privateKey: PrivateKey, app: HermesClientApp) {
 
     val loggingTag: String = "IOTAConnector"
 
@@ -64,7 +63,7 @@ class IOTAConnector(val seed: Seed, val keyPair: KeyPair, app: HermesClientApp) 
             .mapNotNull { it?.toCarbon20String() }
             .joinToString(separator = "::")
             .prepend(header)
-            .sign(header = "digest:", privateKey = keyPair.private, separator = "::")
+            .sign(header = "digest:", privateKey = privateKey, separator = "::")
 
         Log.d(loggingTag, "$clientUUID -- Cleartext payload: $clearTextPayload")
 
