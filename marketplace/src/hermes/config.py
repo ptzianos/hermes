@@ -20,11 +20,8 @@ DEBUG_DB = False
 RECREATE_DATABASE = False
 
 PUBLIC_KEY_VERIFICATION_TEXT = """
-By signing this text with your private key you verify that you are the sole rightful owner of the key pair whose
-public key has a SHA3-512 digest equal to {digest}.
-This makes you legally responsible for all actions performed on the platform and liable for any malicious
-activities that might occur.
-If you have not yourself requested this key to be verified, please do not sign this document.
+By signing this with your private key you verify that you are the sole rightful owner of the key pair whose
+public key has a SHA3-512 digest that starts with {digest}.
 
 Expires on: {expiration_date}
 """
