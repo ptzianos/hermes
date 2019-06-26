@@ -6,7 +6,6 @@ import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import java.lang.Exception
 import java.lang.StringBuilder
-import java.security.PrivateKey
 import javax.inject.Inject
 import javax.inject.Named
 import kotlinx.coroutines.*
@@ -24,6 +23,7 @@ import org.hermes.BACKGROUND
 import org.hermes.HermesClientApp
 import org.hermes.HermesRoomDatabase
 import org.hermes.Metric20
+import org.hermes.crypto.SecP256K1PrivKey
 import org.hermes.entities.Event
 import org.hermes.iota.IOTA
 import org.hermes.iota.Seed
@@ -33,7 +33,7 @@ import org.hermes.utils.splitInChunks
 import org.hermes.utils.toTrytes
 
 
-class IOTAConnector(val seed: Seed, val privateKey: PrivateKey, app: HermesClientApp) {
+class IOTAConnector(val seed: Seed, val privateKey: SecP256K1PrivKey, app: HermesClientApp) {
 
     val loggingTag: String = "IOTAConnector"
 
@@ -88,9 +88,6 @@ class IOTAConnector(val seed: Seed, val privateKey: PrivateKey, app: HermesClien
             try {
                 broadcastBundle(clientUUID, trytes, newAddress, i, 3)
                 break
-            } catch (e: IllegalAccessError) {
-                Log.e(loggingTag, "$clientUUID -- There was an error while trying to broadcast a sample to IOTA: $e")
-                Thread.sleep(5 * 1000)
             } catch (e: Exception) {
                 Log.e(loggingTag, "$clientUUID -- There was an error while trying to broadcast a sample to IOTA: $e")
                 Thread.sleep(5 * 1000)

@@ -176,5 +176,5 @@ class CryptoRepository @Inject constructor(val application: Application,
 
     fun IOTASeed(): Seed = seed
 
-    fun privateKey(): PrivateKey = privateKey
+    fun privateKey(): SecP256K1PrivKey = privateKey
 }

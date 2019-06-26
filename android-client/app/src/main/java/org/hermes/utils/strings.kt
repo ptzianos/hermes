@@ -2,6 +2,7 @@ package org.hermes.utils
 
 import android.util.Log
 import org.bouncycastle.util.encoders.Hex
+import org.hermes.crypto.SecP256K1PrivKey
 import org.iota.jota.utils.TrytesConverter
 import java.lang.StringBuilder
 import java.security.PrivateKey
@@ -54,21 +55,12 @@ fun String.prepend(header: String): String {
     return header + this
 }
 
-fun String.sign(header: String = "", privateKey: PrivateKey,
+fun String.sign(header: String = "", privateKey: SecP256K1PrivKey,
                 separator: String = ""): String {
     return try {
         StringBuilder()
             .append(header)
-            .append(
-                Hex.toHexString(
-                    Signature.getInstance("SHA512withECDSA")
-                        .apply {
-                            this.initSign(privateKey)
-                            this.update(this@sign.toByteArray())
-                        }
-                        .sign()
-                )
-            )
+            .append(privateKey.sign(this@sign.toByteArray()).toHexedBinary())
             .append(separator)
             .append(this)
             .toString()
