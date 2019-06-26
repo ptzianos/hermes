@@ -10,6 +10,7 @@ import javax.inject.Inject
 import javax.inject.Named
 import kotlinx.coroutines.*
 import org.apache.commons.lang3.StringUtils
+import org.hermes.*
 import org.iota.jota.IotaAPI
 import org.iota.jota.model.Bundle
 import org.iota.jota.model.Transaction
@@ -19,10 +20,6 @@ import org.iota.jota.utils.InputValidator
 import org.iota.jota.utils.IotaAPIUtils
 import org.threeten.bp.OffsetDateTime
 
-import org.hermes.BACKGROUND
-import org.hermes.HermesClientApp
-import org.hermes.HermesRoomDatabase
-import org.hermes.Metric20
 import org.hermes.crypto.SecP256K1PrivKey
 import org.hermes.entities.Event
 import org.hermes.iota.IOTA
@@ -47,6 +44,9 @@ class IOTAConnector(val seed: Seed, val privateKey: SecP256K1PrivKey, app: Herme
 
     @field:[Inject Named("iota")]
     lateinit var prefs: SharedPreferences
+
+    @Inject
+    lateinit var metadataRepository: MetadataRepository
 
     init { app.daggerHermesComponent.inject(this) }
 
@@ -121,6 +121,7 @@ class IOTAConnector(val seed: Seed, val privateKey: SecP256K1PrivKey, app: Herme
             prefs.edit()
                 .putString("root_address", newAddress)
                 .apply()
+            metadataRepository.rootIOTAAddress.postValue(newAddress)
         }
 
         prefs.edit()

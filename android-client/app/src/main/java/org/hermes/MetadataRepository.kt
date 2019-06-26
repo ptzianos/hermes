@@ -11,7 +11,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.launch
 import org.hermes.daos.EventDao
-import org.hermes.daos.UserDao
 import org.hermes.entities.Event
 import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
@@ -23,7 +22,8 @@ import javax.inject.Singleton
 @Singleton
 class MetadataRepository @Inject constructor(
     private val db: HermesRoomDatabase,
-    private val application: Application
+    private val application: Application,
+    @Named("iota") private val prefs: SharedPreferences
 ) {
 
     private val loggingTag = "MetadataRepository"
@@ -57,9 +57,11 @@ class MetadataRepository @Inject constructor(
         mld.value = ledgerServiceRunning.get()
         mld
     }()
-
-    @field:[Inject Named("iota")]
-    lateinit var prefs: SharedPreferences
+    val rootIOTAAddress: MutableLiveData<String> = {
+        val mld = MutableLiveData<String>()
+        mld.value = prefs.getString("root_address", "")!!
+        mld
+    }()
 
     fun addSensor(sensor: LedgerService.Sensor) {
         sensorList.add(sensor)
@@ -112,8 +114,6 @@ class MetadataRepository @Inject constructor(
         } else
             Log.i(loggingTag, "Ledger service is already running")
     }
-
-    fun getRootAddress(): String = prefs.getString("root_address", "")!!
 
     fun fetchEvent(id: Int, callback: (event: Event) -> Unit) {
         CoroutineScope(BACKGROUND.asCoroutineDispatcher()).launch {

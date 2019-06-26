@@ -63,6 +63,9 @@ class DashboardFragment @Inject constructor() : Fragment() {
         dashboardViewModel.uptime.observe(this, Observer<Int> {
             mView.findViewById<TextView>(R.id.uptimeNum).text = (if (it != null) it.toString() else "0") + " minutes"
         })
+        dashboardViewModel.rootAddress.observe(this, Observer<String> {
+            mView.findViewById<TextView>(R.id.rootAddress).text = it
+        })
         val activateText = "Start Broadcasting"
         val deActivateText = "Stop Broadcasting"
         val green = ResourcesCompat.getColor(resources, R.color.green, null)
