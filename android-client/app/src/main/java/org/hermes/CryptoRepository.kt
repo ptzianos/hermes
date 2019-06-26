@@ -134,7 +134,8 @@ class CryptoRepository @Inject constructor(val application: Application,
             .isNullOrBlank()
         val hashedPinEmpty = sharedPref.getString(application.getString(R.string.auth_hashed_pin), "")
             .isNullOrBlank()
-        val keypairEmpty = !ks.containsAlias(application.getString(R.string.auth_private_key))
+        val keypairEmpty = sharedPref.getString(application.getString(R.string.auth_private_key), "")
+            .isNullOrBlank()
 
         if (seedEmpty != hashedPinEmpty || hashedPinEmpty != keypairEmpty) {
             Log.e(loggingTag, "Application is in an incorrect state. Seed, keypair or pin not available!")

@@ -116,6 +116,13 @@ class IOTAConnector(val seed: Seed, val privateKey: SecP256K1PrivKey, app: Herme
         val nextAddress = IotaAPIUtils.newAddress(seed.toString(), Seed.DEFAULT_SEED_SECURITY,
             newAddressIndex + 1, true, SpongeFactory.create(SpongeFactory.Mode.KERL))
 
+        if (previousAddress == "") {
+            Log.i(loggingTag, "This is the first packet to be attached. Storing first address index $newAddress")
+            prefs.edit()
+                .putString("root_address", newAddress)
+                .apply()
+        }
+
         prefs.edit()
             .putInt("latest_addr_index", newAddressIndex)
             .putString("latest_addr_used", newAddress)
@@ -124,7 +131,7 @@ class IOTAConnector(val seed: Seed, val privateKey: SecP256K1PrivKey, app: Herme
         Log.d(loggingTag,
             "$clientUUID -- Address that will be used for the next sample broadcast is $newAddress")
 
-        return listOf<String>(previousAddress, newAddress, nextAddress)
+        return listOf(previousAddress, newAddress, nextAddress)
     }
 
     private fun prepareTransactions(previousAddress: String, newAddress: String, nextAddress: String,

@@ -2,6 +2,7 @@ package org.hermes
 
 import android.app.Application
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Build
 import android.util.Log
 import androidx.lifecycle.LiveData
@@ -15,6 +16,7 @@ import org.hermes.entities.Event
 import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
+import javax.inject.Named
 import javax.inject.Singleton
 
 
@@ -55,6 +57,9 @@ class MetadataRepository @Inject constructor(
         mld.value = ledgerServiceRunning.get()
         mld
     }()
+
+    @field:[Inject Named("iota")]
+    lateinit var prefs: SharedPreferences
 
     fun addSensor(sensor: LedgerService.Sensor) {
         sensorList.add(sensor)
@@ -104,12 +109,11 @@ class MetadataRepository @Inject constructor(
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) application.startForegroundService(intent)
             else application.startService(intent)
             ledgerServiceBootstrapped = true
-        } else {
+        } else
             Log.i(loggingTag, "Ledger service is already running")
-        }
     }
 
-    fun getRootAddress(): String = ""
+    fun getRootAddress(): String = prefs.getString("root_address", "")!!
 
     fun fetchEvent(id: Int, callback: (event: Event) -> Unit) {
         CoroutineScope(BACKGROUND.asCoroutineDispatcher()).launch {

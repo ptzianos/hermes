@@ -76,7 +76,7 @@ class SetupActivity : BaseActivity() {
             errorsInForm = true
             pinSetupInputVerify.error = "The two fields must be equal"
         }
-        if (!errorsInForm && cryptoRepository.generateCredentials(pinSetupInput.text.toString())) {
+        if (!errorsInForm) {
             cryptoRepository.unseal(pinSetupInput.text.toString())
             goToLoader(pinSetupInput.text.toString())
         }

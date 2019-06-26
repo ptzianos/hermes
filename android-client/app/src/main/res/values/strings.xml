@@ -42,4 +42,5 @@
     <string name="show_seed">Show seed</string>
     <string name="show_key">Show Key</string>
     <string name="title_activity_setup_load">SetupLoadActivity</string>
+    <string name="iota_root_address">IOTA Root Address</string>
 </resources>
