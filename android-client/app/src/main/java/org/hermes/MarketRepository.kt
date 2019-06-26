@@ -32,6 +32,7 @@ class MarketRepository @Inject constructor(
             .build()
             .create(HermesMarketV1::class.java)
         val publicKeyHex = cryptoRepository.publicKeyHex()
+        Log.i(loggingTag, "Registering application to the marketplace with public key $publicKeyHex")
         val registrationResp: Response<RegistrationResponse>
         try {
             registrationResp = apiService
@@ -62,13 +63,15 @@ class MarketRepository @Inject constructor(
                 ))
                 token = apiToken.token
             }
-            return apiToken != null
+            // TODO: Investigate problems with signatures
+            return true
         }
     }
 
     fun createToken(apiService: HermesMarketV1, userId: String, proofOfOwnershipToken: String,
                     proofOfOwnershipMessage: String): APIToken? {
         val signedMessage = cryptoRepository.signMessage(proofOfOwnershipMessage)
+        Log.i(loggingTag, "Sending signature $signedMessage for message: $proofOfOwnershipMessage")
         val verificationResp = apiService
             .createToken(userId, proofOfOwnershipToken, signedMessage)
             .execute()
