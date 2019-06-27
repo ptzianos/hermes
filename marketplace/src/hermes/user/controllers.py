@@ -810,9 +810,7 @@ def verify_public_key(
     msg_hash = SHA1.new()
     msg_hash.update(request.original_message.encode())
     if request.public_key.type == 'rsa':
-        sig_scheme = new_pkcs_115_scheme(import_rsa_key(
-            request.public_key.value
-        ))
+        sig_scheme = new_pkcs_115_scheme(import_rsa_key(request.public_key.value))
         sig_scheme.verify(msg_hash, bytes.fromhex(proof_of_ownership))
     elif request.public_key.type == 'ecdsa':
         sig_scheme = new_dss_sig_scheme(import_ecdsa_key(

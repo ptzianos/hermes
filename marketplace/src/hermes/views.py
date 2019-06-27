@@ -112,7 +112,7 @@ def login() -> ViewResponse:
         session.owner = user
         session.refresh()
         return redirect(url_for(index))
-    except (UnknownUser, WrongParameters):
+    except (UnknownUser, WrongParameters, ValueError):
         return make_response('', requests.codes.bad_request)
 
 
