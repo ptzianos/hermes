@@ -4,7 +4,7 @@ from string import ascii_letters
 from typing import Callable, Iterator, Tuple
 
 import pytest
-from Crypto.Hash import SHA3_512
+from Crypto.Hash import SHA1, SHA3_512
 from Crypto.PublicKey.ECC import EccKey
 from Crypto.PublicKey.RSA import RsaKey
 from Crypto.Signature.DSS import new as new_dss_sig_scheme
@@ -291,9 +291,8 @@ def test_public_key_verification(
                       public_key_type='rsa')
 
     sig_scheme = new_pkcs115(rsa_key)
-    msg_hash = (SHA3_512
-                .new()
-                .update(pk_verification_request.original_message.encode()))
+    msg_hash = SHA1.new()
+    msg_hash.update(pk_verification_request.original_message.encode())
     hexed_sig = sig_scheme.sign(msg_hash).hex()
 
     with pytest.raises(UnknownToken):
@@ -324,9 +323,8 @@ def test_public_key_verification_for_ecdsa(
                       public_key_type='ecdsa')
 
     sig_scheme = new_dss_sig_scheme(ecdsa_key, mode='deterministic-rfc6979')
-    msg_hash = (SHA3_512
-                .new()
-                .update(pk_verification_request.original_message.encode()))
+    msg_hash = SHA1.new()
+    msg_hash.update(pk_verification_request.original_message.encode())
     hexed_sig = sig_scheme.sign(msg_hash).hex()
 
     with pytest.raises(UnknownToken):
@@ -361,9 +359,8 @@ def test_user_authentication(
                       public_key_type='rsa')
 
     sig_scheme = new_pkcs115(rsa_key)
-    msg_hash = (SHA3_512
-                .new()
-                .update(pk_verification_request.original_message.encode()))
+    msg_hash = SHA1.new()
+    msg_hash.update(pk_verification_request.original_message.encode())
     hexed_sig = sig_scheme.sign(msg_hash).hex()
 
     email_verification_token.email.verified = True
