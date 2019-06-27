@@ -217,7 +217,7 @@
                         app:layout_constraintEnd_toEndOf="parent"
                         tools:text="EXVJYBXDZDZNQ9SB99ETXQVMHFYOMVJW9DLNGLV9VRSTVRDOVPJXPGJFAYDMNP9XMPUPVCBYZTDFH9VMY"
                         android:fontFamily="@font/roboto_condensed_bold" android:textSize="16sp"
-                        android:textAlignment="center"/>
+                        android:textAlignment="center" android:textIsSelectable="true"/>
                 <View
                         android:id="@+id/divider7"
                         android:layout_width="320dp"
