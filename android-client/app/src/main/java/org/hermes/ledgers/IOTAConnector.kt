@@ -12,6 +12,7 @@ import kotlinx.coroutines.*
 import org.apache.commons.lang3.StringUtils
 import org.hermes.*
 import org.iota.jota.IotaAPI
+import org.iota.jota.error.ArgumentException
 import org.iota.jota.model.Bundle
 import org.iota.jota.model.Transaction
 import org.iota.jota.pow.SpongeFactory
@@ -30,11 +31,11 @@ import org.hermes.utils.splitInChunks
 import org.hermes.utils.toTrytes
 
 
-class IOTAConnector(val seed: Seed, val privateKey: SecP256K1PrivKey, app: HermesClientApp) {
+class IOTAConnector(val seed: Seed, private val privateKey: SecP256K1PrivKey, app: HermesClientApp) {
 
     val loggingTag: String = "IOTAConnector"
 
-    val EMPTY_TAG = StringUtils.rightPad("", 27, "9")
+    val EMPTY_TAG: String = StringUtils.rightPad("", 27, "9")
 
     @Inject
     lateinit var api: IotaAPI
@@ -84,18 +85,14 @@ class IOTAConnector(val seed: Seed, val privateKey: SecP256K1PrivKey, app: Herme
         val (previousAddress, newAddress, nextAddress) = prepareAddress(clientUUID)
         val trytes = prepareTransactions(previousAddress, newAddress, nextAddress, clientUUID, *samples)
 
-        for (i in 1..3) {
-            try {
-                broadcastBundle(clientUUID, trytes, newAddress, i, 3)
-                break
-            } catch (e: Exception) {
-                Log.e(loggingTag, "$clientUUID -- There was an error while trying to broadcast a sample to IOTA: $e")
-                Thread.sleep(5 * 1000)
-            }
+        var i = 1
+        while (i <= 3 && broadcastBundle(clientUUID, trytes, newAddress, i, 3)) {
+            Thread.sleep(5 * 1000)
             if (i == 3) {
                 Log.e(loggingTag, "Could not broadcast transactions. Aborting!")
                 return
             }
+            i += 1
         }
 
         if (asyncConfirmation) {
@@ -162,7 +159,7 @@ class IOTAConnector(val seed: Seed, val privateKey: SecP256K1PrivKey, app: Herme
     }
 
     private fun broadcastBundle(clientUUID: String, bundleTrytes: Array<String>, address: String, currentTry: Int,
-                                maxTries: Int) {
+                                maxTries: Int): Boolean {
         val depth = 3
         val minWeightMagnitude = 14
 
@@ -176,10 +173,24 @@ class IOTAConnector(val seed: Seed, val privateKey: SecP256K1PrivKey, app: Herme
             .toString()
 
         Log.i(loggingTag, eventMessage)
-        api.sendTrytes(bundleTrytes, depth, minWeightMagnitude, null)
+        val msg = "There was an error while trying to broadcast packets to the Tangle: "
+        try {
+            Log.d(loggingTag, "Attempting to broadcast transactions to address $address")
+            api.sendTrytes(bundleTrytes, depth, minWeightMagnitude, null)
+            Log.d(loggingTag, "Broadcast to address $address succeeded")
+        } catch (e: IllegalAccessError) {
+            Log.e(loggingTag, "$clientUUID -- $msg ${e.message}")
+            db.eventDao().insertAll(Event(action = "broadcast failure", resource = "iota", extraInfo = "$msg ${e.message}"))
+            return false
+        } catch (e: IllegalAccessError) {
+            Log.e(loggingTag, "$clientUUID -- $msg ${e.message}")
+            db.eventDao().insertAll(Event(action = "broadcast failure", resource = "iota", extraInfo = "$msg ${e.message}"))
+            return false
+        }
 
         val event = Event(action = "broadcast", resource = "iota", extraInfo = eventMessage)
         db.eventDao().insertAll(event)
+        return true
     }
 
     private suspend fun checkResultOfTransactions(trxs: Array<String>, clientUUID: String,
@@ -190,8 +201,21 @@ class IOTAConnector(val seed: Seed, val privateKey: SecP256K1PrivKey, app: Herme
             delay(5 * 1000)
 
             Log.d(loggingTag, "$clientUUID -- Starting IOTA API call $i/3 for addresses: $txsAddressesStr.")
+            val unsuccessfulMsg = "$clientUUID -- IOTA API call $i/3 was unsuccessful for addresses: $txsAddressesStr"
+            val fetchedTxs: List<Transaction>
+            try {
+                fetchedTxs = api.findTransactionObjectsByAddresses(trxs)
+            } catch (e: IllegalAccessError) {
+                Log.d(loggingTag, unsuccessfulMsg + " because of ${e.message}")
+                continue
+            } catch (e: IllegalAccessError) {
+                Log.d(loggingTag, unsuccessfulMsg + " because of ${e.message}")
+                continue
+            } catch (e: ArgumentException) {
+                Log.d(loggingTag, unsuccessfulMsg + " because of ${e.message}")
+                continue
+            }
 
-            val fetchedTxs = api.findTransactionObjectsByAddresses(trxs)
             val successfulTxs = fetchedTxs.filter { it.hash.isNotEmpty() }
 
             if (successfulTxs.isNotEmpty()) {
@@ -209,7 +233,7 @@ class IOTAConnector(val seed: Seed, val privateKey: SecP256K1PrivKey, app: Herme
                 Log.i(loggingTag, eventMessage.toString())
                 return
             }
-            Log.d(loggingTag, "$clientUUID -- IOTA API call $i/3 was unsuccessful for addresses: $txsAddressesStr")
+            Log.d(loggingTag, unsuccessfulMsg)
         }
         val eventMessage = StringBuilder()
             .append("$clientUUID -- Broadcast was unsuccessful for txs: ")
