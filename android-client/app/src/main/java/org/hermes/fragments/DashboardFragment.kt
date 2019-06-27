@@ -82,7 +82,6 @@ class DashboardFragment @Inject constructor() : Fragment() {
                     button.text = activateText
                 }
             }
-
         })
         button.setOnClickListener {
             metadataRepository.ledgerServiceRunning.set(dashboardViewModel.activeService.value == null || !dashboardViewModel.activeService.value!!)
