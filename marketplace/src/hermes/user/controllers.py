@@ -690,7 +690,7 @@ def generate_public_key_verification_request(
         token.revoke()
 
     message = PUBLIC_KEY_VERIFICATION_TEXT.format(
-        digest=public_key.uuid,
+        digest=hash_value(public_key.value)[:10],
         expiration_date=(datetime.now() +
                          PUBLIC_KEY_VERIFICATION_REQUEST_DURATION)
     )
