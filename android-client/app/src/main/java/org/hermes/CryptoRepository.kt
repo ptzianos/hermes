@@ -18,10 +18,10 @@ import org.hermes.iota.Seed
 
 
 @Singleton
-class CryptoRepository @Inject constructor(val application: Application,
-                                           val db: HermesRoomDatabase,
-                                           @param:Named("auth") val sharedPref: SharedPreferences,
-                                           private val ks: KeyStore
+class CryptoRepository @Inject constructor(
+    val application: Application,
+    val db: HermesRoomDatabase,
+    @param:Named("auth") val sharedPref: SharedPreferences
 ) {
 
     private val loggingTag = "CryptoRepository"
