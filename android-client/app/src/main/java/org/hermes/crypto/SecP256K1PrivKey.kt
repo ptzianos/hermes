@@ -24,6 +24,8 @@ import org.bouncycastle.util.encoders.Hex
 import org.bouncycastle.util.io.pem.PemObject
 import org.bouncycastle.util.io.pem.PemWriter
 
+import org.hermes.utils.toByteArray
+
 
 class SecP256K1PrivKey : PrivateKey {
 
@@ -106,15 +108,22 @@ class SecP256K1PrivKey : PrivateKey {
     }
 
     fun electrumSign(message: String): String {
-        val msgBytes = ByteArray(1){ 24.toByte() } +
+        val messageLength = message.length
+        val messageLengthExtraByte = when {
+            messageLength < 253 -> ByteArray(0)
+            messageLength < 65536 -> 253.toByteArray()
+            messageLength < 4294967296 -> 254.toByteArray()
+            else -> 255.toByteArray()
+        }
+        val msgBytes = 24.toByteArray() +
                 "Bitcoin Signed Message:\n".toByteArray() +
-                ByteArray(1){ message.length.toByte() } +
+                messageLengthExtraByte +
+                message.length.toByteArray().reversedArray() +
                 message.toByteArray()
         val digest = MessageDigest.getInstance("SHA-256")
         val twiceHashed = digest.digest(digest.digest(msgBytes))
         val (r, s, rY) = rawSign(twiceHashed)
-        val temp = ECDSASignature(r, s, rY).toBTCFormat()
-        return temp
+        return ECDSASignature(r, s, rY).toBTCFormat()
     }
 
     override fun getAlgorithm(): String = "EC"
