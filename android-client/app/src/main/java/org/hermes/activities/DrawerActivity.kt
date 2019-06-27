@@ -54,9 +54,8 @@ class DrawerActivity : BaseActivity(), NavigationDrawerFragment.NavigationDrawer
         )
 
         val extras = intent.extras
-        if (extras != null && extras.containsKey("tile")) {
-            onNavigationDrawerItemSelected(extras.getInt("tile"))
-        }
+        onNavigationDrawerItemSelected(
+            if (extras != null && extras.containsKey("tile")) extras.getInt("tile") else 0)
     }
 
     override fun onNavigationDrawerItemSelected(position: Int) {
@@ -78,7 +77,7 @@ class DrawerActivity : BaseActivity(), NavigationDrawerFragment.NavigationDrawer
         }
         supportFragmentManager.beginTransaction()
                 .replace(R.id.container, fragment)
-                .commitAllowingStateLoss()
+                .commit()
     }
 
     /**

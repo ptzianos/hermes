@@ -52,16 +52,16 @@ class DashboardFragment @Inject constructor() : Fragment() {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         dashboardViewModel.activeSensors.observe(this, Observer<Int> {
-            mView.findViewById<TextView>(R.id.activeSensorNum).text = if (it != null) it.toString() else "0"
+            mView.findViewById<TextView>(R.id.activeSensorNum).text = it?.toString() ?: "0"
         })
         dashboardViewModel.iotaReceived.observe(this, Observer<Int> {
-            mView.findViewById<TextView>(R.id.iotaReceived).text = if (it != null) it.toString() else "0"
+            mView.findViewById<TextView>(R.id.iotaReceived).text = it?.toString() ?: "0"
         })
         dashboardViewModel.packetsBroadcast.observe(this, Observer<Int> {
-            mView.findViewById<TextView>(R.id.dataPacketNum).text = if (it != null) it.toString() else "0"
+            mView.findViewById<TextView>(R.id.dataPacketNum).text = it?.toString() ?: "0"
         })
         dashboardViewModel.uptime.observe(this, Observer<Int> {
-            mView.findViewById<TextView>(R.id.uptimeNum).text = (if (it != null) it.toString() else "0") + " minutes"
+            mView.findViewById<TextView>(R.id.uptimeNum).text = "${it?.toString() ?: "0"} minutes"
         })
         dashboardViewModel.rootAddress.observe(this, Observer<String> {
             mView.findViewById<TextView>(R.id.rootAddress).text = it
