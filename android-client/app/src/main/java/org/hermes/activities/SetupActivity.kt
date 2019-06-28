@@ -32,11 +32,7 @@ class SetupActivity : BaseActivity() {
 
     override fun onResume() {
         super.onResume()
-        if (cryptoRepository.credentialsGenerated()) {
-            startActivity(Intent(this, LoginActivity::class.java))
-        } else {
-            initForm()
-        }
+        initForm()
     }
 
     private fun initForm() {
@@ -52,9 +48,8 @@ class SetupActivity : BaseActivity() {
     }
 
     private fun goToLoader(pin: String) {
-        val intent = Intent()
-            .putExtra("pin", pin)
-            .setClass(this, SetupLoadActivity::class.java)
+        val intent = Intent(this, SetupLoadActivity::class.java)
+        cryptoRepository.generateCredentials(pin)
         startActivity(intent)
     }
 

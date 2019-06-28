@@ -27,20 +27,22 @@ class CryptoRepository @Inject constructor(
     private val loggingTag = "CryptoRepository"
 
     private lateinit var seed: Seed
-    private lateinit var privateKey: SecP256K1PrivKey
-    private lateinit var publicKey: SecP256K1PubKey
+    private var privateKey: SecP256K1PrivKey? = null
+    private var publicKey: SecP256K1PubKey? = null
 
     private var unsealed: Boolean = false
     private var credentialsLoaded: Boolean = false
 
     fun sealed(): Boolean = !unsealed
 
+    fun unsealed(): Boolean = unsealed
+
     init {
         Security.addProvider(BouncyCastleProvider())
     }
 
     private val pkHashString by lazy {
-        val sha3512 = SHA3.Digest512().apply { update(publicKey.encoded) }
+        val sha3512 = SHA3.Digest512().apply { update(publicKey?.encoded) }
         Hex.toHexString(sha3512.digest())
     }
     val pkHash: String
@@ -76,6 +78,7 @@ class CryptoRepository @Inject constructor(
      * TODO: Throw a clear error when the credentials cannot be stored.
      */
     fun generateCredentials(pin: String): Boolean {
+        clearCredentials()
         val hashedPin = PasswordHasher.hashPassword(pin.toCharArray()).toString()
         seed = Seed.new()
         privateKey = SecP256K1PrivKey.random()
@@ -119,9 +122,10 @@ class CryptoRepository @Inject constructor(
 //            arrayOf(certificate))
 
         return sharedPref.edit()
-            .putString(application.getString(R.string.auth_hashed_pin), hashedPin)
             .putString(application.getString(R.string.auth_seed), seed.toString())
-            .putString(application.getString(R.string.auth_private_key), Hex.toHexString(privateKey.value.toByteArray()))
+            .putString(application.getString(R.string.auth_hashed_pin), hashedPin)
+            // TODO:  See if this can be added to the keystore
+            .putString(application.getString(R.string.auth_private_key), Hex.toHexString(privateKey?.value?.toByteArray()))
             .commit()
     }
 
@@ -154,7 +158,7 @@ class CryptoRepository @Inject constructor(
                 .toCharArray()
         )
         privateKey = SecP256K1PrivKey(sharedPref.getString(application.getString(R.string.auth_private_key), "") as String)
-        publicKey = SecP256K1PubKey.fromPrivateKey(privateKey)
+        publicKey = SecP256K1PubKey.fromPrivateKey(privateKey!!)
 
 //        val privateKeyEntry =
 //            ks.getEntry(application.getString(R.string.auth_private_key), null)
@@ -171,11 +175,17 @@ class CryptoRepository @Inject constructor(
             .remove(application.getString(R.string.auth_private_key))
             .commit()
 
-    fun publicKeyHex(): String = publicKey.encodedHex
+    fun seal() {
+        unsealed = false
+        privateKey = null
 
-    fun signMessage(msg: String): String = privateKey.electrumSign(msg)
+    }
+
+    fun publicKeyHex(): String = publicKey?.encodedHex ?: ""
+
+    fun signMessageElectrumStyle(msg: String): String = privateKey?.electrumSign(msg) ?: ""
 
     fun IOTASeed(): Seed = seed
 
-    fun privateKey(): SecP256K1PrivKey = privateKey
+    fun privateKey(): SecP256K1PrivKey? = privateKey
 }

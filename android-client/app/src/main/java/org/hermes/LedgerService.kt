@@ -190,7 +190,7 @@ class LedgerService : Service() {
     lateinit var app: HermesClientApp
 
     private val iotaConnector by lazy {
-        IOTAConnector(cryptoRepository.IOTASeed(), cryptoRepository.privateKey(), app)
+        IOTAConnector(cryptoRepository.IOTASeed(), cryptoRepository.privateKey()!!, app)
     }
 
     override fun onCreate() {

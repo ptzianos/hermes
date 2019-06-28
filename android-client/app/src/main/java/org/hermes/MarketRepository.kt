@@ -1,8 +1,11 @@
 package org.hermes
 
+import android.app.Application
+import android.content.SharedPreferences
 import android.util.Log
 import java.lang.Exception
 import javax.inject.Inject
+import javax.inject.Named
 import javax.inject.Singleton
 import retrofit2.Response
 import retrofit2.Retrofit
@@ -15,9 +18,11 @@ import org.hermes.market.RegistrationResponse
 
 @Singleton
 class MarketRepository @Inject constructor(
+    val application: Application,
     private val db: HermesRoomDatabase,
     private val retroBuilder: Retrofit.Builder,
-    private val cryptoRepository: CryptoRepository
+    private val cryptoRepository: CryptoRepository,
+    @param:Named("auth") val sharedPrefs: SharedPreferences
 ) {
 
     private val loggingTag = "MarketRepository"
@@ -42,44 +47,59 @@ class MarketRepository @Inject constructor(
             Log.e(loggingTag, "$e")
             return false
         }
-        if (!registrationResp.isSuccessful) {
+        if (!registrationResp.isSuccessful || registrationResp.body() == null) {
             Log.e(loggingTag, "Could not register user with marketplace: " +
                     "${registrationResp.code()}")
             return false
-        } else {
-            val registrationResponse = registrationResp.body()!!
-            Log.i(loggingTag, "Verifying user's key with market https://$domain")
-            val apiToken = createToken(
-                apiService,
-                registrationResponse.uuid,
-                registrationResponse.publicKeyVerificationToken,
-                registrationResponse.publicKeyVerificationMessage)
-            if (apiToken != null) {
-                Log.i(loggingTag, "Storing user with ${registrationResponse.uuid} from market " +
-                        "https://$domain to the database")
-                db.userDao().insertAll(User(
-                    marketUUID = registrationResponse.uuid, name = registrationResponse.name,
-                    domain = domain, token = apiToken.token
-                ))
-                token = apiToken.token
-            }
-            // TODO: Investigate problems with signatures
-            return true
         }
+        val registrationResponse = registrationResp.body()!!
+        Log.i(loggingTag, "Storing user with ${registrationResponse.uuid} from market " +
+                "https://$domain to the database")
+        db.userDao().insertAll(User(
+            marketUUID = registrationResponse.uuid, name = registrationResponse.name,
+            domain = domain, token = null
+        ))
+        Log.i(loggingTag, "Verifying user's key with market https://$domain")
+        val apiToken = getToken(
+            registrationResponse.uuid,
+            apiService,
+            registrationResponse.uuid,
+            registrationResponse.publicKeyVerificationToken,
+            registrationResponse.publicKeyVerificationMessage)
+        if (apiToken != null) {
+            sharedPrefs.edit()
+                .putBoolean(domain + "_token", true)
+                .apply()
+        }
+        return true
     }
 
-    fun createToken(apiService: HermesMarketV1, userId: String, proofOfOwnershipToken: String,
-                    proofOfOwnershipMessage: String): APIToken? {
-        val signedMessage = cryptoRepository.signMessage(proofOfOwnershipMessage)
+    fun getToken(userUUID: String, apiService: HermesMarketV1, userId: String, proofOfOwnershipToken: String,
+                 proofOfOwnershipMessage: String): String? {
+        val signedMessage = cryptoRepository.signMessageElectrumStyle(proofOfOwnershipMessage)
         Log.i(loggingTag, "Sending signature $signedMessage for message: $proofOfOwnershipMessage")
         val verificationResp = apiService
             .createToken(userId, proofOfOwnershipToken, signedMessage)
             .execute()
-        return verificationResp.body()
+        val verificationBody = verificationResp.body()
+        if (verificationResp.isSuccessful && verificationBody != null) {
+            Log.i(loggingTag, "Updating user's $userUUID token in the database")
+            db.userDao().updateToken(userUUID, verificationBody.token)
+            token = verificationBody.token
+        }
+        return verificationBody?.token
     }
 
     fun loadToken(domain: String = "hermes-data.io") {
         val user: User? = db.userDao().findByMarket(domain = domain)
         token = user?.token
+    }
+
+    fun registered(domain: String = "hermes-data.io"): Boolean {
+        return sharedPrefs.getBoolean(domain + "_registered", false)
+    }
+
+    fun tokenAcquired(domain: String = "hermes-data.io"): Boolean {
+        return sharedPrefs.getBoolean(domain + "_token", false)
     }
 }

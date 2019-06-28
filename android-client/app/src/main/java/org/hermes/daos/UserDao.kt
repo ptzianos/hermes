@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
+
 import org.hermes.entities.User
 
 
@@ -26,4 +27,7 @@ interface UserDao {
 
     @Query("DELETE FROM users WHERE domain = :domain")
     fun deleteByDomain(domain: String)
+
+    @Query("UPDATE users SET token = :token WHERE market_uuid = :uuid")
+    fun updateToken(uuid: String, token: String)
 }

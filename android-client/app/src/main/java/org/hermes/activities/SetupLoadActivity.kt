@@ -47,25 +47,29 @@ class SetupLoadActivity : BaseActivity() {
         AndroidInjection.inject(this)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_setup_load)
-        startPipeline(intent?.extras?.getString("pin") as String)
     }
 
-    private fun startPipeline(pin: String) {
+    override fun onResume() {
+        super.onResume()
+        startPipeline()
+    }
+
+    private fun startPipeline() {
         CoroutineScope(BACKGROUND.asCoroutineDispatcher()).launch {
-            handler
-                .obtainMessage(0, "Generating seed and key pair. Please don't close app")
-                .apply { sendToTarget() }
-            cryptoRepository.generateCredentials(pin)
-            cryptoRepository.unseal(pin)
+            if (hermesLifeCycleObserver.getCurrentState()!! == State.REGISTERED)
+                handler
+                    .obtainMessage(0, "Generated seed and key pair.")
+                    .apply { sendToTarget() }
+            delay(2 * 1000)
             handler
                 .obtainMessage(0, "Registering agent with the marketplace. Please don't close the app")
                 .apply { sendToTarget() }
             if (!marketRepository.registerUser()) {
                 handler
-                    .obtainMessage(0, "There was an error. Please retry later to setup and make sure you " +
-                            "have an active Internet connection")
+                    .obtainMessage(0, "There was an error while trying to register with the marketplace. " +
+                            "Please retry later to setup and make sure you have an active Internet connection")
                     .apply { sendToTarget() }
-                rollbackCredentials()
+                cryptoRepository.seal()
                 delay(5 * 1000)
                 goToSetupPage()
             } else {

@@ -52,7 +52,10 @@ class DrawerActivity : BaseActivity(), NavigationDrawerFragment.NavigationDrawer
             R.id.navigation_drawer,
             findViewById<View>(R.id.drawer_layout) as DrawerLayout
         )
+    }
 
+    override fun onResume() {
+        super.onResume()
         val extras = intent.extras
         onNavigationDrawerItemSelected(
             if (extras != null && extras.containsKey("tile")) extras.getInt("tile") else 0)
