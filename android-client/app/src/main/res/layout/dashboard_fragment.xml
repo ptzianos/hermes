@@ -14,20 +14,18 @@
             app:layout_constraintEnd_toEndOf="parent" android:layout_marginEnd="8dp" android:background="@color/green"
             tools:text="Stop service" android:layout_marginTop="30dp" app:layout_constraintTop_toTopOf="parent"/>
     <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="354dp"
-            android:layout_height="343dp" app:layout_constraintTop_toBottomOf="@+id/serviceActivationButton"
+            android:layout_width="match_parent"
+            android:layout_height="463dp" app:layout_constraintTop_toBottomOf="@+id/serviceActivationButton"
             android:layout_marginTop="18dp"
-            android:layout_marginBottom="18dp"
             app:layout_constraintEnd_toEndOf="parent" app:layout_constraintStart_toStartOf="parent"
-            android:layout_marginEnd="8dp" android:id="@+id/dashboardWidgetHolder"
-    >
+            android:layout_marginEnd="32dp" android:id="@+id/dashboardWidgetHolder"
+            android:layout_marginStart="32dp">
 
         <androidx.cardview.widget.CardView
                 android:layout_width="116dp"
                 android:layout_height="104dp"
                 android:background="@android:color/white"
                 android:id="@+id/sensorsCard" app:layout_constraintStart_toStartOf="parent"
-                android:layout_marginStart="8dp"
                 android:layout_marginTop="8dp" app:layout_constraintTop_toTopOf="parent">
             <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
@@ -70,9 +68,9 @@
         <androidx.cardview.widget.CardView
                 android:layout_width="220dp"
                 android:layout_height="104dp"
-                android:id="@+id/uptimeCard" app:layout_constraintEnd_toEndOf="parent" android:layout_marginEnd="8dp"
+                android:id="@+id/uptimeCard" app:layout_constraintEnd_toEndOf="parent"
                 android:layout_marginTop="8dp" app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintStart_toEndOf="@+id/sensorsCard" android:layout_marginStart="8dp">
+        >
             <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent" android:background="@android:color/white">
@@ -110,9 +108,9 @@
         <androidx.cardview.widget.CardView
                 android:layout_width="177dp"
                 android:layout_height="104dp" app:layout_constraintTop_toBottomOf="@+id/sensorsCard"
-                app:layout_constraintStart_toStartOf="parent" android:layout_marginStart="8dp"
+                app:layout_constraintStart_toStartOf="parent"
                 android:background="@android:color/white"
-                android:id="@+id/packagesCard"
+                android:id="@+id/packagesBroadcastCard"
                 android:layout_marginTop="8dp">
             <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
@@ -154,10 +152,49 @@
         <androidx.cardview.widget.CardView
                 android:layout_width="158dp"
                 android:layout_height="104dp"
+                android:id="@+id/packagesConfirmedCard"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_marginTop="8dp"
                 app:layout_constraintTop_toBottomOf="@+id/uptimeCard"
-                app:layout_constraintStart_toEndOf="@+id/packagesCard"
-                android:layout_marginStart="8dp" android:id="@+id/profitsCard" app:layout_constraintEnd_toEndOf="parent"
-                android:layout_marginEnd="8dp"
+        >
+            <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                <TextView
+                        android:text="80"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" android:id="@+id/dataPacketAttachedNum"
+                        android:textSize="36sp"
+                        android:fontFamily="@font/roboto_condensed_bold" android:textAlignment="center"
+                        app:layout_constraintStart_toStartOf="parent" app:layout_constraintEnd_toEndOf="parent"
+                        android:layout_marginEnd="8dp" app:layout_constraintTop_toTopOf="parent"
+                        android:layout_marginStart="8dp" android:layout_marginTop="8dp"/>
+                <View
+                        android:id="@+id/divider20"
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="@color/dividerColor"
+                        app:layout_constraintEnd_toEndOf="parent" android:layout_marginTop="9dp"
+                        app:layout_constraintTop_toBottomOf="@+id/dataPacketAttachedNum"
+                        app:layout_constraintStart_toStartOf="parent" android:layout_marginStart="8dp"
+                        android:layout_marginEnd="8dp"/>
+                <TextView
+                        android:text="Samples Attached"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" android:id="@+id/textView2"
+                        app:layout_constraintTop_toBottomOf="@+id/divider20" app:layout_constraintEnd_toEndOf="parent"
+                        android:layout_marginEnd="8dp" app:layout_constraintStart_toStartOf="parent"
+                        android:layout_marginStart="8dp" android:layout_marginTop="8dp"
+                        android:layout_marginBottom="8dp" app:layout_constraintBottom_toBottomOf="parent"
+                        android:textSize="16sp" android:fontFamily="@font/roboto_condensed_regular"/>
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.cardview.widget.CardView>
+        <androidx.cardview.widget.CardView
+                android:layout_width="158dp"
+                android:layout_height="104dp"
+                app:layout_constraintTop_toBottomOf="@+id/packagesBroadcastCard"
+                android:id="@+id/profitsCard" app:layout_constraintEnd_toEndOf="parent"
                 android:layout_marginTop="8dp">
             <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
@@ -196,14 +233,14 @@
             </androidx.constraintlayout.widget.ConstraintLayout>
         </androidx.cardview.widget.CardView>
         <androidx.cardview.widget.CardView
-                android:layout_width="340dp"
+                android:layout_width="match_parent"
                 android:layout_height="106dp"
-                app:layout_constraintTop_toBottomOf="@+id/packagesCard"
+                app:layout_constraintTop_toBottomOf="@+id/profitsCard"
                 android:id="@+id/rootAddressCard"
                 app:layout_constraintEnd_toEndOf="parent"
-                android:layout_marginEnd="6dp" android:layout_marginBottom="8dp"
+                android:layout_marginBottom="8dp"
                 app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintStart_toStartOf="parent"
-                android:layout_marginStart="8dp" android:layout_marginTop="8dp">
+        >
             <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent" android:background="@android:color/white">
