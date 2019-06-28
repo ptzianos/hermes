@@ -11,7 +11,6 @@ import retrofit2.Response
 import retrofit2.Retrofit
 
 import org.hermes.entities.User
-import org.hermes.market.APIToken
 import org.hermes.market.HermesMarketV1
 import org.hermes.market.RegistrationResponse
 
