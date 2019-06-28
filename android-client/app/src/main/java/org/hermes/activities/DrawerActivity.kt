@@ -12,6 +12,7 @@ import dagger.android.AndroidInjection
 import javax.inject.Inject
 
 import org.hermes.BaseActivity
+import org.hermes.MetadataRepository
 import org.hermes.R
 import org.hermes.fragments.DashboardFragment
 import org.hermes.fragments.EventLogFragment
@@ -41,6 +42,9 @@ class DrawerActivity : BaseActivity(), NavigationDrawerFragment.NavigationDrawer
     @Inject
     lateinit var sensorListFragment: SensorListFragment
 
+    @Inject
+    lateinit var metadataRepository: MetadataRepository
+
     override fun onCreate(savedInstanceState: Bundle?) {
         AndroidInjection.inject(this)
         super.onCreate(savedInstanceState)
@@ -56,6 +60,7 @@ class DrawerActivity : BaseActivity(), NavigationDrawerFragment.NavigationDrawer
 
     override fun onResume() {
         super.onResume()
+        metadataRepository.startLedgerService()
         val extras = intent.extras
         onNavigationDrawerItemSelected(
             if (extras != null && extras.containsKey("tile")) extras.getInt("tile") else 0)

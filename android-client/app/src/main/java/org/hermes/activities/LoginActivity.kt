@@ -45,7 +45,6 @@ class LoginActivity: BaseActivity() {
             if (valid) {
                 login_pin_input.error = null
                 cryptoRepository.unseal(viewModel.pin!!)
-                metadataRepository.startLedgerService()
                 startActivity(Intent(this, DrawerActivity::class.java))
             }
         })
