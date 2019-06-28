@@ -50,6 +50,7 @@ class SetupActivity : BaseActivity() {
     private fun goToLoader(pin: String) {
         val intent = Intent(this, SetupLoadActivity::class.java)
         cryptoRepository.generateCredentials(pin)
+        cryptoRepository.unseal(pin)
         startActivity(intent)
     }
 
