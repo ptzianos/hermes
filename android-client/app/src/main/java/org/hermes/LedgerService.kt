@@ -298,7 +298,6 @@ class LedgerService : Service() {
         }
         Log.i(loggingTag, "Starting generating data with uuid $uuid")
         while (true) {
-            Log.d(loggingTag, "Generating a data sample for the Hermes Service")
             iHermesService?.sendDataDouble(uuid, (Random().nextInt() % 30).toDouble(), null, null,
                 null, null, null, null, -1, null)
             delay(5 * 1000)
