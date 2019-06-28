@@ -12,7 +12,6 @@ import kotlinx.coroutines.*
 import org.apache.commons.lang3.StringUtils
 import org.hermes.*
 import org.iota.jota.IotaAPI
-import org.iota.jota.error.ArgumentException
 import org.iota.jota.model.Bundle
 import org.iota.jota.model.Transaction
 import org.iota.jota.pow.SpongeFactory
