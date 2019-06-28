@@ -11,6 +11,7 @@ class IOTAModule {
             .protocol("https")
             .host("nodes.thetangle.org")
             .port(443)
+            .timeout(20)
             .build()
     }
 }
