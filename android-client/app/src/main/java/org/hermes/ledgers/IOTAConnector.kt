@@ -86,7 +86,7 @@ class IOTAConnector(val seed: Seed, private val privateKey: SecP256K1PrivKey, ap
         val trytes = prepareTransactions(previousAddress, newAddress, nextAddress, clientUUID, *samples)
 
         var i = 1
-        while (i <= 3 && broadcastBundle(clientUUID, trytes, newAddress, i, 3)) {
+        while (i <= 3 && !broadcastBundle(clientUUID, trytes, newAddress, i, 3)) {
             Thread.sleep(5 * 1000)
             if (i == 3) {
                 Log.e(loggingTag, "Could not broadcast transactions. Aborting!")
