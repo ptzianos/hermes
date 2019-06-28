@@ -56,14 +56,16 @@ class SetupLoadActivity : BaseActivity() {
 
     private fun startPipeline() {
         CoroutineScope(BACKGROUND.asCoroutineDispatcher()).launch {
-            if (hermesLifeCycleObserver.getCurrentState()!! == State.REGISTERED)
+            if (hermesLifeCycleObserver.getCurrentState()!! == State.REGISTERED) {
                 handler
                     .obtainMessage(0, "Generated seed and key pair.")
                     .apply { sendToTarget() }
-            delay(2 * 1000)
+                delay(2 * 1000)
+            }
             handler
                 .obtainMessage(0, "Registering agent with the marketplace. Please don't close the app")
                 .apply { sendToTarget() }
+            delay(1000)
             if (!marketRepository.registerUser()) {
                 handler
                     .obtainMessage(0, "There was an error while trying to register with the marketplace. " +
@@ -76,8 +78,7 @@ class SetupLoadActivity : BaseActivity() {
                 handler
                     .obtainMessage(0, "Done with the registration. Have fun!")
                     .apply { sendToTarget() }
-                delay(1000)
-                metadataRepository.startLedgerService()
+                delay(2 * 1000)
                 goToDashboard()
             }
         }
