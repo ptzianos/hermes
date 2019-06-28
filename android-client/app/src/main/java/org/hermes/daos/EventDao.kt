@@ -15,7 +15,7 @@ interface EventDao {
     @Query("SELECT * FROM events ORDER BY datetime(created_on)")
     fun getAllLive(): LiveData<List<Event>>
 
-    @Query("SELECT * FROM events ORDER BY datetime(created_on)")
+    @Query("SELECT * FROM events ORDER BY datetime(created_on) DESC")
     fun getAllLivePaged(): DataSource.Factory<Int, Event>
 
     @Query("SELECT * FROM events WHERE uid = :eventId")
