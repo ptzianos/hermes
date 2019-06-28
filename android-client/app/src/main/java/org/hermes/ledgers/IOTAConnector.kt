@@ -87,11 +87,11 @@ class IOTAConnector(val seed: Seed, private val privateKey: SecP256K1PrivKey, ap
 
         var i = 1
         while (i <= 3 && !broadcastBundle(clientUUID, trytes, newAddress, i, 3)) {
-            Thread.sleep(5 * 1000)
             if (i == 3) {
                 Log.e(loggingTag, "Could not broadcast transactions. Aborting!")
                 return
             }
+            Thread.sleep(10 * 1000)
             i += 1
         }
 
@@ -178,13 +178,10 @@ class IOTAConnector(val seed: Seed, private val privateKey: SecP256K1PrivKey, ap
             Log.d(loggingTag, "Attempting to broadcast transactions to address $address")
             api.sendTrytes(bundleTrytes, depth, minWeightMagnitude, null)
             Log.d(loggingTag, "Broadcast to address $address succeeded")
-        } catch (e: IllegalAccessError) {
+        } catch (e: Throwable) {
             Log.e(loggingTag, "$clientUUID -- $msg ${e.message}")
-            db.eventDao().insertAll(Event(action = "broadcast failure", resource = "iota", extraInfo = "$msg ${e.message}"))
-            return false
-        } catch (e: IllegalAccessError) {
-            Log.e(loggingTag, "$clientUUID -- $msg ${e.message}")
-            db.eventDao().insertAll(Event(action = "broadcast failure", resource = "iota", extraInfo = "$msg ${e.message}"))
+            db.eventDao().insertAll(Event(action = "broadcast failure ($currentTry/$maxTries)", resource = "iota",
+                extraInfo = "$msg ${e.message}"))
             return false
         }
 
@@ -205,13 +202,7 @@ class IOTAConnector(val seed: Seed, private val privateKey: SecP256K1PrivKey, ap
             val fetchedTxs: List<Transaction>
             try {
                 fetchedTxs = api.findTransactionObjectsByAddresses(trxs)
-            } catch (e: IllegalAccessError) {
-                Log.d(loggingTag, unsuccessfulMsg + " because of ${e.message}")
-                continue
-            } catch (e: IllegalAccessError) {
-                Log.d(loggingTag, unsuccessfulMsg + " because of ${e.message}")
-                continue
-            } catch (e: ArgumentException) {
+            } catch (e: Throwable) {
                 Log.d(loggingTag, unsuccessfulMsg + " because of ${e.message}")
                 continue
             }
