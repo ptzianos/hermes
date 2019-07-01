@@ -43,4 +43,12 @@
     <string name="show_key">Show Key</string>
     <string name="title_activity_setup_load">SetupLoadActivity</string>
     <string name="iota_root_address">IOTA Root Address</string>
+    <string name="failedBroadcastNumDef">0</string>
+    <string name="failedBroadcastNumLabel">Failed Broadcasts</string>
+    <string name="activeSensorNumDef">0</string>
+    <string name="uptimeNumDef">0</string>
+    <string name="dataPacketNumDef">0</string>
+    <string name="dataPacketAttachedNumDef">0</string>
+    <string name="dataPacketAttachedNumLabel">Samples Attached</string>
+    <string name="iotaReceivedDef">0</string>
 </resources>
