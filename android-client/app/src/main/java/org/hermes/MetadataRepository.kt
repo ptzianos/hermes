@@ -79,7 +79,7 @@ class MetadataRepository @Inject constructor(
                 DataType.STOP_BACKGROUND_SERVICE -> ledgerServiceBroadcasting.setAndNotify(false)
                 DataType.FLIP_BACKGROUND_SERVICE -> if (ledgerServiceBroadcasting.get()) ledgerServiceBroadcasting.setAndNotify(false)
                                                     else ledgerServiceBroadcasting.setAndNotify(true)
-                DataType.NOTIFY_FAILED_BROADCAST -> ledgerServiceBroadcasting.setAndNotify(false)
+                DataType.NOTIFY_FAILED_BROADCAST -> failedBroadcastNum.value = (failedBroadcastNum.value ?: 0) + 1
                 else -> Log.e(loggingTag, "Someone sent an unknown packet to the Metadata event handler")
             }
         }
