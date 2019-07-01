@@ -73,13 +73,13 @@ class IOTAConnector(val seed: Seed, private val privateKey: SecP256K1PrivKey, ap
             .toMutableList()
     }
 
-    fun sendData(vararg samples: Metric20?, clientUUID: String, asyncConfirmation: Boolean,
+    fun sendData(samples: Array<Metric20?>, clientUUID: String, asyncConfirmation: Boolean,
                  blockUntilConfirmation: Boolean, sensorId: String = "", eventBus: Handler
-    ) {
+    ): Array<Metric20?> {
         // Validate seed
         if (!InputValidator.isValidSeed(seed.toString())) {
             Log.e(loggingTag, "The seed loaded to the service is incorrect!")
-            return
+            return samples
         }
         val (previousAddress, newAddress, nextAddress) = prepareAddress(clientUUID)
         val trytes = prepareTransactions(previousAddress, newAddress, nextAddress, clientUUID, *samples)
@@ -88,7 +88,7 @@ class IOTAConnector(val seed: Seed, private val privateKey: SecP256K1PrivKey, ap
         while (i <= 3 && !broadcastBundle(clientUUID, trytes, newAddress, i, samples.size, 3, eventBus)) {
             if (i == 3) {
                 Log.e(loggingTag, "Could not broadcast transactions. Aborting!")
-                return
+                return samples
             }
             Thread.sleep(10 * 1000)
             i += 1
@@ -101,6 +101,7 @@ class IOTAConnector(val seed: Seed, private val privateKey: SecP256K1PrivKey, ap
             else CoroutineScope(BACKGROUND.asCoroutineDispatcher())
                 .launch { checkResultOfTransactions(arrayOf(newAddress), clientUUID, samples.size, eventBus) }
         }
+        return Array(0) { null }
     }
 
     private fun prepareAddress(clientUUID: String): List<String> {

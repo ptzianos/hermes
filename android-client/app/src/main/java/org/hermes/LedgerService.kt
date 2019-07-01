@@ -26,6 +26,8 @@ import kotlinx.coroutines.*
 import org.hermes.activities.LoginActivity
 import org.hermes.ledgers.IOTAConnector
 import org.hermes.utils.AtomicLiveBoolean
+import org.hermes.utils.applyIfNotEmpty
+import org.hermes.utils.mapIfNotEmpty
 
 
 class LedgerService : Service() {
@@ -52,7 +54,7 @@ class LedgerService : Service() {
             counter = 0
         }
 
-        fun returnSamples(vararg metrics: Metric20) = metrics.forEach { returnSample(it) }
+        fun returnSamples(metrics: Array<Metric20?>) = metrics.forEach { if (it != null) returnSample(it) }
 
         fun returnSample(metric: Metric20) {
             fun dec(i: Int, mod: Int): Int = if (i == 0) mod - 1 else i - 1
@@ -338,13 +340,14 @@ class LedgerService : Service() {
                 }
                 for ((uuid, client) in sensorRegistry.filter { it.value.active.get() }) {
                     Log.d(loggingTag, "Broadcasting data of client with id $uuid")
-                    client.flushData().apply {
-                        if (isNotEmpty()) iotaConnector.sendData(
-                            *this, clientUUID = uuid,
-                            blockUntilConfirmation = true, asyncConfirmation = true,
-                            eventBus = metadataRepository.eventBus
-                        )
-                    }
+                    client.flushData()
+                        .mapIfNotEmpty {
+                            iotaConnector.sendData(
+                                it, clientUUID = uuid,
+                                blockUntilConfirmation = true, asyncConfirmation = true,
+                                eventBus = metadataRepository.eventBus
+                            )}
+                        .applyIfNotEmpty { client.returnSamples(it) }
                 }
             }
             delay(20 * 1000)
