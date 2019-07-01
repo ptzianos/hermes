@@ -2,10 +2,11 @@ package org.hermes
 
 import android.app.Application
 import android.content.Intent
-import android.content.SharedPreferences
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
+import android.os.Message
 import android.util.Log
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.asCoroutineDispatcher
@@ -15,16 +16,69 @@ import org.hermes.entities.Event
 import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
-import javax.inject.Named
 import javax.inject.Singleton
 
 
 @Singleton
 class MetadataRepository @Inject constructor(
     private val db: HermesRoomDatabase,
-    private val application: Application,
-    @Named("iota") private val prefs: SharedPreferences
+    private val application: Application
 ) {
+
+    enum class DataType {
+        IOTA_RECEIVED,
+        ETH_RECEIVED,
+        PACKETS_BROADCAST,
+        PACKETS_CONFIRMED,
+        ADD_SENSOR,
+        REMOVE_SENSOR,
+        IOTA_STREAM_ROOT_ADdRESS,
+        ADS,
+    }
+
+    val eventBus: Handler = object : Handler(Looper.getMainLooper()) {
+        override fun handleMessage(inputMessage: Message) {
+            val msg = inputMessage.obj
+            if (msg == null || msg !is Pair<*, *> || msg.first !is MetadataRepository.DataType) return
+            val message = msg as Pair<MetadataRepository.DataType, *>
+            when (message.first) {
+                DataType.PACKETS_BROADCAST -> {
+                    if (message.second == null || message.second !is Int) return
+                    packetsBroadcastNum.value = (packetsBroadcastNum.value ?: 0) + message.second as Int
+                }
+                DataType.PACKETS_CONFIRMED -> {
+                    if (message.second == null || message.second !is Int) return
+                    packetsConfirmedNum.value = (packetsConfirmedNum.value ?: 0) + message.second as Int
+                }
+                DataType.ADD_SENSOR -> {
+                    if (message.second !is LedgerService.Sensor) return
+                    sensorList.add(message.second as LedgerService.Sensor)
+                    // Do this to notify clients that the data has changed
+                    sensorListData.postValue(sensorListData.value)
+                    activeSensorNum.postValue(sensorList.filter { it.active.get() }.size)
+                }
+                DataType.REMOVE_SENSOR -> {
+                    if (message.second !is LedgerService.Sensor) return
+                    sensorList.remove(message.second as LedgerService.Sensor)
+                    // Do this to notify clients that the data has changed
+                    sensorListData.postValue(sensorList)
+                    activeSensorNum.postValue(sensorList.filter { it.active.get() }.size)
+                }
+                DataType.IOTA_STREAM_ROOT_ADdRESS -> {
+                    if (message.second == null || message.second !is String) {
+//                        Log.e(loggingTag, "No sensor uuid provided for iota stream root address")
+                        return
+                    }
+                    if (rootIOTAAddress.value == null || rootIOTAAddress.value == "") rootIOTAAddress.value = message.second as String
+                }
+                else -> Log.e(loggingTag, "Someone sent an unknown packet to the Metadata event handler")
+            }
+        }
+    }
+
+    private fun <T> initLiveData(value: T): MutableLiveData<T> {
+        return MutableLiveData<T>().apply { this.value = value }
+    }
 
     private val loggingTag = "MetadataRepository"
 
@@ -32,73 +86,17 @@ class MetadataRepository @Inject constructor(
     private var ledgerServiceBootstrapped: Boolean = false
     var ledgerServiceRunning: AtomicBoolean = AtomicBoolean(true)
     private var sensorList: LinkedList<LedgerService.Sensor> = LinkedList()
-    private var sensorListData: MutableLiveData<List<LedgerService.Sensor>> = {
-        val mld = MutableLiveData<List<LedgerService.Sensor>>()
-        mld.value = sensorList
-        mld
-    }()
-    private val activeSensorNum: MutableLiveData<Int> = {
-        val mld = MutableLiveData<Int>()
-        mld.value = 0
-        mld
-    }()
-    val ledgerServiceUptime: MutableLiveData<Int> = {
-        val mld = MutableLiveData<Int>()
-        mld.value = 0
-        mld
-    }()
-    val packetBroadcastNum: MutableLiveData<Int> = {
-        val mld = MutableLiveData<Int>()
-        mld.value = 0
-        mld
-    }()
-    val ledgerServiceRunningLiveData: MutableLiveData<Boolean> = {
-        val mld = MutableLiveData<Boolean>()
-        mld.value = ledgerServiceRunning.get()
-        mld
-    }()
-    val rootIOTAAddress: MutableLiveData<String> = {
-        val mld = MutableLiveData<String>()
-        mld.value = prefs.getString("root_address", "")!!
-        mld
-    }()
-
-    fun addSensor(sensor: LedgerService.Sensor) {
-        sensorList.add(sensor)
-        // Do this to notify clients that the data has changed
-        sensorListData.postValue(sensorListData.value)
-        activeSensorNum.postValue(sensorList.filter { it.active.get() }.size)
-    }
-
-    fun removeSensor(sensor: LedgerService.Sensor) {
-        sensorList.remove(sensor)
-        // Do this to notify clients that the data has changed
-        sensorListData.postValue(sensorList)
-        activeSensorNum.postValue(sensorList.filter { it.active.get() }.size)
-    }
+    var sensorListData: MutableLiveData<List<LedgerService.Sensor>> = initLiveData(sensorList)
+    val activeSensorNum: MutableLiveData<Int> = initLiveData(0)
+    val ledgerServiceUptime: MutableLiveData<Int> = initLiveData(0)
+    val packetsBroadcastNum: MutableLiveData<Int> = initLiveData(0)
+    val packetsConfirmedNum: MutableLiveData<Int> = initLiveData(0)
+    val ledgerServiceRunningLiveData: MutableLiveData<Boolean> = initLiveData(false)
+    val rootIOTAAddress: MutableLiveData<String> = initLiveData("")
 
     fun refreshSensorList() {
         sensorListData.value = sensorList
         activeSensorNum.value = sensorList.filter { it.active.get() }.size
-    }
-
-    fun getSensorLiveData(): LiveData<List<LedgerService.Sensor>> {
-        return sensorListData
-    }
-
-    /**
-     * Returns the number of minutes the service has been running
-     */
-    fun getLedgerServiceUptime(): LiveData<Int> {
-        return ledgerServiceUptime
-    }
-
-    fun getActiveSensorNumLiveData(): LiveData<Int> {
-        return activeSensorNum
-    }
-
-    fun getPacketsBroadcast(): LiveData<Int> {
-        return packetBroadcastNum
     }
 
     /**

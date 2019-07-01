@@ -2,6 +2,8 @@ package org.hermes.ledgers
 
 
 import android.content.SharedPreferences
+import android.os.Handler
+import android.os.Message
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import java.lang.Exception
@@ -45,9 +47,6 @@ class IOTAConnector(val seed: Seed, private val privateKey: SecP256K1PrivKey, ap
     @field:[Inject Named("iota")]
     lateinit var prefs: SharedPreferences
 
-    @Inject
-    lateinit var metadataRepository: MetadataRepository
-
     init { app.daggerHermesComponent.inject(this) }
 
     /**
@@ -75,7 +74,8 @@ class IOTAConnector(val seed: Seed, private val privateKey: SecP256K1PrivKey, ap
     }
 
     fun sendData(vararg samples: Metric20?, clientUUID: String, asyncConfirmation: Boolean,
-                 blockUntilConfirmation: Boolean, packetCounter: MutableLiveData<Int>) {
+                 blockUntilConfirmation: Boolean, sensorId: String = "", eventBus: Handler
+    ) {
         // Validate seed
         if (!InputValidator.isValidSeed(seed.toString())) {
             Log.e(loggingTag, "The seed loaded to the service is incorrect!")
@@ -85,7 +85,7 @@ class IOTAConnector(val seed: Seed, private val privateKey: SecP256K1PrivKey, ap
         val trytes = prepareTransactions(previousAddress, newAddress, nextAddress, clientUUID, *samples)
 
         var i = 1
-        while (i <= 3 && !broadcastBundle(clientUUID, trytes, newAddress, i, 3)) {
+        while (i <= 3 && !broadcastBundle(clientUUID, trytes, newAddress, i, samples.size, 3, eventBus)) {
             if (i == 3) {
                 Log.e(loggingTag, "Could not broadcast transactions. Aborting!")
                 return
@@ -96,10 +96,10 @@ class IOTAConnector(val seed: Seed, private val privateKey: SecP256K1PrivKey, ap
 
         if (asyncConfirmation) {
             if (blockUntilConfirmation) runBlocking {
-                checkResultOfTransactions(arrayOf(newAddress), clientUUID, packetCounter, samples.size)
+                checkResultOfTransactions(arrayOf(newAddress), clientUUID, samples.size, eventBus)
             }
             else CoroutineScope(BACKGROUND.asCoroutineDispatcher())
-                .launch { checkResultOfTransactions(arrayOf(newAddress), clientUUID, packetCounter, samples.size) }
+                .launch { checkResultOfTransactions(arrayOf(newAddress), clientUUID, samples.size, eventBus) }
         }
     }
 
@@ -117,7 +117,6 @@ class IOTAConnector(val seed: Seed, private val privateKey: SecP256K1PrivKey, ap
             prefs.edit()
                 .putString("root_address", newAddress)
                 .apply()
-            metadataRepository.rootIOTAAddress.postValue(newAddress)
         }
 
         prefs.edit()
@@ -158,7 +157,7 @@ class IOTAConnector(val seed: Seed, private val privateKey: SecP256K1PrivKey, ap
     }
 
     private fun broadcastBundle(clientUUID: String, bundleTrytes: Array<String>, address: String, currentTry: Int,
-                                maxTries: Int): Boolean {
+                                sampleNum: Int, maxTries: Int, eventBus: Handler): Boolean {
         val depth = 3
         val minWeightMagnitude = 14
 
@@ -177,6 +176,8 @@ class IOTAConnector(val seed: Seed, private val privateKey: SecP256K1PrivKey, ap
             Log.d(loggingTag, "Attempting to broadcast transactions to address $address")
             api.sendTrytes(bundleTrytes, depth, minWeightMagnitude, null)
             Log.d(loggingTag, "Broadcast to address $address succeeded")
+            eventBus.sendMessage(eventBus.obtainMessage().apply{
+                obj = Pair(MetadataRepository.DataType.PACKETS_BROADCAST, sampleNum) })
         } catch (e: Throwable) {
             Log.e(loggingTag, "$clientUUID -- $msg ${e.message}")
             db.eventDao().insertAll(Event(action = "broadcast failure ($currentTry/$maxTries)", resource = "iota",
@@ -190,7 +191,7 @@ class IOTAConnector(val seed: Seed, private val privateKey: SecP256K1PrivKey, ap
     }
 
     private suspend fun checkResultOfTransactions(trxs: Array<String>, clientUUID: String,
-                                                  packetCounter: MutableLiveData<Int>, packetsBroadcast: Int) {
+                                                  packetsBroadcast: Int, eventBus: Handler) {
         val txsAddressesStr = trxs.joinToString()
 
         for (i in 1..3) {
@@ -217,9 +218,10 @@ class IOTAConnector(val seed: Seed, private val privateKey: SecP256K1PrivKey, ap
 
                 val event = Event(action = "confirm attach", resource = "iota", extraInfo = eventMessage.toString())
                 db.eventDao().insertAll(event)
-                packetCounter.postValue(
-                    (if (packetCounter.value != null) packetCounter.value as Int else 0) + packetsBroadcast
-                )
+                eventBus.sendMessage(eventBus.obtainMessage().apply{
+                    obj = Pair(MetadataRepository.DataType.PACKETS_CONFIRMED, packetsBroadcast) })
+                eventBus.sendMessage(eventBus.obtainMessage().apply{
+                    obj = Pair(MetadataRepository.DataType.IOTA_STREAM_ROOT_ADdRESS, fetchedTxs[0].bundle) })
                 Log.i(loggingTag, eventMessage.toString())
                 return
             }

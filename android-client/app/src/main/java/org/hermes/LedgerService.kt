@@ -7,6 +7,7 @@ import android.content.Intent
 import android.content.ServiceConnection
 import android.os.Build
 import android.os.IBinder
+import android.os.Message
 import android.util.Log
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
@@ -90,7 +91,8 @@ class LedgerService : Service() {
                         uuid = UUID.randomUUID().toString()
                         val newSensor = Sensor(dataId, unit, mtype, what, device).apply { this.uuid = uuid }
                         sensorRegistry[uuid] = newSensor
-                        metadataRepository.addSensor(newSensor)
+                        metadataRepository.eventBus.dispatchMessage(Message().apply {
+                            obj = Pair(MetadataRepository.DataType.ADD_SENSOR, newSensor) })
                         reverseSensorRegistry[newSensor] = uuid
                         Log.i(loggingTag, "A new sensor has registered with the application with uuid $uuid")
                     }
@@ -103,7 +105,8 @@ class LedgerService : Service() {
                 null -> ErrorCode.NO_UUID.errorStr
                 else -> {
                     val sensor = sensorRegistry.remove(uuid)
-                    if (sensor != null) metadataRepository.removeSensor(sensor)
+                    if (sensor != null) metadataRepository.eventBus.dispatchMessage(Message().apply {
+                        obj = Pair(MetadataRepository.DataType.REMOVE_SENSOR, sensor) })
                     ""
                 }
             }
@@ -323,7 +326,7 @@ class LedgerService : Service() {
                         if (isNotEmpty()) iotaConnector.sendData(
                             *this, clientUUID = uuid,
                             blockUntilConfirmation = true, asyncConfirmation = true,
-                            packetCounter = metadataRepository.packetBroadcastNum
+                            eventBus = metadataRepository.eventBus
                         )
                     }
                 }

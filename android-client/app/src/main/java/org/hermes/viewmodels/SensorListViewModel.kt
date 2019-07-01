@@ -10,5 +10,5 @@ import org.hermes.MetadataRepository
 class SensorListViewModel @Inject constructor(application: Application,
                                               metadataRepository: MetadataRepository): AndroidViewModel(application) {
 
-    val sensors = metadataRepository.getSensorLiveData()
+    val sensors = metadataRepository.sensorListData
 }

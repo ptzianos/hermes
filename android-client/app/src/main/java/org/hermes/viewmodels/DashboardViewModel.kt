@@ -15,11 +15,13 @@ class DashboardViewModel @Inject constructor(application: Application,
         value = 0
     }
 
-    val uptime = metadataRepository.getLedgerServiceUptime()
+    val uptime = metadataRepository.ledgerServiceUptime
 
-    val activeSensors = metadataRepository.getActiveSensorNumLiveData()
+    val activeSensors = metadataRepository.activeSensorNum
 
-    val packetsBroadcast = metadataRepository.getPacketsBroadcast()
+    val packetsBroadcast = metadataRepository.packetsBroadcastNum
+
+    val packetsConfirmed = metadataRepository.packetsConfirmedNum
 
     val activeService = metadataRepository.ledgerServiceRunningLiveData
 

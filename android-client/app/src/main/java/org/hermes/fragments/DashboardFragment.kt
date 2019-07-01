@@ -60,6 +60,9 @@ class DashboardFragment @Inject constructor() : Fragment() {
         dashboardViewModel.packetsBroadcast.observe(this, Observer<Int> {
             mView.findViewById<TextView>(R.id.dataPacketNum).text = it?.toString() ?: "0"
         })
+        dashboardViewModel.packetsConfirmed.observe(this, Observer<Int> {
+            mView.findViewById<TextView>(R.id.dataPacketAttachedNum).text = it?.toString() ?: "0"
+        })
         dashboardViewModel.uptime.observe(this, Observer<Int> {
             mView.findViewById<TextView>(R.id.uptimeNum).text = "${it?.toString() ?: "0"} minutes"
         })

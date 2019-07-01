@@ -162,14 +162,14 @@
                     android:layout_height="match_parent">
 
                 <TextView
-                        android:text="80"
+                        android:text="0"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content" android:id="@+id/dataPacketAttachedNum"
                         android:textSize="36sp"
                         android:fontFamily="@font/roboto_condensed_bold" android:textAlignment="center"
                         app:layout_constraintStart_toStartOf="parent" app:layout_constraintEnd_toEndOf="parent"
                         android:layout_marginEnd="8dp" app:layout_constraintTop_toTopOf="parent"
-                        android:layout_marginStart="8dp" android:layout_marginTop="8dp"/>
+                        android:layout_marginStart="8dp" android:layout_marginTop="8dp" tools:text="80"/>
                 <View
                         android:id="@+id/divider20"
                         android:layout_width="match_parent"
