@@ -119,7 +119,7 @@ class LedgerService : Service() {
                 !sensorRegistry.containsKey(uuid) -> ErrorCode.NOT_REGISTERED.errorStr
                 cryptoRepository.sealed() -> ErrorCode.SEALED.errorStr
                 else -> {
-                    Log.d(loggingTag, "Got a new sample from client with uuid $uuid")
+                    Log.d(loggingTag, "Got a new sample from sensor with uuid $uuid")
                     // TODO: Add a check to ensure that the data are in the expected form
                     val client = sensorRegistry[uuid] as Sensor
                     val newSample = Metric20("${cryptoRepository.pkHash}.${client.dataId}", value)
@@ -138,7 +138,7 @@ class LedgerService : Service() {
                 !sensorRegistry.containsKey(uuid) -> ErrorCode.NOT_REGISTERED.errorStr
                 cryptoRepository.sealed() -> ErrorCode.SEALED.errorStr
                 else -> {
-                    Log.d(loggingTag, "Got a new sample from client with uuid $uuid")
+                    Log.d(loggingTag, "Got a new sample from sensor with uuid $uuid")
                     // TODO: Add a check to ensure that the data are in the expected form
                     val client = sensorRegistry[uuid] as Sensor
                     val newSample = Metric20("${cryptoRepository.pkHash}.${client.dataId}", value.toString())
@@ -309,7 +309,7 @@ class LedgerService : Service() {
 
     private suspend fun broadcastData() {
         while (true) {
-            if (!metadataRepository.ledgerServiceRunning.get()) {
+            if (!metadataRepository.ledgerServiceBroadcasting.get()) {
                 Log.d(loggingTag, "Ledger service skipping broadcasting data for now")
                 broadcastStart = null
             } else {
