@@ -228,7 +228,7 @@ def register_user(
 
     if not public_key:
         raise WrongParameters()
-    name = name or email or hash_value(public_key)
+    name = name or email or hash_value(public_key)[:10]
     fullname = fullname or name
     public_key_type = public_key_type.lower()
     if (public_key_type == 'ecdsa'
