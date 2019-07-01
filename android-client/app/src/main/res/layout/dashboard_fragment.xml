@@ -300,11 +300,11 @@
                             android:layout_height="match_parent" android:background="@android:color/white">
 
                         <TextView
-                                android:layout_width="312dp"
-                                android:layout_height="66dp" android:id="@+id/rootAddress"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content" android:id="@+id/rootAddress"
                                 android:background="@android:color/white" android:layout_marginTop="8dp"
                                 app:layout_constraintTop_toTopOf="parent" app:layout_constraintStart_toStartOf="parent"
-                                android:layout_marginStart="8dp" android:layout_marginEnd="8dp"
+                                android:layout_marginStart="16dp" android:layout_marginEnd="16dp"
                                 app:layout_constraintEnd_toEndOf="parent"
                                 tools:text="EXVJYBXDZDZNQ9SB99ETXQVMHFYOMVJW9DLNGLV9VRSTVRDOVPJXPGJFAYDMNP9XMPUPVCBYZTDFH9VMY"
                                 android:fontFamily="@font/roboto_condensed_bold" android:textSize="16sp"
@@ -314,11 +314,10 @@
                                 android:layout_width="320dp"
                                 android:layout_height="1dp"
                                 android:background="@color/dividerColor"
-                                app:layout_constraintBottom_toTopOf="@+id/rootAddressCardLabel"
                                 app:layout_constraintEnd_toEndOf="parent"
                                 android:layout_marginEnd="8dp" app:layout_constraintStart_toStartOf="parent"
                                 android:layout_marginStart="8dp"
-                                app:layout_constraintTop_toBottomOf="@+id/rootAddress" android:layout_marginTop="9dp"/>
+                                app:layout_constraintTop_toBottomOf="@+id/rootAddress" android:layout_marginTop="8dp"/>
                         <TextView
                                 android:text="@string/iota_root_address"
                                 android:layout_width="wrap_content"
