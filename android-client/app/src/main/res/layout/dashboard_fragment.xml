@@ -342,7 +342,8 @@
                     android:layout_marginStart="8dp"
                     app:layout_constraintEnd_toEndOf="parent" android:layout_marginEnd="8dp"
                     android:background="@android:color/holo_blue_bright"
-                    android:layout_marginTop="8dp" app:layout_constraintTop_toBottomOf="@+id/showSeedButton"/>
+                    android:layout_marginTop="8dp" app:layout_constraintTop_toBottomOf="@+id/showSeedButton"
+                    app:layout_constraintBottom_toBottomOf="parent" android:layout_marginBottom="16dp"/>
             <Button
                     android:text="@string/show_seed"
                     android:layout_width="192dp"
