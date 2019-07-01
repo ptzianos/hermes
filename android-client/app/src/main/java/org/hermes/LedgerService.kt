@@ -123,7 +123,7 @@ class LedgerService : Service() {
                     // TODO: Add a check to ensure that the data are in the expected form
                     val client = sensorRegistry[uuid] as Sensor
                     val newSample = Metric20(
-                        "${cryptoRepository.pkHash.slice(0 until 10)}.${client.dataId.slice(0 until 10)}", value)
+                        "${cryptoRepository.pkHash.slice(0 until 10)}.${client.dataId}", value)
                         .setData(Metric20.TagKey.MTYPE, client.mtype)
                         .setData(Metric20.TagKey.UNIT, client.unit)
                     client.putSample(newSample)
@@ -143,7 +143,7 @@ class LedgerService : Service() {
                     // TODO: Add a check to ensure that the data are in the expected form
                     val client = sensorRegistry[uuid] as Sensor
                     val newSample = Metric20(
-                        "${cryptoRepository.pkHash.slice(0 until 10)}.${client.dataId.slice(0 until 10)}", value.toString())
+                        "${cryptoRepository.pkHash.slice(0 until 10)}.${client.dataId}", value.toString())
                         .setData(Metric20.TagKey.MTYPE, client.mtype)
                         .setData(Metric20.TagKey.UNIT, client.unit)
                     client.putSample(newSample)
