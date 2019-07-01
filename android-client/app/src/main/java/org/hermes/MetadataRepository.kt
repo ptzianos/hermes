@@ -13,8 +13,8 @@ import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.launch
 import org.hermes.daos.EventDao
 import org.hermes.entities.Event
+import org.hermes.utils.AtomicLiveBoolean
 import java.util.*
-import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -32,7 +32,9 @@ class MetadataRepository @Inject constructor(
         PACKETS_CONFIRMED,
         ADD_SENSOR,
         REMOVE_SENSOR,
-        IOTA_STREAM_ROOT_ADdRESS,
+        IOTA_STREAM_ROOT_ADDRESS,
+        START_BACKGROUND_SERVICE,
+        STOP_BACKGROUND_SERVICE,
         ADS,
     }
 
@@ -64,13 +66,15 @@ class MetadataRepository @Inject constructor(
                     sensorListData.postValue(sensorList)
                     activeSensorNum.postValue(sensorList.filter { it.active.get() }.size)
                 }
-                DataType.IOTA_STREAM_ROOT_ADdRESS -> {
+                DataType.IOTA_STREAM_ROOT_ADDRESS -> {
                     if (message.second == null || message.second !is String) {
 //                        Log.e(loggingTag, "No sensor uuid provided for iota stream root address")
                         return
                     }
                     if (rootIOTAAddress.value == null || rootIOTAAddress.value == "") rootIOTAAddress.value = message.second as String
                 }
+                DataType.START_BACKGROUND_SERVICE -> ledgerServiceBroadcasting.setLive(true)
+                DataType.STOP_BACKGROUND_SERVICE -> ledgerServiceBroadcasting.setLive(false)
                 else -> Log.e(loggingTag, "Someone sent an unknown packet to the Metadata event handler")
             }
         }
@@ -84,14 +88,13 @@ class MetadataRepository @Inject constructor(
 
     val eventDao: EventDao = db.eventDao()
     private var ledgerServiceBootstrapped: Boolean = false
-    var ledgerServiceRunning: AtomicBoolean = AtomicBoolean(true)
+    var ledgerServiceBroadcasting: AtomicLiveBoolean = AtomicLiveBoolean(false)
     private var sensorList: LinkedList<LedgerService.Sensor> = LinkedList()
     var sensorListData: MutableLiveData<List<LedgerService.Sensor>> = initLiveData(sensorList)
     val activeSensorNum: MutableLiveData<Int> = initLiveData(0)
     val ledgerServiceUptime: MutableLiveData<Int> = initLiveData(0)
     val packetsBroadcastNum: MutableLiveData<Int> = initLiveData(0)
     val packetsConfirmedNum: MutableLiveData<Int> = initLiveData(0)
-    val ledgerServiceRunningLiveData: MutableLiveData<Boolean> = initLiveData(false)
     val rootIOTAAddress: MutableLiveData<String> = initLiveData("")
 
     fun refreshSensorList() {

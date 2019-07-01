@@ -43,7 +43,7 @@ class HermesRepository @Inject constructor(val application: Application,
     private var unsealed: Boolean = false
     private var credentialsLoaded: Boolean = false
     private var ledgerServiceBootstrapped: Boolean = false
-    var ledgerServiceRunning: AtomicBoolean = AtomicBoolean(true)
+    var ledgerServiceBroadcasting: AtomicBoolean = AtomicBoolean(true)
     private var sensorList: LinkedList<LedgerService.Sensor> = LinkedList()
     private var sensorListData: MutableLiveData<List<LedgerService.Sensor>> = {
         val mld = MutableLiveData<List<LedgerService.Sensor>>()
@@ -65,9 +65,9 @@ class HermesRepository @Inject constructor(val application: Application,
         mld.value = 0
         mld
     }()
-    val ledgerServiceRunningLiveData: MutableLiveData<Boolean> = {
+    val ledgerServiceBroadcastingLiveData: MutableLiveData<Boolean> = {
         val mld = MutableLiveData<Boolean>()
-        mld.value = ledgerServiceRunning.get()
+        mld.value = ledgerServiceBroadcasting.get()
         mld
     }()
     private val pkHashString by lazy {

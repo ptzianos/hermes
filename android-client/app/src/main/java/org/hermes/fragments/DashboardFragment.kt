@@ -69,8 +69,8 @@ class DashboardFragment @Inject constructor() : Fragment() {
         dashboardViewModel.rootAddress.observe(this, Observer<String> {
             mView.findViewById<TextView>(R.id.rootAddress).text = it
         })
-        val activateText = "Start Broadcasting"
-        val deActivateText = "Stop Broadcasting"
+        val activateText = "Service Not Broadcasting"
+        val deActivateText = "Service Broadcasting"
         val green = ResourcesCompat.getColor(resources, R.color.green, null)
         val red = ResourcesCompat.getColor(resources, R.color.red, null)
         val button = mView.findViewById<Button>(R.id.serviceActivationButton)
@@ -87,8 +87,9 @@ class DashboardFragment @Inject constructor() : Fragment() {
             }
         })
         button.setOnClickListener {
-            metadataRepository.ledgerServiceRunning.set(dashboardViewModel.activeService.value == null || !dashboardViewModel.activeService.value!!)
-            dashboardViewModel.activeService.value = metadataRepository.ledgerServiceRunning.get()
+            val eventBus = metadataRepository.eventBus
+            eventBus.sendMessage(eventBus.obtainMessage().apply{
+                obj = Pair(MetadataRepository.DataType.START_BACKGROUND_SERVICE, null) })
         }
     }
 }

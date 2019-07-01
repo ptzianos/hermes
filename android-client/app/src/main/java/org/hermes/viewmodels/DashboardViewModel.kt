@@ -23,7 +23,7 @@ class DashboardViewModel @Inject constructor(application: Application,
 
     val packetsConfirmed = metadataRepository.packetsConfirmedNum
 
-    val activeService = metadataRepository.ledgerServiceRunningLiveData
+    val activeService = metadataRepository.ledgerServiceBroadcasting.getLiveData()
 
     val rootAddress = metadataRepository.rootIOTAAddress
 }

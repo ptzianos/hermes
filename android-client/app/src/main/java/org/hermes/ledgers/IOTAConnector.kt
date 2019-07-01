@@ -221,7 +221,7 @@ class IOTAConnector(val seed: Seed, private val privateKey: SecP256K1PrivKey, ap
                 eventBus.sendMessage(eventBus.obtainMessage().apply{
                     obj = Pair(MetadataRepository.DataType.PACKETS_CONFIRMED, packetsBroadcast) })
                 eventBus.sendMessage(eventBus.obtainMessage().apply{
-                    obj = Pair(MetadataRepository.DataType.IOTA_STREAM_ROOT_ADdRESS, fetchedTxs[0].bundle) })
+                    obj = Pair(MetadataRepository.DataType.IOTA_STREAM_ROOT_ADDRESS, fetchedTxs[0].address) })
                 Log.i(loggingTag, eventMessage.toString())
                 return
             }
