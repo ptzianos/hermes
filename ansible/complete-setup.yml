@@ -5,7 +5,7 @@
     - common
 
 - name: PostgreSQL installation and configuration
-  hosts: db_hosts
+  hosts: hermes_db_hosts
   roles:
     - postgres
 
@@ -13,3 +13,8 @@
   hosts: haproxy_hosts
   roles:
     - haproxy
+
+- name: Hermes API server installation
+  hosts: hermes_api_hosts
+  roles:
+    - hermes-node
