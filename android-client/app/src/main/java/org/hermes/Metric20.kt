@@ -9,9 +9,9 @@ import org.threeten.bp.OffsetDateTime
  *
  * There are two tags that are mandatory:  unit and mtype.
  */
-class Metric20(private val key: String,
-               private val value: Any,
-               private val timestamp: OffsetDateTime = OffsetDateTime.now()) {
+class Metric20(val key: String,
+               val value: Any,
+               val timestamp: OffsetDateTime = OffsetDateTime.now()) {
 
     class NoData: Exception()
     class ForbiddenKey: Exception()

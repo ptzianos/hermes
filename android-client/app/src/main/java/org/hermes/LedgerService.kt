@@ -25,6 +25,7 @@ import kotlinx.coroutines.*
 
 import org.hermes.activities.LoginActivity
 import org.hermes.ledgers.IOTAConnector
+import org.hermes.utils.AtomicLiveBoolean
 
 
 class LedgerService : Service() {
@@ -34,46 +35,59 @@ class LedgerService : Service() {
 
     data class Sensor(val dataId: String, val unit: String, val mtype: String, val what: String?, val device: String?) {
         private val loggingTag = "Sensor"
-        private var counter = 0
-        private var metricPosition = -1
-        private val lock = ReentrantLock()
         // TODO: Make this configurable
-        private val sampleSize = 10
+        val sampleSize = 10
+        var counter = 0
+            private set
+        private var start = 0
+        private var end = -1
+        private val lock = ReentrantLock()
         private var buffer = Array<Metric20?>(sampleSize) { null }
         lateinit var uuid: String
-        var active: AtomicBoolean = AtomicBoolean(false)
+        var active: AtomicLiveBoolean = AtomicLiveBoolean(false)
+
+        private fun clear() {
+            start = 0
+            end = -1
+            counter = 0
+        }
+
+        fun returnSamples(vararg metrics: Metric20) = metrics.forEach { returnSample(it) }
+
+        fun returnSample(metric: Metric20) {
+            fun dec(i: Int, mod: Int): Int = if (i == 0) mod - 1 else i - 1
+            val newStart = dec(start, sampleSize)
+            if (newStart == end) return
+            counter++
+            start = newStart
+            buffer[start] = metric
+        }
 
         /**
          * Put a new sample in the buffer.
-         * The buffer is a ring buffer so if the client exceeds the available number of
-         * samples, the oldest sample will be overwritten.
+         * The buffer is a ring buffer so if the client exceeds the max
+         * number of samples, the oldest sample will be overwritten.
          */
         fun putSample(metric: Metric20) = lock.withLock {
-            metricPosition = (metricPosition + 1) % sampleSize
-            counter++
-            Log.d(loggingTag, "Putting new sample at pos: $metricPosition, counter: $counter")
-            buffer[metricPosition] = metric
+            val inc = fun(i: Int): Int = (i + 1) % sampleSize
+            end = inc(end)
+            buffer[end] = metric
+            start = if (end == start && counter > 0) inc(start) else start
+            counter = if (counter < sampleSize) counter + 1 else counter
+            Log.d(loggingTag, "Putting new sample at pos: $end, counter: $counter")
         }
 
         /**
          * Return a buffer with all the samples in the correct order and clear the original buffer
          */
         fun flushData(): Array<Metric20?> = lock.withLock {
-            val sampleNum = Math.min(counter, sampleSize)
-            if (sampleNum <= 0) {
-                Array(0) { null }
-            } else {
-                val start = if (counter > sampleSize) counter % sampleSize else 0
-                val tempBuffer = Array<Metric20?>(sampleNum) { null }
-                for (j in 0 until sampleNum) {
-                    tempBuffer[j] = buffer[(start + j) % sampleSize]
-                    buffer[(start + j) % sampleSize] = null
-                }
-                Log.d("Sensor", "Flushing $sampleNum samples from $start to ${(start + sampleNum - 1) % sampleSize}")
-                metricPosition = -1
-                counter = 0
-                tempBuffer
+            val chunk = when {
+                counter == 0 -> Array<Metric20?> (0) { null }
+                start < end -> buffer.sliceArray(start .. end)
+                else -> buffer.sliceArray(start until sampleSize) + buffer.sliceArray(0 .. end)
             }
+            clear()
+            chunk
         }
     }
 

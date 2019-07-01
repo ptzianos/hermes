@@ -6,12 +6,16 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 
 class AtomicLiveBoolean(b: Boolean): AtomicBoolean(b) {
-    private val observer: MutableLiveData<Boolean> = MutableLiveData<Boolean>().apply { value = b }
+    private var observer: MutableLiveData<Boolean>? = null
 
-    fun setLive(newValue: Boolean) {
+    fun setAndNotify(newValue: Boolean) {
         super.set(newValue)
-        observer.setValue(get())
+        observer?.setValue(get())
     }
 
-    fun getLiveData(): LiveData<Boolean> = observer
+    fun getLiveData(): LiveData<Boolean> {
+        if (observer == null)
+            observer = MutableLiveData<Boolean>().apply { value = get() }
+        return observer!!
+    }
 }

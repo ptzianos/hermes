@@ -73,8 +73,8 @@ class MetadataRepository @Inject constructor(
                     }
                     if (rootIOTAAddress.value == null || rootIOTAAddress.value == "") rootIOTAAddress.value = message.second as String
                 }
-                DataType.START_BACKGROUND_SERVICE -> ledgerServiceBroadcasting.setLive(true)
-                DataType.STOP_BACKGROUND_SERVICE -> ledgerServiceBroadcasting.setLive(false)
+                DataType.START_BACKGROUND_SERVICE -> ledgerServiceBroadcasting.setAndNotify(true)
+                DataType.STOP_BACKGROUND_SERVICE -> ledgerServiceBroadcasting.setAndNotify(false)
                 else -> Log.e(loggingTag, "Someone sent an unknown packet to the Metadata event handler")
             }
         }
