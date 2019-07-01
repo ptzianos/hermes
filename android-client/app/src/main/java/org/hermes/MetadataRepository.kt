@@ -35,6 +35,8 @@ class MetadataRepository @Inject constructor(
         IOTA_STREAM_ROOT_ADDRESS,
         START_BACKGROUND_SERVICE,
         STOP_BACKGROUND_SERVICE,
+        FLIP_BACKGROUND_SERVICE,
+        NOTIFY_FAILED_BROADCAST,
         ADS,
     }
 
@@ -75,6 +77,9 @@ class MetadataRepository @Inject constructor(
                 }
                 DataType.START_BACKGROUND_SERVICE -> ledgerServiceBroadcasting.setAndNotify(true)
                 DataType.STOP_BACKGROUND_SERVICE -> ledgerServiceBroadcasting.setAndNotify(false)
+                DataType.FLIP_BACKGROUND_SERVICE -> if (ledgerServiceBroadcasting.get()) ledgerServiceBroadcasting.setAndNotify(false)
+                                                    else ledgerServiceBroadcasting.setAndNotify(true)
+                DataType.NOTIFY_FAILED_BROADCAST -> ledgerServiceBroadcasting.setAndNotify(false)
                 else -> Log.e(loggingTag, "Someone sent an unknown packet to the Metadata event handler")
             }
         }
@@ -96,6 +101,7 @@ class MetadataRepository @Inject constructor(
     val packetsBroadcastNum: MutableLiveData<Int> = initLiveData(0)
     val packetsConfirmedNum: MutableLiveData<Int> = initLiveData(0)
     val rootIOTAAddress: MutableLiveData<String> = initLiveData("")
+    val failedBroadcastNum: MutableLiveData<Int> = initLiveData(0)
 
     fun refreshSensorList() {
         sensorListData.value = sensorList

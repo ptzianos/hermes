@@ -69,6 +69,9 @@ class DashboardFragment @Inject constructor() : Fragment() {
         dashboardViewModel.rootAddress.observe(this, Observer<String> {
             mView.findViewById<TextView>(R.id.rootAddress).text = it
         })
+        dashboardViewModel.failedBroadcastNum.observe(this, Observer<Int> {
+            mView.findViewById<TextView>(R.id.failedBroadcastNum).text = it?.toString() ?: "0"
+        })
         val activateText = "Service Not Broadcasting"
         val deActivateText = "Service Broadcasting"
         val green = ResourcesCompat.getColor(resources, R.color.green, null)
@@ -89,7 +92,7 @@ class DashboardFragment @Inject constructor() : Fragment() {
         button.setOnClickListener {
             val eventBus = metadataRepository.eventBus
             eventBus.sendMessage(eventBus.obtainMessage().apply{
-                obj = Pair(MetadataRepository.DataType.START_BACKGROUND_SERVICE, null) })
+                obj = Pair(MetadataRepository.DataType.FLIP_BACKGROUND_SERVICE, null) })
         }
     }
 }
