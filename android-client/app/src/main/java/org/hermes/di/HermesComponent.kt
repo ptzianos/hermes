@@ -31,6 +31,8 @@ interface HermesComponent : AndroidInjector<HermesClientApp> {
 
     fun inject(repository: MetadataRepository)
 
+    fun inject(repository: SensorRepository)
+
     fun inject(repository: CryptoRepository)
 
     fun inject(repository: MarketRepository)
@@ -46,6 +48,8 @@ interface HermesComponent : AndroidInjector<HermesClientApp> {
     fun getMetadataRepository(): MetadataRepository
 
     fun getCryptoRepository(): CryptoRepository
+
+    fun getSensorRepository(): SensorRepository
 
     fun getLoginViewModel(): LoginViewModel
 

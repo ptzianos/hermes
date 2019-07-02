@@ -92,7 +92,7 @@ class DashboardFragment @Inject constructor() : Fragment() {
         button.setOnClickListener {
             val eventBus = metadataRepository.eventBus
             eventBus.sendMessage(eventBus.obtainMessage().apply{
-                obj = Pair(MetadataRepository.DataType.FLIP_BACKGROUND_SERVICE, null) })
+                obj = Pair(MetadataRepository.MessageType.FLIP_BACKGROUND_SERVICE, null) })
         }
     }
 }

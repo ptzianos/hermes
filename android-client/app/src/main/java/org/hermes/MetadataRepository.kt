@@ -25,61 +25,36 @@ class MetadataRepository @Inject constructor(
     private val application: Application
 ) {
 
-    enum class DataType {
+    enum class MessageType {
         IOTA_RECEIVED,
         ETH_RECEIVED,
         PACKETS_BROADCAST,
         PACKETS_CONFIRMED,
-        ADD_SENSOR,
-        REMOVE_SENSOR,
-        IOTA_STREAM_ROOT_ADDRESS,
         START_BACKGROUND_SERVICE,
         STOP_BACKGROUND_SERVICE,
         FLIP_BACKGROUND_SERVICE,
         NOTIFY_FAILED_BROADCAST,
-        ADS,
     }
 
     val eventBus: Handler = object : Handler(Looper.getMainLooper()) {
         override fun handleMessage(inputMessage: Message) {
             val msg = inputMessage.obj
-            if (msg == null || msg !is Pair<*, *> || msg.first !is MetadataRepository.DataType) return
-            val message = msg as Pair<MetadataRepository.DataType, *>
+            if (msg == null || msg !is Pair<*, *> || msg.first !is MetadataRepository.MessageType) return
+            val message = msg as Pair<MetadataRepository.MessageType, *>
             when (message.first) {
-                DataType.PACKETS_BROADCAST -> {
+                MessageType.PACKETS_BROADCAST -> {
                     if (message.second == null || message.second !is Int) return
                     packetsBroadcastNum.value = (packetsBroadcastNum.value ?: 0) + message.second as Int
                 }
-                DataType.PACKETS_CONFIRMED -> {
+                MessageType.PACKETS_CONFIRMED -> {
                     if (message.second == null || message.second !is Int) return
                     packetsConfirmedNum.value = (packetsConfirmedNum.value ?: 0) + message.second as Int
                 }
-                DataType.ADD_SENSOR -> {
-                    if (message.second !is LedgerService.Sensor) return
-                    sensorList.add(message.second as LedgerService.Sensor)
-                    // Do this to notify clients that the data has changed
-                    sensorListData.postValue(sensorListData.value)
-                    activeSensorNum.postValue(sensorList.filter { it.active.get() }.size)
-                }
-                DataType.REMOVE_SENSOR -> {
-                    if (message.second !is LedgerService.Sensor) return
-                    sensorList.remove(message.second as LedgerService.Sensor)
-                    // Do this to notify clients that the data has changed
-                    sensorListData.postValue(sensorList)
-                    activeSensorNum.postValue(sensorList.filter { it.active.get() }.size)
-                }
-                DataType.IOTA_STREAM_ROOT_ADDRESS -> {
-                    if (message.second == null || message.second !is String) {
-//                        Log.e(loggingTag, "No sensor uuid provided for iota stream root address")
-                        return
-                    }
-                    if (rootIOTAAddress.value == null || rootIOTAAddress.value == "") rootIOTAAddress.value = message.second as String
-                }
-                DataType.START_BACKGROUND_SERVICE -> ledgerServiceBroadcasting.setAndNotify(true)
-                DataType.STOP_BACKGROUND_SERVICE -> ledgerServiceBroadcasting.setAndNotify(false)
-                DataType.FLIP_BACKGROUND_SERVICE -> if (ledgerServiceBroadcasting.get()) ledgerServiceBroadcasting.setAndNotify(false)
+                MessageType.START_BACKGROUND_SERVICE -> ledgerServiceBroadcasting.setAndNotify(true)
+                MessageType.STOP_BACKGROUND_SERVICE -> ledgerServiceBroadcasting.setAndNotify(false)
+                MessageType.FLIP_BACKGROUND_SERVICE -> if (ledgerServiceBroadcasting.get()) ledgerServiceBroadcasting.setAndNotify(false)
                                                     else ledgerServiceBroadcasting.setAndNotify(true)
-                DataType.NOTIFY_FAILED_BROADCAST -> failedBroadcastNum.value = (failedBroadcastNum.value ?: 0) + 1
+                MessageType.NOTIFY_FAILED_BROADCAST -> failedBroadcastNum.value = (failedBroadcastNum.value ?: 0) + 1
                 else -> Log.e(loggingTag, "Someone sent an unknown packet to the Metadata event handler")
             }
         }
@@ -96,17 +71,11 @@ class MetadataRepository @Inject constructor(
     var ledgerServiceBroadcasting: AtomicLiveBoolean = AtomicLiveBoolean(false)
     private var sensorList: LinkedList<LedgerService.Sensor> = LinkedList()
     var sensorListData: MutableLiveData<List<LedgerService.Sensor>> = initLiveData(sensorList)
-    val activeSensorNum: MutableLiveData<Int> = initLiveData(0)
     val ledgerServiceUptime: MutableLiveData<Int> = initLiveData(0)
     val packetsBroadcastNum: MutableLiveData<Int> = initLiveData(0)
     val packetsConfirmedNum: MutableLiveData<Int> = initLiveData(0)
     val rootIOTAAddress: MutableLiveData<String> = initLiveData("")
     val failedBroadcastNum: MutableLiveData<Int> = initLiveData(0)
-
-    fun refreshSensorList() {
-        sensorListData.value = sensorList
-        activeSensorNum.value = sensorList.filter { it.active.get() }.size
-    }
 
     /**
      * Start the LedgerService if it's not running already
@@ -125,15 +94,6 @@ class MetadataRepository @Inject constructor(
     fun fetchEvent(id: Int, callback: (event: Event) -> Unit) {
         CoroutineScope(BACKGROUND.asCoroutineDispatcher()).launch {
             callback(db.eventDao().findById(id))
-        }
-    }
-
-    fun fetchSensor(id: String, callback: (sensor: LedgerService.Sensor) -> Unit) {
-        for (sensor in sensorList) {
-            if (sensor.dataId == id) {
-                callback(sensor)
-                return
-            }
         }
     }
 }

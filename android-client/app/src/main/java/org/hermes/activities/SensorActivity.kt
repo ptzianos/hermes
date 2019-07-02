@@ -6,12 +6,14 @@ import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.content.res.ResourcesCompat
+import androidx.lifecycle.Observer
 import dagger.Module
 import dagger.android.AndroidInjection
-import org.hermes.*
-import org.hermes.utils.addBackButton
+import kotlinx.android.synthetic.main.activity_sensor.*
 import javax.inject.Inject
 
+import org.hermes.*
+import org.hermes.utils.addBackButton
 
 class SensorActivity : BaseActivity() {
 
@@ -21,7 +23,7 @@ class SensorActivity : BaseActivity() {
     private val loggingTag = "SensorActivity"
 
     @Inject
-    lateinit var metadataRepository: MetadataRepository
+    lateinit var sensorRepository: SensorRepository
 
     private lateinit var sensorUUID: TextView
     private lateinit var sensorID: TextView
@@ -30,6 +32,8 @@ class SensorActivity : BaseActivity() {
     private lateinit var sensorWhat: TextView
     private lateinit var sensorDevice: TextView
     private lateinit var sensorActivateButton: Button
+    private lateinit var sensorRootAddress: TextView
+    private lateinit var sensorLatestAddress: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         AndroidInjection.inject(this)
@@ -44,6 +48,9 @@ class SensorActivity : BaseActivity() {
         sensorDevice = findViewById(R.id.sensorDevice)
         sensorActivateButton = findViewById(R.id.sensorActivate)
 
+        sensorRootAddress = findViewById(R.id.rootAddress)
+        sensorLatestAddress = findViewById(R.id.latestAddress)
+
         val extras = intent.extras
         if (extras != null) {
             val sensorId = extras.getString("sensorId", "")
@@ -52,7 +59,7 @@ class SensorActivity : BaseActivity() {
                     .show()
                 startActivity(Intent(this, SensorListActivity::class.java))
             } else {
-                metadataRepository.fetchSensor(sensorId) { bind(it) }
+                sensorRepository.fetchSensor(sensorId) { bind(it) }
             }
         }
 
@@ -73,31 +80,26 @@ class SensorActivity : BaseActivity() {
         val deActivateText = "Deactivate"
         val green = ResourcesCompat.getColor(resources, R.color.green, null)
         val red = ResourcesCompat.getColor(resources, R.color.red, null)
-        sensorActivateButton.text = when(sensor.active.get()) {
-            true -> {
+
+        sensorRepository.registry[sensor.uuid]?.active?.getLiveData()?.observe(this, Observer<Boolean> {
+            sensorActivateButton.text = if (it) {
                 sensorActivateButton.setBackgroundColor(green)
                 deActivateText
-            }
-            false -> {
+            } else {
                 sensorActivateButton.setBackgroundColor(red)
                 activateText
             }
-        }
+        })
+        sensorRepository.latestAddresses[sensor.uuid]?.observe(this, Observer<String> {
+            latestAddress.text = it ?: ""
+        })
+        sensorRepository.rootAddresses[sensor.uuid]?.observe(this, Observer<String> {
+            rootAddress.text = it ?: ""
+        })
         sensorActivateButton.setOnClickListener {
-            when (sensorActivateButton.text) {
-                activateText -> {
-                    sensor.active.compareAndSet(false, true)
-                    sensorActivateButton.text = deActivateText
-                    sensorActivateButton.setBackgroundColor(green)
-                    metadataRepository.refreshSensorList()
-                }
-                deActivateText -> {
-                    sensor.active.compareAndSet(true, false)
-                    sensorActivateButton.text = activateText
-                    sensorActivateButton.setBackgroundColor(red)
-                    metadataRepository.refreshSensorList()
-                }
-            }
+            sensorRepository.eventBus.sendMessage(sensorRepository.eventBus.obtainMessage().apply {
+                obj = Pair(SensorRepository.MessageType.FLIP_SENSOR, sensor)
+            })
         }
     }
 }

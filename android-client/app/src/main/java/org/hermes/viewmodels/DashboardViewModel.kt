@@ -6,10 +6,12 @@ import androidx.lifecycle.MutableLiveData
 import javax.inject.Inject
 
 import org.hermes.MetadataRepository
+import org.hermes.SensorRepository
 
 
 class DashboardViewModel @Inject constructor(application: Application,
-                                             metadataRepository: MetadataRepository
+                                             metadataRepository: MetadataRepository,
+                                             sensorRepository: SensorRepository
 ): AndroidViewModel(application) {
     val iotaReceived = MutableLiveData<Int>().apply {
         value = 0
@@ -17,7 +19,7 @@ class DashboardViewModel @Inject constructor(application: Application,
 
     val uptime = metadataRepository.ledgerServiceUptime
 
-    val activeSensors = metadataRepository.activeSensorNum
+    val activeSensors = sensorRepository.activeSensorNum
 
     val packetsBroadcast = metadataRepository.packetsBroadcastNum
 

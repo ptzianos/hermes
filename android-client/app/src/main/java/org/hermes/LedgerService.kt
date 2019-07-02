@@ -7,7 +7,6 @@ import android.content.Intent
 import android.content.ServiceConnection
 import android.os.Build
 import android.os.IBinder
-import android.os.Message
 import android.util.Log
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
@@ -15,10 +14,8 @@ import dagger.Module
 import dagger.android.AndroidInjection
 import java.security.SecureRandom
 import java.util.*
-import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.locks.ReentrantLock
 import java.util.concurrent.TimeUnit
-import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 import kotlin.concurrent.withLock
 import kotlinx.coroutines.*
@@ -102,14 +99,12 @@ class LedgerService : Service() {
                 mtype == null -> ErrorCode.NO_TYPE.errorStr
                 dataId.startsWith(".") -> ErrorCode.INVALID_DATA_ID.errorStr
                 else -> {
-                    var uuid = reverseSensorRegistry.getOrDefault(Sensor(dataId, unit, mtype, what, device), "")
+                    var uuid = sensorRepository.reverseRegistry.getOrDefault(Sensor(dataId, unit, mtype, what, device), "")
                     if (uuid.isEmpty()) {
                         uuid = UUID.randomUUID().toString()
                         val newSensor = Sensor(dataId, unit, mtype, what, device).apply { this.uuid = uuid }
-                        sensorRegistry[uuid] = newSensor
-                        metadataRepository.eventBus.dispatchMessage(Message().apply {
-                            obj = Pair(MetadataRepository.DataType.ADD_SENSOR, newSensor) })
-                        reverseSensorRegistry[newSensor] = uuid
+                        sensorRepository.eventBus.sendMessage(sensorRepository.eventBus.obtainMessage().apply {
+                            obj = Pair(SensorRepository.MessageType.ADD_SENSOR, newSensor) })
                         Log.i(loggingTag, "A new sensor has registered with the application with uuid $uuid")
                     }
                     uuid
@@ -120,9 +115,11 @@ class LedgerService : Service() {
             when (uuid) {
                 null -> ErrorCode.NO_UUID.errorStr
                 else -> {
-                    val sensor = sensorRegistry.remove(uuid)
-                    if (sensor != null) metadataRepository.eventBus.dispatchMessage(Message().apply {
-                        obj = Pair(MetadataRepository.DataType.REMOVE_SENSOR, sensor) })
+                    val sensor = sensorRepository.registry.remove(uuid)
+                    if (sensor != null) sensorRepository.eventBus.sendMessage(
+                        sensorRepository.eventBus.obtainMessage().apply {
+                            obj = Pair(SensorRepository.MessageType.REMOVE_SENSOR, sensor) }
+                    )
                     ""
                 }
             }
@@ -132,12 +129,12 @@ class LedgerService : Service() {
                                     file: String?, line: Int, env: String?): String =
             when {
                 uuid == null -> ErrorCode.NO_UUID.errorStr
-                !sensorRegistry.containsKey(uuid) -> ErrorCode.NOT_REGISTERED.errorStr
+                !sensorRepository.registry.containsKey(uuid) -> ErrorCode.NOT_REGISTERED.errorStr
                 cryptoRepository.sealed() -> ErrorCode.SEALED.errorStr
                 else -> {
                     Log.d(loggingTag, "Got a new sample from sensor with uuid $uuid")
                     // TODO: Add a check to ensure that the data are in the expected form
-                    val client = sensorRegistry[uuid] as Sensor
+                    val client = sensorRepository.registry[uuid] as Sensor
                     val newSample = Metric20(
                         "${cryptoRepository.pkHash.slice(0 until 10)}.${client.dataId}", value)
                         .setData(Metric20.TagKey.MTYPE, client.mtype)
@@ -152,12 +149,12 @@ class LedgerService : Service() {
                                     file: String?, line: Int, env: String?): String  =
             when {
                 uuid == null -> ErrorCode.NO_UUID.errorStr
-                !sensorRegistry.containsKey(uuid) -> ErrorCode.NOT_REGISTERED.errorStr
+                !sensorRepository.registry.containsKey(uuid) -> ErrorCode.NOT_REGISTERED.errorStr
                 cryptoRepository.sealed() -> ErrorCode.SEALED.errorStr
                 else -> {
                     Log.d(loggingTag, "Got a new sample from sensor with uuid $uuid")
                     // TODO: Add a check to ensure that the data are in the expected form
-                    val client = sensorRegistry[uuid] as Sensor
+                    val client = sensorRepository.registry[uuid] as Sensor
                     val newSample = Metric20(
                         "${cryptoRepository.pkHash.slice(0 until 10)}.${client.dataId}", value.toString())
                         .setData(Metric20.TagKey.MTYPE, client.mtype)
@@ -191,8 +188,6 @@ class LedgerService : Service() {
     private var mNotificationManager: NotificationManager? = null
     private val channelId = SecureRandom.getInstance("SHA1PRNG").nextInt().toString()
     private val foregroundNotificationId: Int = 15970
-    private val sensorRegistry = ConcurrentHashMap<String, Sensor>()
-    private val reverseSensorRegistry = HashMap<Sensor, String>()
     private var broadcastStart: Long? = null
 
     @Inject
@@ -206,6 +201,9 @@ class LedgerService : Service() {
 
     @Inject
     lateinit var metadataRepository: MetadataRepository
+
+    @Inject
+    lateinit var sensorRepository: SensorRepository
 
     @Inject
     lateinit var app: HermesClientApp
@@ -338,15 +336,12 @@ class LedgerService : Service() {
                 } else {
                     metadataRepository.ledgerServiceUptime.postValue(((System.currentTimeMillis() - broadcastStart as Long) / (60 * 1000)).toInt())
                 }
-                for ((uuid, client) in sensorRegistry.filter { it.value.active.get() }) {
+                for ((uuid, client) in sensorRepository.registry.filter { it.value.active.get() }) {
                     Log.d(loggingTag, "Broadcasting data of client with id $uuid")
                     client.flushData()
                         .mapIfNotEmpty {
-                            iotaConnector.sendData(
-                                it, clientUUID = uuid,
-                                blockUntilConfirmation = true, asyncConfirmation = true,
-                                eventBus = metadataRepository.eventBus
-                            )}
+                            iotaConnector.sendData(it, clientUUID = uuid,
+                                blockUntilConfirmation = true, asyncConfirmation = true)}
                         .applyIfNotEmpty { client.returnSamples(it) }
                 }
             }

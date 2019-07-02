@@ -3,16 +3,13 @@ package org.hermes.ledgers
 
 import android.content.SharedPreferences
 import android.os.Handler
-import android.os.Message
 import android.util.Log
-import androidx.lifecycle.MutableLiveData
 import java.lang.Exception
 import java.lang.StringBuilder
 import javax.inject.Inject
 import javax.inject.Named
 import kotlinx.coroutines.*
 import org.apache.commons.lang3.StringUtils
-import org.hermes.*
 import org.iota.jota.IotaAPI
 import org.iota.jota.model.Bundle
 import org.iota.jota.model.Transaction
@@ -22,6 +19,7 @@ import org.iota.jota.utils.InputValidator
 import org.iota.jota.utils.IotaAPIUtils
 import org.threeten.bp.OffsetDateTime
 
+import org.hermes.*
 import org.hermes.crypto.SecP256K1PrivKey
 import org.hermes.entities.Event
 import org.hermes.iota.IOTA
@@ -43,6 +41,15 @@ class IOTAConnector(val seed: Seed, private val privateKey: SecP256K1PrivKey, ap
 
     @Inject
     lateinit var db: HermesRoomDatabase
+
+    @Inject
+    lateinit var metadataRepository: MetadataRepository
+
+    @Inject
+    lateinit var sensorRepository: SensorRepository
+
+    @Inject
+    lateinit var addressManager: IOTAAddressManager
 
     @field:[Inject Named("iota")]
     lateinit var prefs: SharedPreferences
@@ -74,22 +81,26 @@ class IOTAConnector(val seed: Seed, private val privateKey: SecP256K1PrivKey, ap
     }
 
     fun sendData(samples: Array<Metric20?>, clientUUID: String, asyncConfirmation: Boolean,
-                 blockUntilConfirmation: Boolean, sensorId: String = "", eventBus: Handler
+                 blockUntilConfirmation: Boolean, sensorId: String = ""
     ): Array<Metric20?> {
         // Validate seed
         if (!InputValidator.isValidSeed(seed.toString())) {
             Log.e(loggingTag, "The seed loaded to the service is incorrect!")
             return samples
         }
-        val (previousAddress, newAddress, nextAddress) = prepareAddress(clientUUID)
+        if (addressManager.hasUnconfirmedAddressFor(clientUUID)) {
+            Log.d(loggingTag, "There is another  broadcast already in progress for $clientUUID. Returning.")
+            return samples
+        }
+        val (previousAddress, newAddress, nextAddress) = addressManager.getAddress(clientUUID)
         val trytes = prepareTransactions(previousAddress, newAddress, nextAddress, clientUUID, *samples)
 
         var i = 1
-        while (i <= 3) { // && !broadcastBundle(clientUUID, trytes, newAddress, i, samples.size, 3, eventBus)) {
+        while (i <= 3 && !broadcastBundle(clientUUID, trytes, newAddress, i, samples.size, 3)) {
             if (i == 3) {
                 Log.e(loggingTag, "Could not broadcast transactions. Aborting!")
-                eventBus.sendMessage(eventBus.obtainMessage().apply{
-                    obj = Pair(MetadataRepository.DataType.NOTIFY_FAILED_BROADCAST, null) })
+                metadataRepository.eventBus.sendMessage(metadataRepository.eventBus.obtainMessage().apply{
+                    obj = Pair(MetadataRepository.MessageType.NOTIFY_FAILED_BROADCAST, null) })
                 return samples
             }
             Thread.sleep(10 * 1000)
@@ -98,39 +109,12 @@ class IOTAConnector(val seed: Seed, private val privateKey: SecP256K1PrivKey, ap
 
         if (asyncConfirmation) {
             if (blockUntilConfirmation) runBlocking {
-                checkResultOfTransactions(arrayOf(newAddress), clientUUID, samples.size, eventBus)
+                checkResultOfTransactions(arrayOf(newAddress), clientUUID, samples.size)
             }
             else CoroutineScope(BACKGROUND.asCoroutineDispatcher())
-                .launch { checkResultOfTransactions(arrayOf(newAddress), clientUUID, samples.size, eventBus) }
+                .launch { checkResultOfTransactions(arrayOf(newAddress), clientUUID, samples.size) }
         }
         return Array(0) { null }
-    }
-
-    private fun prepareAddress(clientUUID: String): List<String> {
-        val newAddressIndex = prefs.getInt("latest_addr_index", 1000) + 1
-        val previousAddress = prefs.getString("latest_addr_used", "")!!
-        Log.d(loggingTag, "$clientUUID -- Next IOTA address index to use is: $newAddressIndex")
-        val newAddress = IotaAPIUtils.newAddress(seed.toString(), Seed.DEFAULT_SEED_SECURITY,
-            newAddressIndex, true, SpongeFactory.create(SpongeFactory.Mode.KERL))
-        val nextAddress = IotaAPIUtils.newAddress(seed.toString(), Seed.DEFAULT_SEED_SECURITY,
-            newAddressIndex + 1, true, SpongeFactory.create(SpongeFactory.Mode.KERL))
-
-        if (previousAddress == "") {
-            Log.i(loggingTag, "This is the first packet to be attached. Storing first address index $newAddress")
-            prefs.edit()
-                .putString("root_address", newAddress)
-                .apply()
-        }
-
-        prefs.edit()
-            .putInt("latest_addr_index", newAddressIndex)
-            .putString("latest_addr_used", newAddress)
-            .apply()
-
-        Log.d(loggingTag,
-            "$clientUUID -- Address that will be used for the next sample broadcast is $newAddress")
-
-        return listOf(previousAddress, newAddress, nextAddress)
     }
 
     private fun prepareTransactions(previousAddress: String, newAddress: String, nextAddress: String,
@@ -160,7 +144,7 @@ class IOTAConnector(val seed: Seed, private val privateKey: SecP256K1PrivKey, ap
     }
 
     private fun broadcastBundle(clientUUID: String, bundleTrytes: Array<String>, address: String, currentTry: Int,
-                                sampleNum: Int, maxTries: Int, eventBus: Handler): Boolean {
+                                sampleNum: Int, maxTries: Int): Boolean {
         val depth = 3
         val minWeightMagnitude = 14
 
@@ -179,8 +163,8 @@ class IOTAConnector(val seed: Seed, private val privateKey: SecP256K1PrivKey, ap
             Log.d(loggingTag, "Attempting to broadcast transactions to address $address")
             api.sendTrytes(bundleTrytes, depth, minWeightMagnitude, null)
             Log.d(loggingTag, "Broadcast to address $address succeeded")
-            eventBus.sendMessage(eventBus.obtainMessage().apply{
-                obj = Pair(MetadataRepository.DataType.PACKETS_BROADCAST, sampleNum) })
+            metadataRepository.eventBus.sendMessage(metadataRepository.eventBus.obtainMessage().apply{
+                obj = Pair(MetadataRepository.MessageType.PACKETS_BROADCAST, sampleNum) })
         } catch (e: Throwable) {
             Log.e(loggingTag, "$clientUUID -- $msg ${e.message}")
             db.eventDao().insertAll(Event(action = "broadcast failure ($currentTry/$maxTries)", resource = "iota",
@@ -194,7 +178,7 @@ class IOTAConnector(val seed: Seed, private val privateKey: SecP256K1PrivKey, ap
     }
 
     private suspend fun checkResultOfTransactions(trxs: Array<String>, clientUUID: String,
-                                                  packetsBroadcast: Int, eventBus: Handler) {
+                                                  packetsBroadcast: Int) {
         val txsAddressesStr = trxs.joinToString()
 
         for (i in 1..3) {
@@ -221,10 +205,13 @@ class IOTAConnector(val seed: Seed, private val privateKey: SecP256K1PrivKey, ap
 
                 val event = Event(action = "confirm attach", resource = "iota", extraInfo = eventMessage.toString())
                 db.eventDao().insertAll(event)
-                eventBus.sendMessage(eventBus.obtainMessage().apply{
-                    obj = Pair(MetadataRepository.DataType.PACKETS_CONFIRMED, packetsBroadcast) })
-                eventBus.sendMessage(eventBus.obtainMessage().apply{
-                    obj = Pair(MetadataRepository.DataType.IOTA_STREAM_ROOT_ADDRESS, fetchedTxs[0].address) })
+                metadataRepository.eventBus.sendMessage(metadataRepository.eventBus.obtainMessage().apply{
+                    obj = Pair(MetadataRepository.MessageType.PACKETS_CONFIRMED, packetsBroadcast) })
+                try {
+                    addressManager.confirmAddress(clientUUID)
+                } catch (e: UnknownClient) {
+                    Log.e(loggingTag, "There seems to be no address for client: $clientUUID")
+                }
                 Log.i(loggingTag, eventMessage.toString())
                 return
             }
