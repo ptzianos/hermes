@@ -66,9 +66,6 @@ class DashboardFragment @Inject constructor() : Fragment() {
         dashboardViewModel.uptime.observe(this, Observer<Int> {
             mView.findViewById<TextView>(R.id.uptimeNum).text = "${it?.toString() ?: "0"} minutes"
         })
-        dashboardViewModel.rootAddress.observe(this, Observer<String> {
-            mView.findViewById<TextView>(R.id.rootAddress).text = it
-        })
         dashboardViewModel.failedBroadcastNum.observe(this, Observer<Int> {
             mView.findViewById<TextView>(R.id.failedBroadcastNum).text = it?.toString() ?: "0"
         })
