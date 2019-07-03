@@ -282,12 +282,12 @@ def revoke_token_view(user_id: str, token_name: str) -> ViewResponse:
     try:
         revoke_token(session['owner'], token_name)
         return make_response('', requests.codes.ok)
-    except UnknownToken:
-        return make_response('', requests.codes.not_found)
-    except ForbiddenAction:
-        return make_response('', requests.codes.forbidden)
-    except AlreadyRevoked:
-        return make_response('', requests.codes.bad_request)
+    except UnknownToken as e:
+        return log_error_and_make_response(e, requests.codes.not_found)
+    except ForbiddenAction as e:
+        return log_error_and_make_response(e, requests.codes.forbidden)
+    except AlreadyRevoked as e:
+        return log_error_and_make_response(e, requests.codes.bad_request)
 
 
 @put('/api/v1/ads/')
@@ -307,8 +307,8 @@ def create_ad_view() -> ViewResponse:
             mobile=True, rate=Decimal(0.0), currency='miota')
     except AttributeError as e:
         return log_error_and_make_response(e, requests.codes.bad_request)
-    except (InvalidOperation, NoStartOfStream, UnknownProtocol,
-            UnknownLocation, WrongRate, UnsupportedCryptocurrency) as e:
+    except (NoStartOfStream, UnknownProtocol, UnknownLocation, WrongRate,
+            UnsupportedCryptocurrency) as e:
         return log_error_and_make_response(e, e.msg, requests.codes.bad_request)
     return make_json_response(requests.codes.ok, uuid=new_ad.uuid)
 
@@ -359,11 +359,10 @@ def delete_ad(ad_id: str) -> ViewResponse:
 
 def register_views_to_app(flask_app: Flask) -> None:
     for http_method, func, rule in view_registry:
-        # log.debug('Registering view to flask app: {} {}'.format(http_method, rule))
         flask_app.add_url_rule(rule, func.__name__, func,
                                methods=[http_method])
 
 
 def log_error_and_make_response(err: Exception, error_code: int, msg: str = '') -> ViewResponse:
-    current_app.log.error(f"Error while creating the ad {repr(err)}")
+    current_app.log.error(f"Error: {repr(err)}")
     return make_response(msg, error_code)
