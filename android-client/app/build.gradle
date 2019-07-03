@@ -96,6 +96,7 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-extensions:$rootProject.ext.archLifecycleVersion"
     implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.0.0'
     implementation 'androidx.paging:paging-runtime-ktx:2.1.0'
+    implementation 'androidx.recyclerview:recyclerview:1.0.0'
     implementation "androidx.room:room-runtime:${rootProject.ext.room_version}"
     implementation 'com.google.android.material:material:1.0.0'
     implementation 'com.google.code.gson:gson:2.8.5'
