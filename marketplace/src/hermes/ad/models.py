@@ -8,6 +8,7 @@ from sqlalchemy import (Boolean, Column, DateTime, Float,
 from sqlalchemy.orm import relationship
 from sqlalchemy_utils.types.choice import ChoiceType
 
+from hermes.currencies import CryptoCurrency
 from hermes.user.models import User
 
 
@@ -20,9 +21,7 @@ class Ad(current_app.Base):
         ('private_bundle', 'PRIVATE_BUNDLE')
     ]
 
-    CURRENCIES = [
-        ('miota', 'MIOTA'),
-    ]
+    CURRENCIES = list(map(lambda c: (c.value.lower(), c.value), list(CryptoCurrency)))
 
     id = Column(Integer, primary_key=True)
     uuid = Column(String, unique=True,
