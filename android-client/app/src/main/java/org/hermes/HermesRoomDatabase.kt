@@ -17,7 +17,7 @@ import org.hermes.utils.SQLiteTypeConverter
 
 @Database(
     entities = [Ad::class, Event::class, Marketplace::class, User::class],
-    version = 3,
+    version = 4,
     exportSchema = true
 )
 @TypeConverters(SQLiteTypeConverter::class)
