@@ -2,7 +2,7 @@ from decimal import Decimal, InvalidOperation
 from typing import Any, Callable, Tuple, TYPE_CHECKING, Union
 
 import requests
-from flask import (Flask, make_response, redirect, request,
+from flask import (current_app, Flask, make_response, redirect, request,
                    Response, session, url_for)
 
 from hermes.ad.controllers import (AdQuery, ad_to_json, create_ad, delete_ad,
@@ -87,12 +87,8 @@ def register() -> ViewResponse:
             "public_key_verification_message":
                 public_key_verification.original_message
         })
-    except AlreadyRegistered:
-        return make_response('already_registered', requests.codes.bad_request)
-    except WrongParameters:
-        return make_response('', requests.codes.bad_request)
-    except UnsupportedPublicKeyType:
-        return make_response('', requests.codes.bad_request)
+    except (AlreadyRegistered, WrongParameters, UnsupportedPublicKeyType) as e:
+        return log_error_and_make_response(e, e.msg, requests.codes.bad_request)
 
 
 @post('/api/v1/users/<string:user_id>/deregister')
@@ -112,8 +108,10 @@ def login() -> ViewResponse:
         session.owner = user
         session.refresh()
         return redirect(url_for(index))
-    except (UnknownUser, WrongParameters, ValueError):
-        return make_response('', requests.codes.bad_request)
+    except (UnknownUser, WrongParameters) as e:
+        return log_error_and_make_response(e, e.msg, requests.codes.bad_request)
+    except ValueError as e:
+        return log_error_and_make_response(e, requests.codes.bad_request)
 
 
 @post('/api/v1/users/logout')
@@ -155,12 +153,12 @@ def verify_email_view(user_id: str, email_id: str):
     try:
         verify_email(user_id, email_id, request.form.get('token'))
         return make_response('', requests.codes.ok)
-    except UnknownUser:
-        return make_response('', requests.codes.forbidden)
-    except UnknownEmail:
-        return make_response('', requests.codes.not_found)
-    except UnknownToken:
-        return make_response('', requests.codes.bad_request)
+    except UnknownUser as e:
+        return log_error_and_make_response(e, e.msg, requests.codes.forbidden)
+    except UnknownEmail as e:
+        return log_error_and_make_response(e, e.msg, requests.codes.not_found)
+    except UnknownToken as e:
+        return log_error_and_make_response(e, e.msg, requests.codes.bad_request)
 
 
 @get('/api/v1/users/<string:user_id>/keys/')
@@ -180,10 +178,10 @@ def post_su(user_id: str) -> ViewResponse:
     try:
         su(user=session['owner'], user_to_su=user_id)
         return make_response('', requests.codes.ok)
-    except WrongParameters:
-        return make_response('', requests.codes.bad_request)
-    except ForbiddenAction:
-        return make_response('', requests.codes.forbidden)
+    except WrongParameters as e:
+        return log_error_and_make_response(e, e.msg, requests.codes.bad_request)
+    except ForbiddenAction as e:
+        return log_error_and_make_response(e, e.msg, requests.codes.forbidden)
 
 
 @get('/api/v1/users/')
@@ -209,10 +207,10 @@ def get_user_details(user_id: str) -> ViewResponse:
             requesting_user=session['owner'],
             user=user_id)
         )
-    except ForbiddenAction:
-        return make_response('', requests.codes.forbidden)
-    except UnknownUser:
-        return make_response('', requests.codes.not_found)
+    except ForbiddenAction as e:
+        return log_error_and_make_response(e, e.msg, requests.codes.forbidden)
+    except UnknownUser as e:
+        return log_error_and_make_response(e, e.msg, requests.codes.not_found)
 
 
 @patch('/api/v1/users/<string:user_id>')
@@ -236,12 +234,12 @@ def get_key_verification_message(user_id: str, key_id: str):
                 "public_key_verification_message":
                     public_key_verification_request.original_message,
             })
-    except UnknownUser:
-        return make_response('', requests.codes.forbidden)
-    except UnknownEmail:
-        return make_response('', requests.codes.not_found)
-    except (AlreadyVerified, UnknownPublicKey):
-        return make_response('', requests.codes.bad_request)
+    except UnknownUser as e:
+        return log_error_and_make_response(e, e.msg, requests.codes.forbidden)
+    except UnknownEmail as e:
+        return log_error_and_make_response(e, e.msg, requests.codes.not_found)
+    except (AlreadyVerified, UnknownPublicKey) as e:
+        return log_error_and_make_response(e, e.msg, requests.codes.bad_request)
 
 
 @get('/api/v1/users/<string:user_id>/tokens/')
@@ -263,10 +261,12 @@ def create_token(user_id: str) -> ViewResponse:
             )
             session.owner = user
             session.refresh()
-        except (UnknownUser, WrongParameters):
-            return make_response('', requests.codes.forbidden)
-        except (ExpiredToken, ValueError):
-            return make_response('', requests.codes.bad_request)
+        except (UnknownUser, WrongParameters) as e:
+            return log_error_and_make_response(e, e.msg, requests.codes.forbidden)
+        except ExpiredToken as e:
+            return log_error_and_make_response(e, e.msg, requests.codes.bad_request)
+        except ValueError as e:
+            return log_error_and_make_response(e, requests.codes.bad_request)
 
     if user_id != session.owner.uuid and not session.owner.admin:
         return make_response('', requests.codes.forbidden)
@@ -305,9 +305,11 @@ def create_ad_view() -> ViewResponse:
             longitude=Decimal(request.args.get('longitude', 0)),
             latitude=Decimal(request.args.get('latitude', 0)),
             mobile=True, rate=Decimal(0.0), currency='miota')
-    except (AttributeError, InvalidOperation, NoStartOfStream, UnknownProtocol,
-            UnknownLocation, WrongRate):
-        return make_response('', requests.codes.bad_request)
+    except AttributeError as e:
+        return log_error_and_make_response(e, requests.codes.bad_request)
+    except (InvalidOperation, NoStartOfStream, UnknownProtocol,
+            UnknownLocation, WrongRate, UnsupportedCryptocurrency) as e:
+        return log_error_and_make_response(e, e.msg, requests.codes.bad_request)
     return make_json_response(requests.codes.ok, uuid=new_ad.uuid)
 
 
@@ -327,8 +329,10 @@ def list_ads() -> ViewResponse:
                               longitude=Decimal(request.args.get('y')),
                               width=Decimal(request.args.get('width')),
                               height=Decimal(request.args.get('height')))
-        except (InvalidOperation, TypeError, WrongLocationParameters):
-            make_response('', requests.codes.bad_request)
+        except (InvalidOperation, WrongLocationParameters) as e:
+            return log_error_and_make_response(e, e.msg, requests.codes.bad_request)
+        except TypeError as e:
+            return log_error_and_make_response(e, requests.codes.bad_request)
     if request.args.get('data_type'):
         query.by_data_type(request.args.get('data_type'))
     return make_json_response(status_code=200, ads=query.to_json())
@@ -358,3 +362,8 @@ def register_views_to_app(flask_app: Flask) -> None:
         # log.debug('Registering view to flask app: {} {}'.format(http_method, rule))
         flask_app.add_url_rule(rule, func.__name__, func,
                                methods=[http_method])
+
+
+def log_error_and_make_response(err: Exception, error_code: int, msg: str = '') -> ViewResponse:
+    current_app.log.error(f"Error while creating the ad {repr(err)}")
+    return make_response(msg, error_code)
