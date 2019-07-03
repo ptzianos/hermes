@@ -84,3 +84,7 @@ class NoStartOfStream(Exception):
 
 class AlreadyInactiveAd(Exception):
     msg = 'ad_already_inactive'
+
+
+class UnsupportedCryptocurrency(Exception):
+    msg = 'unsupported cryptocurrency'
