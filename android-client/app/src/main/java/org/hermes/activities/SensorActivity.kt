@@ -5,15 +5,21 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.Observer
+import com.google.android.material.snackbar.Snackbar
 import dagger.Module
 import dagger.android.AndroidInjection
 import kotlinx.android.synthetic.main.activity_sensor.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.asCoroutineDispatcher
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 import org.hermes.*
 import org.hermes.utils.addBackButton
+
 
 class SensorActivity : BaseActivity() {
 
@@ -25,6 +31,12 @@ class SensorActivity : BaseActivity() {
     @Inject
     lateinit var sensorRepository: SensorRepository
 
+    @Inject
+    lateinit var marketRepository: MarketRepository
+
+    @Inject
+    lateinit var hermesApplication: HermesClientApp
+
     private lateinit var sensorUUID: TextView
     private lateinit var sensorID: TextView
     private lateinit var sensorType: TextView
@@ -32,14 +44,17 @@ class SensorActivity : BaseActivity() {
     private lateinit var sensorWhat: TextView
     private lateinit var sensorDevice: TextView
     private lateinit var sensorActivateButton: Button
+    private lateinit var sensorAdvertiseButton: Button
     private lateinit var sensorRootAddress: TextView
     private lateinit var sensorLatestAddress: TextView
+    private lateinit var sensorInfoLayout: ConstraintLayout
 
     override fun onCreate(savedInstanceState: Bundle?) {
         AndroidInjection.inject(this)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_sensor)
 
+        sensorInfoLayout = findViewById(R.id.sensorInfoLayout)
         sensorUUID = findViewById(R.id.sensorUUID)
         sensorID = findViewById(R.id.sensorID)
         sensorType = findViewById(R.id.sensorType)
@@ -47,6 +62,7 @@ class SensorActivity : BaseActivity() {
         sensorWhat = findViewById(R.id.sensorWhat)
         sensorDevice = findViewById(R.id.sensorDevice)
         sensorActivateButton = findViewById(R.id.sensorActivate)
+        sensorAdvertiseButton = findViewById(R.id.sensorAdvertiseButton)
 
         sensorRootAddress = findViewById(R.id.rootAddress)
         sensorLatestAddress = findViewById(R.id.latestAddress)
@@ -80,6 +96,7 @@ class SensorActivity : BaseActivity() {
         val deActivateText = "Deactivate"
         val green = ResourcesCompat.getColor(resources, R.color.green, null)
         val red = ResourcesCompat.getColor(resources, R.color.red, null)
+        val grey = ResourcesCompat.getColor(resources, R.color.secondaryTextColor, null)
 
         sensorRepository.registry[sensor.uuid]?.active?.getLiveData()?.observe(this, Observer<Boolean> {
             sensorActivateButton.text = if (it) {
@@ -95,11 +112,23 @@ class SensorActivity : BaseActivity() {
         })
         sensorRepository.rootAddresses[sensor.uuid]?.observe(this, Observer<String> {
             rootAddress.text = it ?: ""
+            sensorAdvertiseButton.setBackgroundColor(if (it == null || it == "") grey else red)
         })
         sensorActivateButton.setOnClickListener {
             sensorRepository.eventBus.sendMessage(sensorRepository.eventBus.obtainMessage().apply {
                 obj = Pair(SensorRepository.MessageType.FLIP_SENSOR, sensor)
             })
+        }
+        sensorAdvertiseButton.setOnClickListener {
+            if (sensorRootAddress.text == null || sensorRootAddress.text.isBlank())
+                Snackbar.make(sensorInfoLayout, "Can not advertise sensor before streaming starts", Snackbar.LENGTH_LONG).show()
+            else {
+                CoroutineScope(BACKGROUND.asCoroutineDispatcher()).launch {
+                    marketRepository.postOrPingAd(sensor, rootAddress = sensorRootAddress.text.toString(),
+                        toastHandler = hermesApplication.toastHandler,
+                        callback = {})
+                }
+            }
         }
     }
 }
