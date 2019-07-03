@@ -9,20 +9,18 @@ import androidx.annotation.NonNull
         ForeignKey(
                 entity = Marketplace::class,
                 parentColumns = ["uid"],
-                childColumns = ["market_id"]
+                childColumns = ["user_id"]
         )
-    ],
-    indices = [Index(value=["market_id"], name="ad_market_index")]
+    ]
 )
 data class Ad(
+    // UUID assigned to this ad by the market
     @NonNull @ColumnInfo(name = "uuid") var uuid: String,
+    // foreign key to the market that is connected to this
+    @NonNull @ColumnInfo(name = "user_id") var userId: Int,
+    // block-chain used to store the data
     @NonNull @ColumnInfo(name = "network") var network: String,
-    @NonNull @ColumnInfo(name = "currency") var currency: String,
-    @ColumnInfo(name = "lower_left_x") var lowerLeftX: Int? = null,
-    @ColumnInfo(name = "lower_left_y") var lowerLeftY: Int? = null,
-    @ColumnInfo(name = "width") var width: Int? = null,
-    @ColumnInfo(name = "height") var height: Int? = null,
-    @NonNull @ColumnInfo(name = "market_id") var marketId: Int
+    @NonNull @ColumnInfo(name = "currency") var currency: String
 ) {
     @NonNull @PrimaryKey(autoGenerate = true) @ColumnInfo(name = "uid") var uid: Int? = null
 }
