@@ -299,18 +299,18 @@ def create_ad_view() -> ViewResponse:
     try:
         new_ad = create_ad(
             owner=session.owner,
-            data_type=request.args.get('data_type'),
-            data_unit=request.args.get('data_unit'),
-            start_of_stream_address=request.args.get('start_of_stream_address'),
-            longitude=Decimal(request.args.get('longitude', 0)),
-            latitude=Decimal(request.args.get('latitude', 0)),
-            mobile=True, rate=Decimal(0.0), currency='miota')
-    except AttributeError as e:
+            data_type=request.form.get('data_type'),
+            data_unit=request.form.get('data_unit'),
+            start_of_stream_address=request.form.get('start_of_stream_address'),
+            longitude=Decimal(request.form.get('longitude', 0)),
+            latitude=Decimal(request.form.get('latitude', 0)),
+            mobile=True, rate=Decimal(0.0), currency=request.form.get('currency', 'ETH'))
+        return make_json_response(requests.codes.ok, uuid=new_ad.uuid)
+    except (AttributeError, InvalidOperation) as e:
         return log_error_and_make_response(e, requests.codes.bad_request)
     except (NoStartOfStream, UnknownProtocol, UnknownLocation, WrongRate,
             UnsupportedCryptocurrency) as e:
         return log_error_and_make_response(e, e.msg, requests.codes.bad_request)
-    return make_json_response(requests.codes.ok, uuid=new_ad.uuid)
 
 
 @get('/api/v1/ads/')
