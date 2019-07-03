@@ -30,8 +30,12 @@ interface HermesMarketV1 {
     @GET("/api/v1/ads/")
     fun listAds(): Call<List<Ad>>
 
+    @FormUrlEncoded
     @POST("/api/v1/ads/")
-    fun createAd(): Call<Ad>
+    fun createAd(@Field("data_type") dataType: String,
+                 @Field("data_unit") dataUnit: String,
+                 @Field("start_of_stream_address") startOfStreamAddress: String,
+                 @Header("Authorization") authHeader: String): Call<Ad>
 
     @GET("/api/v1/ads/{ad_id}")
     fun getAd(@Path("ad_id") adId: String): Call<Ad>
