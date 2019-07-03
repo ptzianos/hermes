@@ -7,7 +7,7 @@ import androidx.annotation.NonNull
     tableName = "ads",
     foreignKeys = [
         ForeignKey(
-                entity = Marketplace::class,
+                entity = User::class,
                 parentColumns = ["uid"],
                 childColumns = ["user_id"]
         )
