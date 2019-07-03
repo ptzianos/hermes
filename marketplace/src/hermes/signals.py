@@ -1,7 +1,8 @@
+import requests
 import traceback
 from time import strftime
 
-from flask import current_app, Flask, g, request
+from flask import current_app, Flask, g, make_response, request
 from flask.wrappers import Response
 
 
@@ -31,4 +32,5 @@ def register_signals(app: Flask):
         current_app.log.error('%s %s %s %s %s 5xx INTERNAL SERVER ERROR\n%s',
                               timestamp, request.remote_addr, request.method,
                               request.scheme, request.full_path, tb)
-        return e.status_code
+        return make_response('internal_server_error',
+                             requests.codes.internal_server_error)
