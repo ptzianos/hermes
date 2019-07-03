@@ -2,7 +2,9 @@ package org.hermes
 
 import android.app.Application
 import android.content.SharedPreferences
+import android.os.Handler
 import android.util.Log
+import org.bouncycastle.util.encoders.Base64
 import java.lang.Exception
 import javax.inject.Inject
 import javax.inject.Named
@@ -10,6 +12,7 @@ import javax.inject.Singleton
 import retrofit2.Response
 import retrofit2.Retrofit
 
+import org.hermes.entities.Ad
 import org.hermes.entities.User
 import org.hermes.market.HermesMarketV1
 import org.hermes.market.RegistrationResponse
@@ -83,7 +86,7 @@ class MarketRepository @Inject constructor(
         val verificationBody = verificationResp.body()
         if (verificationResp.isSuccessful && verificationBody != null) {
             Log.i(loggingTag, "Updating user's $userUUID token in the database")
-            db.userDao().updateToken(userUUID, verificationBody.token)
+            db.userDao().updateToken(userUUID, Base64.toBase64String(verificationBody.token.toByteArray()))
             token = verificationBody.token
         }
         return verificationBody?.token
@@ -100,5 +103,54 @@ class MarketRepository @Inject constructor(
 
     fun tokenAcquired(domain: String = "hermes-data.io"): Boolean {
         return sharedPrefs.getBoolean(domain + "_token", false)
+    }
+
+    fun postOrPingAd(sensor: LedgerService.Sensor, domain: String = "hermes-data.io",
+                     toastHandler: Handler, callback: (ad: Ad) -> Unit, rootAddress: String) {
+        val user = db.userDao().findByMarket(domain)
+        if (user == null) {
+            toastHandler.sendMessage(toastHandler.obtainMessage().apply {
+                obj = "You have not registered with marketplace at $domain"
+            })
+            return
+        }
+        val ad = db.adDao().findByUserId(user.uid!!)
+        if (ad == null) {
+            Log.e(loggingTag, "There is no advertisement posted for this sensor to $domain. Posting now.")
+            val apiService = try {
+                retroBuilder.baseUrl("https://$domain")
+                    .build()
+                    .create(HermesMarketV1::class.java)
+            } catch (e: Exception) {
+                Log.e(loggingTag, "Could not post advertisement to the marketplace $e")
+                toastHandler.sendMessage(toastHandler.obtainMessage().apply {
+                    obj = "There was an error while trying to create advertisement"
+                })
+                return
+            }
+            if (user.token == null) {
+                Log.e(loggingTag, "There is no valid token for the user for market $domain")
+                toastHandler.sendMessage(toastHandler.obtainMessage().apply {
+                    obj = "There was an error while trying to create advertisement"
+                })
+                return
+            }
+            Log.e(loggingTag, "api token used for ad post is ${user.token}")
+            val adResp = apiService
+                .createAd(sensor.mtype, sensor.unit, rootAddress, "Bearer ${user.token!!}")
+                .execute()
+            if (!adResp.isSuccessful) {
+                Log.e(loggingTag, "Could not post advertisement to the marketplace ${adResp.message()}")
+                toastHandler.sendMessage(toastHandler.obtainMessage().apply {
+                    obj = "There was an error while trying to create advertisement"
+                })
+                return
+            }
+            val marketAd = adResp.body()!!
+            val newAd = Ad(uuid = marketAd.uuid, network = "IOTA", currency = "ETH", userId = user.uid!!)
+            db.adDao().insertAll(newAd)
+            Log.i(loggingTag, "Saved new Ad into the database with uuid: ${newAd.uid}")
+            callback(newAd)
+        }
     }
 }
