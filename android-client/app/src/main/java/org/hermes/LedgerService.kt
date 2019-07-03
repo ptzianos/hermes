@@ -35,7 +35,7 @@ class LedgerService : Service() {
     data class Sensor(val dataId: String, val unit: String, val mtype: String, val what: String?, val device: String?) {
         private val loggingTag = "Sensor"
         // TODO: Make this configurable
-        val sampleSize = 10
+        val sampleSize = 100
         var counter = 0
             private set
         private var start = 0
