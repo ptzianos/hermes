@@ -302,8 +302,8 @@ def create_ad_view() -> ViewResponse:
             data_type=request.args.get('data_type'),
             data_unit=request.args.get('data_unit'),
             start_of_stream_address=request.args.get('start_of_stream_address'),
-            longitude=Decimal(request.args.get('longitude')),
-            latitude=Decimal(request.args.get('latitude')),
+            longitude=Decimal(request.args.get('longitude', 0)),
+            latitude=Decimal(request.args.get('latitude', 0)),
             mobile=True, rate=Decimal(0.0), currency='miota')
     except (AttributeError, InvalidOperation, NoStartOfStream, UnknownProtocol,
             UnknownLocation, WrongRate):
