@@ -4,6 +4,7 @@ from typing import Any, Dict, Iterable, Optional, TYPE_CHECKING
 
 from flask import g
 
+from hermes.currencies import CryptoCurrency
 from hermes.exceptions import *
 from hermes.user.controllers import resolve_user, UserLikeObj
 
@@ -23,7 +24,7 @@ def create_ad(owner: 'User', data_type: str, data_unit: str,
               start_of_stream_address: str,
               longitude: Optional[Decimal], latitude: Optional[Decimal],
               protocol: str = 'plaintext', mobile: bool = True,
-              rate: Decimal = 0.0, currency: str = 'miota') -> 'Ad':
+              rate: Decimal = 0.0, currency: str = CryptoCurrency.IOTA) -> 'Ad':
     """Creates a new Ad instance."""
     from hermes.ad.models import Ad
     if protocol not in [p[0] for p in Ad.PROTOCOL]:
@@ -34,6 +35,11 @@ def create_ad(owner: 'User', data_type: str, data_unit: str,
         raise WrongRate()
     if not start_of_stream_address:
         raise NoStartOfStream()
+    try:
+        # Ensure that the currency is a supported one
+        currency = CryptoCurrency(currency.upper()).value.lower()
+    except (AttributeError, ValueError):
+        raise UnsupportedCryptocurrency()
     ad = Ad(owner_id=owner.id, mobile=mobile, data_type=data_type,
             data_unit=data_unit, protocol=protocol, currency=currency,
             longitude=longitude, latitude=latitude, rate=rate,
