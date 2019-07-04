@@ -13,6 +13,7 @@ import retrofit2.Response
 import retrofit2.Retrofit
 
 import org.hermes.entities.Ad
+import org.hermes.entities.Sensor
 import org.hermes.entities.User
 import org.hermes.market.HermesMarketV1
 import org.hermes.market.RegistrationResponse
@@ -105,7 +106,7 @@ class MarketRepository @Inject constructor(
         return sharedPrefs.getBoolean(domain + "_token", false)
     }
 
-    fun postOrPingAd(sensor: LedgerService.Sensor, domain: String = "hermes-data.io",
+    fun postOrPingAd(sensor: Sensor, domain: String = "hermes-data.io",
                      toastHandler: Handler, callback: (ad: Ad) -> Unit, rootAddress: String) {
         val user = db.userDao().findByMarket(domain)
         if (user == null) {
@@ -147,7 +148,8 @@ class MarketRepository @Inject constructor(
                 return
             }
             val marketAd = adResp.body()!!
-            val newAd = Ad(uuid = marketAd.uuid, network = "IOTA", currency = "ETH", userId = user.uid!!)
+            val newAd = Ad(uuid = marketAd.uuid, network = StorageBackend.IOTA.name, currency = "ETH",
+                userId = user.uid!!, sensorUUID = sensor.uuid)
             db.adDao().insertAll(newAd)
             Log.i(loggingTag, "Saved new Ad into the database with uuid: ${newAd.uid}")
             callback(newAd)

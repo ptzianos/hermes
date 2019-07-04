@@ -8,20 +8,21 @@ import androidx.recyclerview.widget.ListAdapter
 
 import org.hermes.LedgerService
 import org.hermes.R
+import org.hermes.entities.Sensor
 import org.hermes.viewholders.SensorListViewHolder
 
 /**
  * [RecyclerView.Adapter] that can display a [LedgerService.Sensor].
  */
 class SensorListViewAdapter(val context: Context):
-    ListAdapter<LedgerService.Sensor, SensorListViewHolder>(diffCallback) {
+    ListAdapter<Sensor, SensorListViewHolder>(diffCallback) {
 
     companion object {
-        private val diffCallback = object : DiffUtil.ItemCallback<LedgerService.Sensor>() {
-            override fun areItemsTheSame(oldItem: LedgerService.Sensor, newItem: LedgerService.Sensor): Boolean =
+        private val diffCallback = object : DiffUtil.ItemCallback<Sensor>() {
+            override fun areItemsTheSame(oldItem: Sensor, newItem: Sensor): Boolean =
                 oldItem.dataId == newItem.dataId
 
-            override fun areContentsTheSame(oldItem: LedgerService.Sensor, newItem: LedgerService.Sensor): Boolean =
+            override fun areContentsTheSame(oldItem: Sensor, newItem: Sensor): Boolean =
                 oldItem.equals(newItem)
         }
     }

@@ -18,6 +18,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 import org.hermes.*
+import org.hermes.entities.Sensor
 import org.hermes.utils.addBackButton
 
 
@@ -86,7 +87,8 @@ class SensorActivity : BaseActivity() {
         }
     }
 
-    private fun bind(sensor: LedgerService.Sensor) {
+    private fun bind(sensor: Sensor?) {
+        sensor ?: return
         sensorUUID.text = sensor.uuid
         sensorID.text = sensor.dataId
         sensorType.text = sensor.mtype

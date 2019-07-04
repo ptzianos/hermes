@@ -5,12 +5,12 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import java.lang.StringBuilder
-
-import org.hermes.utils.SQLiteTypeConverter
 import org.threeten.bp.OffsetDateTime
 
+import org.hermes.utils.SQLiteTypeConverter
+
 @Entity(tableName = "events")
-data class Event(
+class Event(
     @ColumnInfo(name = "action") var action: String,
     @ColumnInfo(name = "resource") var resource: String,
     @ColumnInfo(name = "resource_id") var resourceId: Int? = null,
@@ -40,5 +40,15 @@ data class Event(
                     this.resource == other.resource && this.resourceId == other.resourceId &&
                     this.uid == other.uid
         return false
+    }
+
+    override fun hashCode(): Int {
+        var result = action.hashCode()
+        result = 31 * result + resource.hashCode()
+        result = 31 * result + (resourceId ?: 0)
+        result = 31 * result + (extraInfo?.hashCode() ?: 0)
+        result = 31 * result + createdOn.hashCode()
+        result = 31 * result + (uid ?: 0)
+        return result
     }
 }

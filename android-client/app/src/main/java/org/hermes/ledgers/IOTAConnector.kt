@@ -2,7 +2,6 @@ package org.hermes.ledgers
 
 
 import android.content.SharedPreferences
-import android.os.Handler
 import android.util.Log
 import java.lang.Exception
 import java.lang.StringBuilder
@@ -13,10 +12,8 @@ import org.apache.commons.lang3.StringUtils
 import org.iota.jota.IotaAPI
 import org.iota.jota.model.Bundle
 import org.iota.jota.model.Transaction
-import org.iota.jota.pow.SpongeFactory
 import org.iota.jota.utils.Constants
 import org.iota.jota.utils.InputValidator
-import org.iota.jota.utils.IotaAPIUtils
 import org.threeten.bp.OffsetDateTime
 
 import org.hermes.*
@@ -81,7 +78,7 @@ class IOTAConnector(val seed: Seed, private val privateKey: SecP256K1PrivKey, ap
     }
 
     fun sendData(samples: Array<Metric20?>, clientUUID: String, asyncConfirmation: Boolean,
-                 blockUntilConfirmation: Boolean, sensorId: String = ""
+                 blockUntilConfirmation: Boolean
     ): Array<Metric20?> {
         // Validate seed
         if (!InputValidator.isValidSeed(seed.toString())) {
@@ -92,6 +89,7 @@ class IOTAConnector(val seed: Seed, private val privateKey: SecP256K1PrivKey, ap
             Log.d(loggingTag, "There is another  broadcast already in progress for $clientUUID. Returning.")
             return samples
         }
+        Log.d(loggingTag, "Broadcasting data of client with id $clientUUID")
         val (previousAddress, newAddress, nextAddress) = addressManager.getAddress(clientUUID)
         val trytes = prepareTransactions(previousAddress, newAddress, nextAddress, clientUUID, *samples)
 

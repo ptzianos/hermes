@@ -17,7 +17,7 @@ class UnknownClient: Exception()
 @Singleton
 class IOTAAddressManager @Inject constructor(
     cryptoRepository: CryptoRepository,
-    sensorRepository: SensorRepository,
+    private val sensorRepository: SensorRepository,
     @param:Named("auth") val iotaPrefs: SharedPreferences
 ) {
 
@@ -30,6 +30,7 @@ class IOTAAddressManager @Inject constructor(
     private val sensorEventBus = sensorRepository.eventBus
 
     fun getAddress(clientUUID: String): Triple<String, String, String> {
+        // TODO: Get these from the sensor repo
         val newAddressIndex = iotaPrefs.getInt("${clientUUID}_latest_address_index", 1000) + 1
         val previousAddress = iotaPrefs.getString("${clientUUID}_latest_address", "")!!
         val nextAddressIndex = newAddressIndex + 1
@@ -53,19 +54,13 @@ class IOTAAddressManager @Inject constructor(
         if (!unConfirmedAddresses.containsKey(clientUUID))
             throw UnknownClient()
         val latestAddressIndexPair = unConfirmedAddresses[clientUUID]!!
-        val prefs = iotaPrefs.edit()
-        if (!iotaPrefs.contains("${clientUUID}_root_address")) {
-            prefs.putString("${clientUUID}_root_address", latestAddressIndexPair.first)
+        val rootAddress = sensorRepository.rootAddresses[clientUUID]?.value
+        if (rootAddress == null || rootAddress == "") {
             val message = sensorEventBus.obtainMessage()
             message.obj = Pair(SensorRepository.MessageType.NOTIFY_SENSOR_ROOT_ADDRESS, clientUUID)
             message.data.putString("root_address", latestAddressIndexPair.first)
             sensorEventBus.sendMessage(message)
         }
-
-        prefs
-            .putString("${clientUUID}_latest_address", latestAddressIndexPair.first)
-            .putInt("${clientUUID}_latest_address_index", latestAddressIndexPair.second)
-            .apply()
 
         val message = sensorEventBus.obtainMessage()
         message.obj = Pair(SensorRepository.MessageType.NOTIFY_SENSOR_LATEST_ADDRESS, clientUUID)
@@ -74,6 +69,6 @@ class IOTAAddressManager @Inject constructor(
         unConfirmedAddresses.remove(clientUUID)
     }
 
-    fun hasUnconfirmedAddressFor(clientUUID: String): Boolean = unConfirmedAddresses[clientUUID] != null
+    fun hasUnconfirmedAddressFor(clientUUID: String): Boolean = unConfirmedAddresses.contains(clientUUID)
 
 }

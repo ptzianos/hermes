@@ -9,9 +9,9 @@ import javax.inject.Inject
 
 import org.hermes.BaseActivity
 import org.hermes.HermesClientApp
-import org.hermes.LedgerService
 import org.hermes.R
 import org.hermes.adapters.SensorListViewAdapter
+import org.hermes.entities.Sensor
 import org.hermes.viewmodels.SensorListViewModel
 
 
@@ -35,7 +35,7 @@ class SensorListActivity : BaseActivity() {
 
         val recyclerView: RecyclerView = findViewById(R.id.sensorFragment)
 
-        viewModel.sensors.observe(this, Observer<List<LedgerService.Sensor>?> {
+        viewModel.sensors.observe(this, Observer<List<Sensor>?> {
             (recyclerView.adapter as SensorListViewAdapter).submitList(it)
         })
     }

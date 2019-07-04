@@ -1,6 +1,6 @@
 package org.hermes
 
-enum class Storage (val network: String) {
+enum class StorageBackend (val network: String) {
     IOTA("IOTA"),
     STORJ("STORJ"),
 }

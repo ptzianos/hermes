@@ -7,9 +7,9 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 
-import org.hermes.LedgerService
 import org.hermes.R
 import org.hermes.activities.SensorActivity
+import org.hermes.entities.Sensor
 
 
 class SensorListViewHolder(val parent : View) :
@@ -18,10 +18,10 @@ class SensorListViewHolder(val parent : View) :
     private val sensorActiveImg: ImageView = parent.findViewById(R.id.sensorActive)
     private val sensorId: TextView = parent.findViewById(R.id.sensorUUID)
     private val sensorUUID: TextView = parent.findViewById(R.id.sensorID)
-    private lateinit var mItem: LedgerService.Sensor
+    private lateinit var mItem: Sensor
     private lateinit var context: Context
 
-    fun bind(item: LedgerService.Sensor, context: Context) {
+    fun bind(item: Sensor, context: Context) {
         sensorActiveImg.setImageResource(when(item.active.get()) {
             true -> R.drawable.green_circle
             false -> R.drawable.red_circle

@@ -14,15 +14,14 @@ import dagger.Module
 import dagger.android.AndroidInjection
 import java.security.SecureRandom
 import java.util.*
-import java.util.concurrent.locks.ReentrantLock
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
-import kotlin.concurrent.withLock
 import kotlinx.coroutines.*
 
 import org.hermes.activities.LoginActivity
+import org.hermes.entities.Sensor
 import org.hermes.ledgers.IOTAConnector
-import org.hermes.utils.AtomicLiveBoolean
+import org.hermes.sensors.RandomSensor
 import org.hermes.utils.applyIfNotEmpty
 import org.hermes.utils.mapIfNotEmpty
 
@@ -31,64 +30,6 @@ class LedgerService : Service() {
 
     @Module
     abstract class DaggerModule
-
-    data class Sensor(val dataId: String, val unit: String, val mtype: String, val what: String?, val device: String?) {
-        private val loggingTag = "Sensor"
-        // TODO: Make this configurable
-        val sampleSize = 100
-        var counter = 0
-            private set
-        private var start = 0
-        private var end = -1
-        private val lock = ReentrantLock()
-        private var buffer = Array<Metric20?>(sampleSize) { null }
-        lateinit var uuid: String
-        var active: AtomicLiveBoolean = AtomicLiveBoolean(false)
-
-        private fun clear() {
-            start = 0
-            end = -1
-            counter = 0
-        }
-
-        fun returnSamples(metrics: Array<Metric20?>) = metrics.forEach { if (it != null) returnSample(it) }
-
-        fun returnSample(metric: Metric20) {
-            fun dec(i: Int, mod: Int): Int = if (i == 0) mod - 1 else i - 1
-            val newStart = dec(start, sampleSize)
-            if (newStart == end) return
-            counter++
-            start = newStart
-            buffer[start] = metric
-        }
-
-        /**
-         * Put a new sample in the buffer.
-         * The buffer is a ring buffer so if the client exceeds the max
-         * number of samples, the oldest sample will be overwritten.
-         */
-        fun putSample(metric: Metric20) = lock.withLock {
-            val inc = fun(i: Int): Int = (i + 1) % sampleSize
-            end = inc(end)
-            buffer[end] = metric
-            start = if (end == start && counter > 0) inc(start) else start
-            counter = if (counter < sampleSize) counter + 1 else counter
-            Log.d(loggingTag, "Putting new sample at pos: $end, counter: $counter")
-        }
-
-        /**
-         * Return a buffer with all the samples in the correct order and clear the original buffer
-         */
-        fun flushData(): Array<Metric20?> = lock.withLock {
-            val chunk = when {
-                counter == 0 -> Array<Metric20?> (0) { null }
-                start < end -> buffer.sliceArray(start .. end)
-                else -> buffer.sliceArray(start until sampleSize) + buffer.sliceArray(0 .. end)
-            }
-            clear()
-            chunk
-        }
-    }
 
     private val binder = object : IHermesService.Stub() {
 
@@ -99,10 +40,11 @@ class LedgerService : Service() {
                 mtype == null -> ErrorCode.NO_TYPE.errorStr
                 dataId.startsWith(".") -> ErrorCode.INVALID_DATA_ID.errorStr
                 else -> {
-                    var uuid = sensorRepository.reverseRegistry.getOrDefault(Sensor(dataId, unit, mtype, what, device), "")
+                    // Search the dao in the db
+                    var uuid = sensorRepository.reverseRegistry.getOrDefault(dataId, "")
                     if (uuid.isEmpty()) {
                         uuid = UUID.randomUUID().toString()
-                        val newSensor = Sensor(dataId, unit, mtype, what, device).apply { this.uuid = uuid }
+                        val newSensor = Sensor(uuid, dataId, unit, mtype, what, device, "", "")
                         sensorRepository.eventBus.sendMessage(sensorRepository.eventBus.obtainMessage().apply {
                             obj = Pair(SensorRepository.MessageType.ADD_SENSOR, newSensor) })
                         Log.i(loggingTag, "A new sensor has registered with the application with uuid $uuid")
@@ -206,6 +148,9 @@ class LedgerService : Service() {
     lateinit var sensorRepository: SensorRepository
 
     @Inject
+    lateinit var randomSensor: RandomSensor
+
+    @Inject
     lateinit var app: HermesClientApp
 
     private val iotaConnector by lazy {
@@ -307,20 +252,7 @@ class LedgerService : Service() {
     }
 
     private suspend fun generateData() {
-        val uuid = iHermesService?.register("android.random", "int", "random_source", null, null)
-        if (uuid == null && uuid != ErrorCode.ALREADY_REGISTERED.errorStr
-            && uuid != ErrorCode.NO_DATA_ID.errorStr && uuid != ErrorCode.NO_TYPE.errorStr
-            && uuid != ErrorCode.NO_UNIT.errorStr)
-        {
-            Log.e(loggingTag, "There was an error while trying to connect to the service")
-            return
-        }
-        Log.i(loggingTag, "Starting generating data with uuid $uuid")
-        while (true) {
-            iHermesService?.sendDataDouble(uuid, (Random().nextInt() % 30).toDouble(), null, null,
-                null, null, null, null, -1, null)
-            delay(5 * 1000)
-        }
+        randomSensor.generateData(this)
     }
 
     private suspend fun broadcastData() {
@@ -337,7 +269,6 @@ class LedgerService : Service() {
                     metadataRepository.ledgerServiceUptime.postValue(((System.currentTimeMillis() - broadcastStart as Long) / (60 * 1000)).toInt())
                 }
                 for ((uuid, client) in sensorRepository.registry.filter { it.value.active.get() }) {
-                    Log.d(loggingTag, "Broadcasting data of client with id $uuid")
                     client.flushData()
                         .mapIfNotEmpty {
                             iotaConnector.sendData(it, clientUUID = uuid,

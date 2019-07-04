@@ -11,13 +11,12 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import dagger.Module
 import dagger.android.support.AndroidSupportInjection
-import java.util.LinkedList
 import javax.inject.Inject
 
 import org.hermes.HermesClientApp
-import org.hermes.LedgerService
 import org.hermes.R
 import org.hermes.adapters.SensorListViewAdapter
+import org.hermes.entities.Sensor
 import org.hermes.viewmodels.SensorListViewModel
 
 
@@ -53,7 +52,7 @@ class SensorListFragment @Inject constructor() : Fragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        sensorListViewModel.sensors.observe(this, Observer<List<LedgerService.Sensor>?> {
+        sensorListViewModel.sensors.observe(this, Observer<List<Sensor>?> {
             (mView.findViewById<RecyclerView>(R.id.sensorRecyclerView).adapter as SensorListViewAdapter).submitList(it)
         })
     }

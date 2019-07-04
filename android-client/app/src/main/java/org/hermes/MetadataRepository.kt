@@ -13,6 +13,7 @@ import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.launch
 import org.hermes.daos.EventDao
 import org.hermes.entities.Event
+import org.hermes.entities.Sensor
 import org.hermes.utils.AtomicLiveBoolean
 import java.util.*
 import javax.inject.Inject
@@ -39,8 +40,8 @@ class MetadataRepository @Inject constructor(
     val eventBus: Handler = object : Handler(Looper.getMainLooper()) {
         override fun handleMessage(inputMessage: Message) {
             val msg = inputMessage.obj
-            if (msg == null || msg !is Pair<*, *> || msg.first !is MetadataRepository.MessageType) return
-            val message = msg as Pair<MetadataRepository.MessageType, *>
+            if (msg == null || msg !is Pair<*, *> || msg.first !is MessageType) return
+            val message = msg as Pair<MessageType, *>
             when (message.first) {
                 MessageType.PACKETS_BROADCAST -> {
                     if (message.second == null || message.second !is Int) return
@@ -69,8 +70,8 @@ class MetadataRepository @Inject constructor(
     val eventDao: EventDao = db.eventDao()
     private var ledgerServiceBootstrapped: Boolean = false
     var ledgerServiceBroadcasting: AtomicLiveBoolean = AtomicLiveBoolean(false)
-    private var sensorList: LinkedList<LedgerService.Sensor> = LinkedList()
-    var sensorListData: MutableLiveData<List<LedgerService.Sensor>> = initLiveData(sensorList)
+    private var sensorList: LinkedList<Sensor> = LinkedList()
+    var sensorListData: MutableLiveData<List<Sensor>> = initLiveData(sensorList)
     val ledgerServiceUptime: MutableLiveData<Int> = initLiveData(0)
     val packetsBroadcastNum: MutableLiveData<Int> = initLiveData(0)
     val packetsConfirmedNum: MutableLiveData<Int> = initLiveData(0)

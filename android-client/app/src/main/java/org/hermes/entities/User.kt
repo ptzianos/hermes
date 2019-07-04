@@ -4,7 +4,10 @@ import androidx.room.*
 import androidx.annotation.NonNull
 
 
-@Entity(tableName = "users")
+@Entity(
+    tableName = "users",
+    indices = [Index(value = ["uid", "market_uuid"], unique = true)]
+)
 data class User(
     @NonNull @ColumnInfo(name = "market_uuid") var marketUUID: String,
     @NonNull @ColumnInfo(name = "name") var name: String,
