@@ -1,9 +1,3 @@
-[submodule "carbon"]
-	path = carbon
-	url = git@github.com:graphite-project/carbon.git
-[submodule "entangled"]
-	path = entangled
-	url = git@github.com:iotaledger/entangled
 [submodule "jota"]
 	path = jota 
 	url = git@github.com:ptzianos/iota-java.git

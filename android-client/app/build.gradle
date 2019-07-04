@@ -50,41 +50,41 @@ android {
     }
 }
 
-task buildJnis(type: Exec) {
-    def res = commandLine '/bin/bash', '-c',
-            'git submodule update --init --recursive && ' +
-                    'cd ../../entangled && ' +
-                    'git status | head -n 1 | sed \'s/On branch //\''
-
-//    For the time being we just use the commit that the submodule is pointed to
-//    we are not going to be updating the repo every time we build the JNI libs.
-//    if (res.toString() != 'develop') {
-//        println 'Not in develop branch'
-//        commandLine '/bin/bash', '-c', 'cd ../../entangled && git reset --hard && git checkout develop'
-//    }
-    Properties properties = new Properties()
-    properties.load(project.rootProject.file('local.properties').newDataInputStream())
-    def sdkDir = properties.getProperty('sdk.dir', '')
-    def ndkDir = properties.getProperty('ndk.dir', '')
-    def cpu_archs = 'armeabi-v7a,arm64-v8a,x86,x86_64'
-    def bazel_env_vars = "ANDROID_HOME=${sdkDir} ANDROID_NDK_HOME=${ndkDir}"
-
-    println """
-=============================
-
-Android SDK Path: ${sdkDir}
-Android NDK Path: ${ndkDir}
-entangled repository is on branch: ${res.toString()}
-
-=============================
-"""
-
-    commandLine '/bin/bash', '-c', 'cd ../../entangled && ' +
-            "${bazel_env_vars} bazel build --fat_apk_cpu='${cpu_archs}' --copt=-Ofast //mobile/android:dummy && " +
-            'rm -rf ../android-client/build/jni &&' +
-            'echo A | unzip bazel-bin/mobile/android/dummy.apk -d ../android-client/build/jni && ' +
-            'cp -r ../android-client/build/jni/lib/ ../android-client/app/src/main/jniLibs'
-}
+//task buildJnis(type: Exec) {
+//    def res = commandLine '/bin/bash', '-c',
+//            'git submodule update --init --recursive && ' +
+//                    'cd ../../entangled && ' +
+//                    'git status | head -n 1 | sed \'s/On branch //\''
+//
+////    For the time being we just use the commit that the submodule is pointed to
+////    we are not going to be updating the repo every time we build the JNI libs.
+////    if (res.toString() != 'develop') {
+////        println 'Not in develop branch'
+////        commandLine '/bin/bash', '-c', 'cd ../../entangled && git reset --hard && git checkout develop'
+////    }
+//    Properties properties = new Properties()
+//    properties.load(project.rootProject.file('local.properties').newDataInputStream())
+//    def sdkDir = properties.getProperty('sdk.dir', '')
+//    def ndkDir = properties.getProperty('ndk.dir', '')
+//    def cpu_archs = 'armeabi-v7a,arm64-v8a,x86,x86_64'
+//    def bazel_env_vars = "ANDROID_HOME=${sdkDir} ANDROID_NDK_HOME=${ndkDir}"
+//
+//    println """
+//=============================
+//
+//Android SDK Path: ${sdkDir}
+//Android NDK Path: ${ndkDir}
+//entangled repository is on branch: ${res.toString()}
+//
+//=============================
+//"""
+//
+//    commandLine '/bin/bash', '-c', 'cd ../../entangled && ' +
+//            "${bazel_env_vars} bazel build --fat_apk_cpu='${cpu_archs}' --copt=-Ofast //mobile/android:dummy && " +
+//            'rm -rf ../android-client/build/jni &&' +
+//            'echo A | unzip bazel-bin/mobile/android/dummy.apk -d ../android-client/build/jni && ' +
+//            'cp -r ../android-client/build/jni/lib/ ../android-client/app/src/main/jniLibs'
+//}
 
 dependencies {
     // TODO: Split all the version numbers into the android-client/build.gradle
