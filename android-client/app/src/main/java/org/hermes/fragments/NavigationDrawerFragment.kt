@@ -164,9 +164,7 @@ class NavigationDrawerFragment @Inject constructor() : Fragment() {
 
         mDrawerToggle = object : DrawerLayout.DrawerListener {
             override fun onDrawerClosed(drawerView: View) {
-                if (!isAdded) {
-                    return
-                }
+                if (!isAdded) return
                 mDrawerListView.getChildAt(mCurrentSelectedPosition).isSelected = true
                 activity!!.invalidateOptionsMenu()
             }

@@ -75,7 +75,6 @@ class LedgerService : Service() {
                 cryptoRepository.sealed() -> ErrorCode.SEALED.errorStr
                 else -> {
                     Log.d(loggingTag, "Got a new sample from sensor with uuid $uuid")
-                    // TODO: Add a check to ensure that the data are in the expected form
                     val client = sensorRepository.registry[uuid] as Sensor
                     val newSample = Metric20(
                         "${cryptoRepository.pkHash.slice(0 until 10)}.${client.dataId}", value)
@@ -95,7 +94,6 @@ class LedgerService : Service() {
                 cryptoRepository.sealed() -> ErrorCode.SEALED.errorStr
                 else -> {
                     Log.d(loggingTag, "Got a new sample from sensor with uuid $uuid")
-                    // TODO: Add a check to ensure that the data are in the expected form
                     val client = sensorRepository.registry[uuid] as Sensor
                     val newSample = Metric20(
                         "${cryptoRepository.pkHash.slice(0 until 10)}.${client.dataId}", value.toString())
