@@ -77,7 +77,8 @@
                                 android:layout_marginEnd="8dp" app:layout_constraintEnd_toEndOf="parent"
                                 android:layout_marginTop="16dp" app:layout_constraintTop_toTopOf="parent"
                                 android:textAlignment="center" android:textIsSelectable="true"
-                                tools:text="EXVJYBXDZDZNQ9SB99ETXQVMHFYOMVJW9DLNGLV9VRSTVRDOVPJXPGJFAYDMNP9XMPUPVCBYZTDFH9VMY"/>
+                                tools:text="EXVJYBXDZDZNQ9SB99ETXQVMHFYOMVJW9DLNGLV9VRSTVRDOVPJXPGJFAYDMNP9XMPUPVCBYZTDFH9VMY"
+                                android:selectAllOnFocus="true"/>
                         <View
                                 android:id="@+id/divider22"
                                 android:layout_width="0dp"
@@ -117,7 +118,8 @@
                                 android:layout_marginStart="16dp" app:layout_constraintStart_toStartOf="parent"
                                 android:layout_marginTop="16dp" app:layout_constraintTop_toTopOf="parent"
                                 android:textAlignment="center" android:textIsSelectable="true"
-                                tools:text="EXVJYBXDZDZNQ9SB99ETXQVMHFYOMVJW9DLNGLV9VRSTVRDOVPJXPGJFAYDMNP9XMPUPVCBYZTDFH9VMY"/>
+                                tools:text="EXVJYBXDZDZNQ9SB99ETXQVMHFYOMVJW9DLNGLV9VRSTVRDOVPJXPGJFAYDMNP9XMPUPVCBYZTDFH9VMY"
+                                android:selectAllOnFocus="true"/>
                         <View
                                 android:id="@+id/divider23"
                                 android:layout_width="0dp"
