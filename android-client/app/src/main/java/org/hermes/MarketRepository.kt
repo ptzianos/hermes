@@ -151,7 +151,7 @@ class MarketRepository @Inject constructor(
             val newAd = Ad(uuid = marketAd.uuid, network = StorageBackend.IOTA.name, currency = "ETH",
                 userId = user.uid!!, sensorUUID = sensor.uuid)
             db.adDao().insertAll(newAd)
-            Log.i(loggingTag, "Saved new Ad into the database with uuid: ${newAd.uid}")
+            Log.i(loggingTag, "Saved new MarketAd into the database with uuid: ${newAd.uid}")
             callback(newAd)
         }
     }

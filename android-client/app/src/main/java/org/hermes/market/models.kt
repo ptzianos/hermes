@@ -10,9 +10,9 @@ data class APIToken (
     @Expose @SerializedName("expiration_date") val expirationDate: String
 )
 
-data class Ad(val uuid: String,val network: String, val currency: String)
+data class MarketAd(val uuid: String, val network: String, val currency: String)
 
-data class User(val uuid: String, val name: String, val fullname: String)
+data class MarketUser(val uuid: String, val name: String, val fullname: String)
 
 data class PublicKey(
         val uuid: String,

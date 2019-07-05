@@ -15,7 +15,7 @@ class EventLogViewModel @Inject constructor(application: Application,
     val allEvents = metadataRepository.eventDao.getAllLivePaged().toLiveData(Config(
         /**
          * A good page size is a value that fills at least a screen worth of content on a large
-         * device so the User is unlikely to see a null item.
+         * device so the MarketUser is unlikely to see a null item.
          * You can play with this constant to observe the paging behavior.
          * <p>
          * It's possible to vary this with list device size, but often unnecessary, unless a

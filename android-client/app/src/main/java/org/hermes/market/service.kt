@@ -6,7 +6,7 @@ import retrofit2.http.*
 
 interface HermesMarketV1 {
     @GET("/api/v1/users/me")
-    fun getMyUser(): Call<User>
+    fun getMyUser(): Call<MarketUser>
 
     @FormUrlEncoded
     @POST("/api/v1/users/register")
@@ -28,17 +28,17 @@ interface HermesMarketV1 {
                     @Path("token_id") tokenId: String): Call<Void>
 
     @GET("/api/v1/ads/")
-    fun listAds(): Call<List<Ad>>
+    fun listAds(): Call<List<MarketAd>>
 
     @FormUrlEncoded
     @POST("/api/v1/ads/")
     fun createAd(@Field("data_type") dataType: String,
                  @Field("data_unit") dataUnit: String,
                  @Field("start_of_stream_address") startOfStreamAddress: String,
-                 @Header("Authorization") authHeader: String): Call<Ad>
+                 @Header("Authorization") authHeader: String): Call<MarketAd>
 
     @GET("/api/v1/ads/{ad_id}")
-    fun getAd(@Path("ad_id") adId: String): Call<Ad>
+    fun getAd(@Path("ad_id") adId: String): Call<MarketAd>
 
     @DELETE("/api/v1/ads/{ad_id}")
     fun deleteAd(@Path("ad_id") adId: String): Call<Void>
