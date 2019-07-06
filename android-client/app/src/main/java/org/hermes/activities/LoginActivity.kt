@@ -9,6 +9,8 @@ import javax.inject.Inject
 import kotlinx.android.synthetic.main.activity_login.*
 
 import org.hermes.*
+import org.hermes.repositories.CryptoRepository
+import org.hermes.repositories.MetadataRepository
 import org.hermes.utils.afterTextChanged
 import org.hermes.viewmodels.LoginViewModel
 

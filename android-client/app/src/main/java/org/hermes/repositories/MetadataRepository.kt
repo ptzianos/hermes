@@ -1,4 +1,4 @@
-package org.hermes
+package org.hermes.repositories
 
 import android.app.Application
 import android.content.Intent
@@ -11,6 +11,9 @@ import androidx.lifecycle.MutableLiveData
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.launch
+import org.hermes.BACKGROUND
+import org.hermes.HermesRoomDatabase
+import org.hermes.LedgerService
 import org.hermes.daos.EventDao
 import org.hermes.entities.Event
 import org.hermes.entities.Sensor

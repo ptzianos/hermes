@@ -1,4 +1,4 @@
-package org.hermes
+package org.hermes.repositories
 
 import android.os.Handler
 import android.os.Looper
@@ -8,6 +8,8 @@ import androidx.lifecycle.MutableLiveData
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.launch
+import org.hermes.BACKGROUND
+import org.hermes.HermesRoomDatabase
 import java.util.*
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -36,8 +38,8 @@ class SensorRepository @Inject constructor(
     val eventBus: Handler = object : Handler(Looper.getMainLooper()) {
         override fun handleMessage(inputMessage: Message) {
             val msg = inputMessage.obj
-            if (msg == null || msg !is Pair<*, *> || msg.first !is SensorRepository.MessageType) return
-            val message = msg as Pair<SensorRepository.MessageType, *>
+            if (msg == null || msg !is Pair<*, *> || msg.first !is MessageType) return
+            val message = msg as Pair<MessageType, *>
             when (message.first) {
                 MessageType.ADD_SENSOR -> {
                     if (message.second !is Sensor) return

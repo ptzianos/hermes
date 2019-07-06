@@ -5,8 +5,8 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import javax.inject.Inject
 
-import org.hermes.MetadataRepository
-import org.hermes.SensorRepository
+import org.hermes.repositories.MetadataRepository
+import org.hermes.repositories.SensorRepository
 
 
 class DashboardViewModel @Inject constructor(application: Application,

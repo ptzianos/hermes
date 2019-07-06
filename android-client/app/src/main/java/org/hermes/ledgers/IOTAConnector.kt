@@ -21,6 +21,8 @@ import org.hermes.crypto.SecP256K1PrivKey
 import org.hermes.entities.Event
 import org.hermes.iota.IOTA
 import org.hermes.iota.Seed
+import org.hermes.repositories.MetadataRepository
+import org.hermes.repositories.SensorRepository
 import org.hermes.utils.prepend
 import org.hermes.utils.sign
 import org.hermes.utils.splitInChunks

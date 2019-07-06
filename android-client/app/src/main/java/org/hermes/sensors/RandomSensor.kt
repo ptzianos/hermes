@@ -12,7 +12,7 @@ import java.util.*
 import javax.inject.Inject
 import javax.inject.Singleton
 
-import org.hermes.SensorRepository
+import org.hermes.repositories.SensorRepository
 import org.hermes.entities.Sensor
 
 

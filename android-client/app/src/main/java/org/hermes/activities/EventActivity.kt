@@ -2,7 +2,6 @@ package org.hermes.activities
 
 import android.content.Intent
 import android.os.Bundle
-import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import dagger.Module
@@ -12,7 +11,7 @@ import javax.inject.Inject
 import org.threeten.bp.format.DateTimeFormatter
 
 import org.hermes.BaseActivity
-import org.hermes.MetadataRepository
+import org.hermes.repositories.MetadataRepository
 import org.hermes.R
 import org.hermes.entities.Event
 import org.hermes.utils.addBackButton

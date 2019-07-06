@@ -15,7 +15,7 @@ import dagger.android.support.AndroidSupportInjection
 import javax.inject.Inject
 
 import org.hermes.HermesClientApp
-import org.hermes.MetadataRepository
+import org.hermes.repositories.MetadataRepository
 import org.hermes.R
 import org.hermes.viewmodels.DashboardViewModel
 

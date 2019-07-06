@@ -1,4 +1,4 @@
-package org.hermes
+package org.hermes.repositories
 
 import android.app.Application
 import android.content.SharedPreferences
@@ -10,6 +10,8 @@ import javax.inject.Named
 import javax.inject.Singleton
 import org.bouncycastle.jce.provider.BouncyCastleProvider
 import org.bouncycastle.util.encoders.Hex
+import org.hermes.HermesRoomDatabase
+import org.hermes.R
 
 import org.hermes.crypto.PasswordHasher
 import org.hermes.crypto.SecP256K1PrivKey

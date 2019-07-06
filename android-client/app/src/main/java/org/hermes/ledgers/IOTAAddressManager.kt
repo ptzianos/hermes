@@ -2,8 +2,8 @@ package org.hermes.ledgers
 
 import android.content.SharedPreferences
 import android.util.Log
-import org.hermes.CryptoRepository
-import org.hermes.SensorRepository
+import org.hermes.repositories.CryptoRepository
+import org.hermes.repositories.SensorRepository
 import org.hermes.iota.Seed
 import org.iota.jota.pow.SpongeFactory
 import org.iota.jota.utils.IotaAPIUtils

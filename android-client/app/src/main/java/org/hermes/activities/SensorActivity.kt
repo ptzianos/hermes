@@ -19,6 +19,8 @@ import javax.inject.Inject
 
 import org.hermes.*
 import org.hermes.entities.Sensor
+import org.hermes.repositories.MarketRepository
+import org.hermes.repositories.SensorRepository
 import org.hermes.utils.addBackButton
 
 

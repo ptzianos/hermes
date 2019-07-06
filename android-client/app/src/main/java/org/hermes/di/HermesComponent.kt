@@ -10,6 +10,10 @@ import org.hermes.*
 import javax.inject.Singleton
 
 import org.hermes.ledgers.IOTAConnector
+import org.hermes.repositories.CryptoRepository
+import org.hermes.repositories.MarketRepository
+import org.hermes.repositories.MetadataRepository
+import org.hermes.repositories.SensorRepository
 import org.hermes.viewmodels.EventLogViewModel
 import org.hermes.viewmodels.LoginViewModel
 import org.hermes.viewmodels.SensorListViewModel

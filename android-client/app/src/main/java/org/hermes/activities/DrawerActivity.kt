@@ -12,7 +12,7 @@ import dagger.android.AndroidInjection
 import javax.inject.Inject
 
 import org.hermes.BaseActivity
-import org.hermes.MetadataRepository
+import org.hermes.repositories.MetadataRepository
 import org.hermes.R
 import org.hermes.fragments.DashboardFragment
 import org.hermes.fragments.EventLogFragment

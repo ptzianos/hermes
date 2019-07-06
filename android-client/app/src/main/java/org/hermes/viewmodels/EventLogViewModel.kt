@@ -6,11 +6,12 @@ import androidx.paging.Config
 import androidx.paging.toLiveData
 import javax.inject.Inject
 
-import org.hermes.MetadataRepository
+import org.hermes.repositories.MetadataRepository
 
 
 class EventLogViewModel @Inject constructor(application: Application,
-                                            metadataRepository: MetadataRepository): AndroidViewModel(application) {
+                                            metadataRepository: MetadataRepository
+): AndroidViewModel(application) {
 
     val allEvents = metadataRepository.eventDao.getAllLivePaged().toLiveData(Config(
         /**

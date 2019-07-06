@@ -1,10 +1,12 @@
-package org.hermes
+package org.hermes.repositories
 
 import android.app.Application
 import android.content.SharedPreferences
 import android.os.Handler
 import android.util.Log
 import org.bouncycastle.util.encoders.Base64
+import org.hermes.HermesRoomDatabase
+import org.hermes.StorageBackend
 import java.lang.Exception
 import javax.inject.Inject
 import javax.inject.Named

@@ -9,7 +9,7 @@ import dagger.Module
 import javax.inject.Inject
 
 import org.hermes.BaseActivity
-import org.hermes.CryptoRepository
+import org.hermes.repositories.CryptoRepository
 import org.hermes.R
 
 

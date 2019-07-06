@@ -6,8 +6,6 @@ import android.os.Handler
 import android.os.Looper
 import android.os.Message
 import android.widget.TextView
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Observer
 import dagger.Module
 import dagger.android.AndroidInjection
 import javax.inject.Inject
@@ -17,6 +15,9 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 import org.hermes.*
+import org.hermes.repositories.CryptoRepository
+import org.hermes.repositories.MarketRepository
+import org.hermes.repositories.MetadataRepository
 
 
 class SetupLoadActivity : BaseActivity() {

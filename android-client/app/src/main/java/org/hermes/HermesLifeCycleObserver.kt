@@ -9,12 +9,15 @@ import javax.inject.Singleton
 import org.hermes.activities.LoginActivity
 import org.hermes.activities.SetupActivity
 import org.hermes.activities.SetupLoadActivity
+import org.hermes.repositories.CryptoRepository
+import org.hermes.repositories.MarketRepository
 
 
 @Singleton
 class HermesLifeCycleObserver @Inject constructor(
     private val cryptoRepository: CryptoRepository,
-    private val marketRepository: MarketRepository) {
+    private val marketRepository: MarketRepository
+) {
 
     private val loggingTag = "HermesLifeCycleObserver"
     private var onScreenActivity: AppCompatActivity? = null

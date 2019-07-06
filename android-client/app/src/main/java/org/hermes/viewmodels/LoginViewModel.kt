@@ -6,11 +6,12 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import javax.inject.Inject
 
-import org.hermes.CryptoRepository
+import org.hermes.repositories.CryptoRepository
 
 
 class LoginViewModel @Inject constructor(application: Application,
-                                         private val cryptoRepository: CryptoRepository)
+                                         private val cryptoRepository: CryptoRepository
+)
     : AndroidViewModel(application) {
 
     private val _isFormValid = MutableLiveData<Boolean>()
