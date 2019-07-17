@@ -75,9 +75,7 @@ class ECDSASignature(val r: BigInteger, val s: BigInteger, val rY: BigInteger? =
     /**
      * Returns the ECDSA signature as a hexed string
      */
-    fun toHexedBinary(): String {
-        return Hex.toHexString(toBinaryFormat())
-    }
+    fun toHexedBinary(): String = Hex.toHexString(toBinaryFormat())
     //DER encoding
     //
     //For reference, here is how to encode signatures correctly in DER format.
