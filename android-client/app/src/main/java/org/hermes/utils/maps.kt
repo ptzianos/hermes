@@ -4,11 +4,11 @@ package org.hermes.utils
  * FrozenHashMap is a HashMap that will not accept any new
  * keys after the end of the constructor.
  */
-class FrozenHashMap<K,  V> : HashMap<K, V> {
+class FrozenHashMap<K,  V>(inputFunction: (FrozenHashMap<K, V>) -> Unit) : HashMap<K, V>() {
 
     private var noNewKeys = false
 
-    constructor(inputFunction: (FrozenHashMap<K, V>) -> Unit) {
+    init {
         inputFunction(this)
         noNewKeys = true
     }
