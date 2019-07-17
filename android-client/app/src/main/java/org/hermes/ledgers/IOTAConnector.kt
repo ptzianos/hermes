@@ -80,7 +80,7 @@ class IOTAConnector(val seed: Seed, private val privateKey: SecP256K1PrivKey, ap
     }
 
     fun sendData(samples: Array<Metric20?>, clientUUID: String, asyncConfirmation: Boolean,
-                 blockUntilConfirmation: Boolean
+        blockUntilConfirmation: Boolean
     ): Array<Metric20?> {
         // Validate seed
         if (!InputValidator.isValidSeed(seed.toString())) {
