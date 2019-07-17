@@ -2,18 +2,18 @@ package org.hermes.sensors
 
 import android.util.Log
 import androidx.room.Ignore
+import java.util.*
+import javax.inject.Inject
+import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+
 import org.hermes.BACKGROUND
 import org.hermes.LedgerService
-import java.util.*
-import javax.inject.Inject
-import javax.inject.Singleton
-
-import org.hermes.repositories.SensorRepository
 import org.hermes.entities.Sensor
+import org.hermes.repositories.SensorRepository
 
 
 @Singleton
@@ -32,7 +32,7 @@ class RandomSensor @Inject constructor(
 
     @Ignore val loggingTag = "RandomSensor"
 
-    suspend fun generateData(ledgerService: LedgerService) {
+    suspend fun beginScrappingData(ledgerService: LedgerService) {
         Log.i(loggingTag, "Starting generating data with uuid $uuid")
         CoroutineScope(BACKGROUND.asCoroutineDispatcher()).launch {
             while (true) {
