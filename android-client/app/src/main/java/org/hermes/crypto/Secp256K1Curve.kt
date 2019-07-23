@@ -24,9 +24,12 @@ import org.bouncycastle.util.encoders.Hex
 object Secp256K1Curve {
 
     val X9ECParameters: X9ECParameters = CustomNamedCurves.getByName("secp256k1")
+
     val ecDomainParameters: ECDomainParameters = ECDomainParameters(
         X9ECParameters.curve, X9ECParameters.g, X9ECParameters.n, X9ECParameters.h)
+
     val halfCurveOrder: BigInteger = X9ECParameters.n.shiftRight(1)
+
     val X962Parameters: X962Parameters = X962Parameters(X9ECParameters)
 
     init {
@@ -50,16 +53,24 @@ object Secp256K1Curve {
      * way.</p>
      */
     val a = BigInteger.ZERO
-    val b = BigInteger.valueOf(7)
-    val p = BigInteger(1, Hex.decode("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F"))
-    val xOfG = BigInteger(1, Hex.decode("79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"))
-    val yOfG = BigInteger(1, Hex.decode("483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8"))
-    val G = ECPoint(xOfG, yOfG)
-    val n = BigInteger(1, Hex.decode("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141"))
-    val h = 1
-    val ecField = ECFieldFp(p)
-    val ellipticCurve = EllipticCurve(ecField, a, b)
 
+    val b = BigInteger.valueOf(7)
+
+    val p = BigInteger(1, Hex.decode("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F"))
+
+    val xOfG = BigInteger(1, Hex.decode("79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"))
+
+    val yOfG = BigInteger(1, Hex.decode("483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8"))
+
+    val G = ECPoint(xOfG, yOfG)
+
+    val n = BigInteger(1, Hex.decode("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141"))
+
+    val h = 1
+
+    val ecField = ECFieldFp(p)
+
+    val ellipticCurve = EllipticCurve(ecField, a, b)
 
     val ecParameterSpec = ECParameterSpec(ellipticCurve, G, n, h)
 }
