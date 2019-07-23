@@ -19,7 +19,7 @@ import org.hermes.repositories.SensorRepository
 @Singleton
 class RandomSensor @Inject constructor(
     @Ignore private val sensorRepository: SensorRepository
-): Sensor(
+): ISensor, Sensor(
     uuid = "00000000-0000-0000-0000-000000000001",
     dataId = "android.random",
     unit = "int",
@@ -32,7 +32,7 @@ class RandomSensor @Inject constructor(
 
     @Ignore val loggingTag = "RandomSensor"
 
-    suspend fun beginScrappingData(ledgerService: LedgerService) {
+    override fun beginScrappingData(ledgerService: LedgerService) {
         Log.i(loggingTag, "Starting generating data with uuid $uuid")
         CoroutineScope(BACKGROUND.asCoroutineDispatcher()).launch {
             while (true) {

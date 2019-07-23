@@ -1,8 +1,9 @@
 package org.hermes.sensors
 
-// TODO: This needs to go more work and planning for the sensor subsystem
-interface ISensor {
-    fun getMetricName(): String
+import org.hermes.LedgerService
 
-    fun getMetricContext(): String
+interface ISensor {
+
+    fun beginScrappingData(ledgerService: LedgerService)
+
 }
