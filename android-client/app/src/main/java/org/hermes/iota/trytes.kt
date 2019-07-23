@@ -512,7 +512,7 @@ class Tryte {
      * by this method.
      */
     operator fun inc(): Tryte {
-        return this + Tryte.one()
+        return this + one()
     }
 
     /**
