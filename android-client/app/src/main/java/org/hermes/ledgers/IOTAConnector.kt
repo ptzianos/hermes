@@ -71,6 +71,7 @@ class IOTAConnector(val seed: Seed, private val privateKey: SecP256K1PrivKey, ap
             .sign(header = "digest:", privateKey = privateKey, separator = "::")
 
         Log.d(loggingTag, "$clientUUID -- Cleartext payload: $clearTextPayload")
+        Log.d(loggingTag, "$clientUUID -- Cleartext payload size: ${clearTextPayload.length}")
 
         return clearTextPayload
             .toTrytes()
