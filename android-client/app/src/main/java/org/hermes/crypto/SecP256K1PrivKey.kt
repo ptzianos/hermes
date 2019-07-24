@@ -109,7 +109,7 @@ class SecP256K1PrivKey : PrivateKey {
     }
 
     private tailrec fun recDigest(msg: ByteArray, round: Int, digest: MessageDigest = MessageDigest.getInstance("SHA-256")): ByteArray {
-        val d = digest.digest((msg))
+        val d = digest.digest(msg)
         return when(round) {
             1 -> d
             else -> recDigest(d, round - 1, digest)
@@ -134,7 +134,7 @@ class SecP256K1PrivKey : PrivateKey {
         val msgBytes = prefixLength.toByteArray() +
                 prefix.toByteArray() +
                 messageLengthExtraByte +
-                messageLength.toString().toByteArray() + //.toByteArray().reversedArray() +
+                messageLength.toByteArray().reversedArray() +
                 message.toByteArray()
 
         val hashed = recDigest(msgBytes, hashRounds, digest)
