@@ -115,7 +115,8 @@ class NavigationDrawerFragment @Inject constructor() : Fragment() {
             arrayOf(
                 getString(R.string.title_activity_dashboard),
                 getString(R.string.title_activity_event_log),
-                getString(R.string.title_activity_sensor_list)
+                getString(R.string.title_activity_sensor_list),
+                getString(R.string.title_activity_about)
             )
         )
         mDrawerListView.setItemChecked(mCurrentSelectedPosition, true)

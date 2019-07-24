@@ -2,6 +2,7 @@ package org.hermes.di
 
 import dagger.Module
 import dagger.android.ContributesAndroidInjector
+import org.hermes.fragments.AboutFragment
 import org.hermes.fragments.DashboardFragment
 
 import org.hermes.fragments.EventLogFragment
@@ -18,4 +19,7 @@ abstract class FragmentBindingModule {
 
     @ContributesAndroidInjector(modules = [ DashboardFragment.DaggerModule::class ])
     abstract fun dashboardFragment(): DashboardFragment
+
+    @ContributesAndroidInjector(modules = [ AboutFragment.DaggerModule::class ])
+    abstract fun aboutFragment(): AboutFragment
 }

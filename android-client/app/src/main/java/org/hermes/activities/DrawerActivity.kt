@@ -14,10 +14,7 @@ import javax.inject.Inject
 import org.hermes.BaseActivity
 import org.hermes.repositories.MetadataRepository
 import org.hermes.R
-import org.hermes.fragments.DashboardFragment
-import org.hermes.fragments.EventLogFragment
-import org.hermes.fragments.NavigationDrawerFragment
-import org.hermes.fragments.SensorListFragment
+import org.hermes.fragments.*
 
 
 class DrawerActivity : BaseActivity(), NavigationDrawerFragment.NavigationDrawerCallbacks {
@@ -25,7 +22,8 @@ class DrawerActivity : BaseActivity(), NavigationDrawerFragment.NavigationDrawer
     enum class Tile(val i: Int) {
         DASHBOARD(0),
         EVENT_LOG(1),
-        SENSOR_LIST(2)
+        SENSOR_LIST(2),
+        ABOUT(3)
     }
 
     @Module
@@ -41,6 +39,9 @@ class DrawerActivity : BaseActivity(), NavigationDrawerFragment.NavigationDrawer
 
     @Inject
     lateinit var sensorListFragment: SensorListFragment
+
+    @Inject
+    lateinit var aboutFragment: AboutFragment
 
     @Inject
     lateinit var metadataRepository: MetadataRepository
@@ -80,6 +81,10 @@ class DrawerActivity : BaseActivity(), NavigationDrawerFragment.NavigationDrawer
             DrawerActivity.Tile.SENSOR_LIST.i -> {
                 toolbar.title = getString(R.string.title_activity_sensor_list)
                 sensorListFragment
+            }
+            DrawerActivity.Tile.ABOUT.i -> {
+                toolbar.title = getString(R.string.title_activity_about)
+                aboutFragment
             }
             else -> throw Exception("WTF?")
         }
