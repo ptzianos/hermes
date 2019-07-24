@@ -57,6 +57,16 @@ Expires on: 2019-06-27 10:36:07.726093
         )
     }
 
+//    @Test
+//    fun signWithPrivateKeyEthStyle() {
+//        val privateKey = SecP256K1PrivKey("fad9c8855b740a0b7ed4c221dbad0f33a83a49cad6b3fe8d5817ac83d38b6a19")
+//        val sig = privateKey.ethSign("hello")
+//        assertEquals(
+//            "789a80053e4927d0a898db8e065e948f5cf086e32f9ccaa54c1908e22ac430c62621578113ddbb62d509bf6049b8fb544ab06d36f916685a2eb8e57ffadde02301",
+//            sig
+//        )
+//    }
+
     @Test
     fun producePublicKey() {
         val privateKey = SecP256K1PrivKey("0x0c28fca386c7a227600b2fe50b7cae11ec86d3bf1fbe471be89827e19d72aa1d")
