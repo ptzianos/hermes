@@ -26,6 +26,7 @@ import org.hermes.repositories.MarketRepository
 import org.hermes.repositories.MetadataRepository
 import org.hermes.repositories.SensorRepository
 import org.hermes.sensors.RandomSensor
+import org.hermes.sensors.StressTestingSensor
 import org.hermes.utils.applyIfNotEmpty
 import org.hermes.utils.mapIfNotEmpty
 
@@ -153,6 +154,9 @@ class LedgerService : Service() {
     lateinit var randomSensor: RandomSensor
 
     @Inject
+    lateinit var stressTestingSensor: StressTestingSensor
+
+    @Inject
     lateinit var app: HermesClientApp
 
     private val iotaConnector by lazy {
@@ -253,8 +257,9 @@ class LedgerService : Service() {
             .build()
     }
 
-    private suspend fun generateData() {
-        randomSensor.generateData(this)
+    private fun generateData() {
+        randomSensor.beginScrappingData(this)
+        stressTestingSensor.beginScrappingData(this)
     }
 
     private suspend fun broadcastData() {
@@ -278,7 +283,7 @@ class LedgerService : Service() {
                         .applyIfNotEmpty { client.returnSamples(it) }
                 }
             }
-            delay(20 * 1000)
+            delay(10 * 1000)
         }
     }
 }
