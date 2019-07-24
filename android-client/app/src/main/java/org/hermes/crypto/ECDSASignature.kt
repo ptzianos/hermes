@@ -10,9 +10,7 @@ class NoEvenBit: Exception()
 
 /**
  * An ECDSA Signature.
- * Code modified from:
- * TODO: Fix the repos
- * /home/pavlos/projects/java/web3j/crypto/src/main/java/org/web3j/crypto/Sign.java
+ * Code modified from: org.web3j.crypto.ECDSASignature
  */
 class ECDSASignature(val r: BigInteger, val s: BigInteger, val rY: BigInteger? = null) {
 
@@ -70,6 +68,15 @@ class ECDSASignature(val r: BigInteger, val s: BigInteger, val rY: BigInteger? =
         System.arraycopy(rb, 0, completeArray, 1, 32)
         System.arraycopy(canonicalSb, 0, completeArray, 33, 32)
         return Base64.toBase64String(completeArray)
+    }
+
+    fun toETHFormat(): String {
+        if (vb == null) throw NoEvenBit()
+        val completeArray = ByteArray(65)
+        System.arraycopy(rb, 0, completeArray, 0, 32)
+        System.arraycopy(sb, 0, completeArray, 32, 32)
+        completeArray[64] = vb
+        return Hex.toHexString(completeArray)
     }
 
     /**
