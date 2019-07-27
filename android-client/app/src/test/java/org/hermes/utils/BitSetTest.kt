@@ -42,4 +42,12 @@ internal class BitSetTest {
             exponent += 1.0
         }
     }
+
+    @Test
+    fun correctConversionOfUnalignedNumbers() {
+        val bitSet = BitSet(4)
+        bitSet.flip(2)
+        bitSet.flip(3)
+        assertEquals(12.toByte(), bitSet.asByteArray(0, 4)[0])
+    }
 }
