@@ -2,4 +2,4 @@ package org.hermes.crypto
 
 import java.security.MessageDigest
 
-class SHA512: SHAHash(MessageDigest.getInstance("SHA512"))
+object SHA512: SHAHash(MessageDigest.getInstance("SHA-512"))
