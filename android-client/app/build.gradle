@@ -3,6 +3,9 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
 
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
 android {
     compileSdkVersion 28
     buildToolsVersion "28.0.3"
@@ -13,6 +16,9 @@ android {
     }
     lintOptions {
         abortOnError false
+    }
+    kotlinOptions {
+        jvmTarget = '1.8'
     }
     defaultConfig {
         applicationId "org.hermes"
