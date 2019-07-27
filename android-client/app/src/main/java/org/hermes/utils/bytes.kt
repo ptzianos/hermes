@@ -19,6 +19,13 @@ fun ByteArray.countLeft(predicate: (Byte) -> Boolean): Int {
     return count
 }
 
+/**
+ * Converts the bits to a byte array.
+ *
+ * If the number of bits is not enough to create a byte
+ * it will be padded with zeros.
+ */
+@Throws(IndexOutOfBoundsException::class)
 fun BitSet.asByteArray(from: Int, to: Int): ByteArray {
     val extractByte = fun(start: Int): Byte {
         var byte = 0
@@ -31,5 +38,5 @@ fun BitSet.asByteArray(from: Int, to: Int): ByteArray {
     }
     if (from > to || from < 0) throw IndexOutOfBoundsException()
     val byteArraySize = (to - from) / 8 + (if ((to - from) % 8 != 0) 1 else 0)
-    return ByteArray(byteArraySize) { extractByte(it * 8) }
+    return ByteArray(byteArraySize) { extractByte(from + it * 8) }
 }
