@@ -2051,4 +2051,11 @@ object EnglishWordlist {
         "zone",
         "zoo"
     )
+
+    val index: HashMap<String, Int>
+
+    init {
+        index = HashMap(items.size)
+        items.forEachIndexed { i: Int, word: String -> index[word] = i }
+    }
 }
