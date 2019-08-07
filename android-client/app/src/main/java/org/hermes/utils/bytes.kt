@@ -27,16 +27,34 @@ fun ByteArray.countLeft(predicate: (Byte) -> Boolean): Int {
  */
 @Throws(IndexOutOfBoundsException::class)
 fun BitSet.asByteArray(from: Int, to: Int): ByteArray {
-    val extractByte = fun(start: Int): Byte {
-        var byte = 0
-        for (i in 0 until 8) {
-            if (this[start + i]) {
-                byte = byte xor (1 shl i)
-            }
-        }
-        return byte.toByte()
-    }
-    if (from > to || from < 0) throw IndexOutOfBoundsException()
     val byteArraySize = (to - from) / 8 + (if ((to - from) % 8 != 0) 1 else 0)
-    return ByteArray(byteArraySize) { extractByte(from + it * 8) }
+    return ByteArray(byteArraySize) {
+        var res = 0
+        for (j in 0 until 8) {
+            if ((it * 8) + j + from > to) break
+            if (this[(it * 8) + j + from]) res = res or (1 shl (7 - j))
+        }
+        res.toByte()
+    }
+}
+
+fun ByteArray.ensureMinSize(minSize: Int, byteToFill: Byte): ByteArray {
+    return if (size < minSize) plus(ByteArray(minSize - size) { byteToFill }) else this
+}
+
+fun BitSet.copyFromInt(int: Int, start: Int, bits: Int, bitOffset: Int = 0) {
+    for (i in 0 until bits) {
+        val test = 1 shl (bits + bitOffset - 1 - i)
+        if (int and (1 shl (bits + bitOffset - 1 - i)) > 0)
+            flip(start + i)
+    }
+}
+
+fun BitSet.copyFromByte(byte: Byte, start: Int, bits: Int, bitOffset: Int = 0) =
+    copyFromInt(byte.toInt(), start, bits, bitOffset)
+
+fun BitSet.asString(from: Int, to: Int): String {
+    return (from until to)
+        .map { if (this[it]) 1 else 0 }
+        .joinToString { it.toString() }
 }
