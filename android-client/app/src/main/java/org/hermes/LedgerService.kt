@@ -142,9 +142,6 @@ class LedgerService : Service() {
     lateinit var cryptoRepository: CryptoRepository
 
     @Inject
-    lateinit var marketRepository: MarketRepository
-
-    @Inject
     lateinit var metadataRepository: MetadataRepository
 
     @Inject
@@ -153,8 +150,7 @@ class LedgerService : Service() {
     @Inject
     lateinit var randomSensor: RandomSensor
 
-    @Inject
-    lateinit var stressTestingSensor: StressTestingSensor
+    private val stressTestingSensors by lazy { Array(10) { StressTestingSensor(sensorRepository, it) }}
 
     @Inject
     lateinit var app: HermesClientApp
@@ -259,7 +255,7 @@ class LedgerService : Service() {
 
     private fun generateData() {
         randomSensor.beginScrappingData(this)
-        stressTestingSensor.beginScrappingData(this)
+        stressTestingSensors.forEach { it.beginScrappingData(this) }
     }
 
     private suspend fun broadcastData() {
