@@ -30,9 +30,9 @@ class IOTAAddressManager @Inject constructor(
     private val sensorEventBus = sensorRepository.eventBus
 
     fun getAddress(clientUUID: String): Triple<String, String, String> {
-        // TODO: Get these from the sensor repo
-        val newAddressIndex = iotaPrefs.getInt("${clientUUID}_latest_address_index", 1000) + 1
-        val previousAddress = iotaPrefs.getString("${clientUUID}_latest_address", "")!!
+        val previousAddress = sensorRepository.latestAddresses[clientUUID]?.value ?: ""
+        val latestAddressIndex = sensorRepository.latestAddressIndices[clientUUID]?.value ?: 1000
+        val newAddressIndex = latestAddressIndex + 1
         val nextAddressIndex = newAddressIndex + 1
 
         val newAddress = IotaAPIUtils.newAddress(seed, Seed.DEFAULT_SEED_SECURITY,
@@ -40,7 +40,7 @@ class IOTAAddressManager @Inject constructor(
         val nextAddress = IotaAPIUtils.newAddress(seed, Seed.DEFAULT_SEED_SECURITY,
             nextAddressIndex, true, SpongeFactory.create(SpongeFactory.Mode.KERL))
 
-        Log.d(loggingTag, "$clientUUID -- New IOTA address for client $clientUUID is: $newAddressIndex, $newAddress")
+        Log.d(loggingTag, "$clientUUID -- New IOTA address for client is: $newAddressIndex, $newAddress")
 
         unConfirmedAddresses[clientUUID] = Pair(newAddress, newAddressIndex)
         return Triple(previousAddress, newAddress, nextAddress)
@@ -65,6 +65,7 @@ class IOTAAddressManager @Inject constructor(
         val message = sensorEventBus.obtainMessage()
         message.obj = Pair(SensorRepository.MessageType.NOTIFY_SENSOR_LATEST_ADDRESS, clientUUID)
         message.data.putString("latest_address", latestAddressIndexPair.first)
+        message.data.putInt("latest_address_index", latestAddressIndexPair.second)
         sensorEventBus.sendMessage(message)
         unConfirmedAddresses.remove(clientUUID)
     }

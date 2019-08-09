@@ -73,11 +73,14 @@ class SensorRepository @Inject constructor(
                 }
                 MessageType.NOTIFY_SENSOR_LATEST_ADDRESS -> {
                     val addr = inputMessage.data.getString("latest_address") as String
+                    val addrIndex = inputMessage.data.getInt("latest_address_index") as Int
                     val uuid = message.second as String
                     latestAddresses[uuid]?.value = addr
+                    latestAddressIndices[uuid]?.value = addrIndex
                     CoroutineScope(BACKGROUND.asCoroutineDispatcher()).launch {
                         Log.d(loggingTag, "Updating latest address of $uuid")
                         db.sensorDao().updateLatestAddress(uuid, addr)
+                        db.sensorDao().updateLatestAddressIndex(uuid, addrIndex)
                     }
                 }
                 MessageType.NOTIFY_SENSOR_ROOT_ADDRESS -> {
@@ -102,11 +105,12 @@ class SensorRepository @Inject constructor(
     val reverseRegistry = HashMap<String, String>()
     val rootAddresses = HashMap<String, MutableLiveData<String>>()
     val latestAddresses = HashMap<String, MutableLiveData<String>>()
+    val latestAddressIndices = HashMap<String, MutableLiveData<Int>>()
     val sensorListData: MutableLiveData<MutableList<Sensor>> = initLiveData(LinkedList<Sensor>())
     private val lock = ReentrantLock()
 
     fun fetchSensor(id: String, callback: (sensor: Sensor?) -> Unit) {
-        callback(sensorListData.value?.filter { it.dataId == id }?.firstOrNull())
+        callback(sensorListData.value?.firstOrNull { it.dataId == id })
     }
 
     fun add(sensor: Sensor, store: Boolean = true, force: Boolean = false) = lock.withLock {
@@ -121,6 +125,7 @@ class SensorRepository @Inject constructor(
         reverseRegistry[sensor.dataId] = sensor.uuid
         rootAddresses[sensor.uuid] = initLiveData(sensor.rootAddress ?: "")
         latestAddresses[sensor.uuid] = initLiveData(sensor.latestAddress ?: "")
+        latestAddressIndices[sensor.uuid] = initLiveData(sensor.latestAddressIndex ?: 1000)
         if (store) {
             CoroutineScope(BACKGROUND.asCoroutineDispatcher()).launch {
                 val sensorInDB = db.sensorDao().getByTag(sensor.dataId)

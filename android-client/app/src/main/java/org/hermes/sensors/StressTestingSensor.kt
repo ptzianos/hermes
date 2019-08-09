@@ -31,7 +31,8 @@ class StressTestingSensor @Inject constructor(
     what = "",
     device = "",
     latestAddress = "",
-    rootAddress = ""
+    rootAddress = "",
+    latestAddressIndex = 1000
 ) {
 
     @Ignore

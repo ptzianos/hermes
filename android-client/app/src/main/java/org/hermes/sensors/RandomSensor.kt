@@ -27,7 +27,8 @@ class RandomSensor @Inject constructor(
     what = "",
     device = "",
     latestAddress = "",
-    rootAddress = ""
+    rootAddress = "",
+    latestAddressIndex = 1000
 ) {
 
     @Ignore val loggingTag = "RandomSensor"

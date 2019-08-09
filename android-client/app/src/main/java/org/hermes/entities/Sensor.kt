@@ -21,8 +21,9 @@ open class Sensor(@NonNull @ColumnInfo(name = "uuid") var uuid: String,
                   @NonNull @ColumnInfo(name = "mtype") var mtype: String,
                   @NonNull @ColumnInfo(name = "what") var what: String?,
                   @NonNull @ColumnInfo(name = "device") var device: String?,
-                  @NonNull @ColumnInfo(name = "root_address") var rootAddress: String?,
-                  @NonNull @ColumnInfo(name = "latest_address") var latestAddress: String?
+                  @NonNull @ColumnInfo(name = "root_address") var rootAddress: String,
+                  @NonNull @ColumnInfo(name = "latest_address") var latestAddress: String,
+                  @NonNull @ColumnInfo(name = "latest_address_index") var latestAddressIndex: Int
 ) {
 
     companion object {

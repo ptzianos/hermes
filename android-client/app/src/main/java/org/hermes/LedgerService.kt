@@ -49,7 +49,7 @@ class LedgerService : Service() {
                     var uuid = sensorRepository.reverseRegistry.getOrDefault(dataId, "")
                     if (uuid.isEmpty()) {
                         uuid = UUID.randomUUID().toString()
-                        val newSensor = Sensor(uuid, dataId, unit, mtype, what, device, "", "")
+                        val newSensor = Sensor(uuid, dataId, unit, mtype, what, device, "", "", 1000)
                         sensorRepository.eventBus.sendMessage(sensorRepository.eventBus.obtainMessage().apply {
                             obj = Pair(SensorRepository.MessageType.ADD_SENSOR, newSensor) })
                         Log.i(loggingTag, "A new sensor has registered with the application with uuid $uuid")

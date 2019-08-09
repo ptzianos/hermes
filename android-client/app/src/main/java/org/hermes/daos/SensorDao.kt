@@ -25,4 +25,7 @@ interface SensorDao {
 
     @Query("UPDATE sensors SET latest_address = :latestAddress WHERE uuid = :uuid")
     fun updateLatestAddress(uuid: String, latestAddress: String)
+
+    @Query("UPDATE sensors SET latest_address_index = :latestAddressIndex WHERE uuid = :uuid")
+    fun updateLatestAddressIndex(uuid: String, latestAddressIndex: Int)
 }
