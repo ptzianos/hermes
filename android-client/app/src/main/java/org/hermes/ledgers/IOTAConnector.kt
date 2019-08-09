@@ -121,10 +121,8 @@ class IOTAConnector(val seed: Seed, private val privateKey: SecP256K1PrivKey, ap
     private fun prepareTransactions(previousAddress: String, newAddress: String, nextAddress: String,
                                     clientUUID: String, vararg samples: Metric20?): Array<String> {
         val header = StringBuilder()
-            .append("next_address:")
             .append(nextAddress)
             .append("::")
-            .append("previous_address:")
             .append(previousAddress)
             .append("::")
             .toString()
