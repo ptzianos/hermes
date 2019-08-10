@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import statistics
 from datetime import datetime
+from string import ascii_lowercase
 from typing import Dict, Iterable, List, Optional, Tuple
 
 from iota import Transaction, TryteString
@@ -117,25 +118,28 @@ if __name__ == '__main__':
     broadcast_latencies = list()
     attachment_latencies = list()
     bundle_index = 0
-    samples = 0
-    broadcast_latency_list = []
-    attachment_latency_list = []
+    broadcast_latency_list = list()
+    attachment_latency_list = list()
+    x_labels = list()
+    sample_counter = 0
     for lt in explored_txs:
         for transaction in lt:
             for sample_index, sample in enumerate(transaction_samples[str(transaction.hash)]):
                 sample_ts = epoch_to_datetime(sample.split(' ')[1])
                 line = '({},{},{}) {}'.format(bundle_index, transaction.current_index, sample_index, sample, )
                 lines.append(line)
-                line = '({},{},{}) {} {}'.format(
-                    bundle_index, transaction.current_index, sample_index,
-                    (epoch_to_datetime(transaction.timestamp) - sample_ts).seconds, bundle_index)
+                x_labels.append('({},{})'.format(bundle_index, sample_index))
+                line = '{}\t{}\t{}'.format(sample_counter,
+                                           (epoch_to_datetime(transaction.timestamp) - sample_ts).seconds,
+                                           ascii_lowercase[bundle_index])
                 broadcast_latencies.append(line)
                 broadcast_latency_list.append((epoch_to_datetime(transaction.timestamp) - sample_ts).seconds)
-                line = '({},{},{}) {} {}'.format(
-                    bundle_index, transaction.current_index, sample_index,
-                    (epoch_to_datetime(transaction.attachment_timestamp) - sample_ts).seconds, bundle_index)
+                line = '{}\t{}\t{}'.format(sample_counter,
+                                           (epoch_to_datetime(transaction.attachment_timestamp) - sample_ts).seconds,
+                                           ascii_lowercase[bundle_index])
                 attachment_latencies.append(line)
                 attachment_latency_list.append((epoch_to_datetime(transaction.attachment_timestamp) - sample_ts).seconds)
+                sample_counter += 1
 
         bundle_index += 1
 
@@ -162,3 +166,5 @@ if __name__ == '__main__':
     print('Standard deviation of attachment latency is: {}'.format(statistics.stdev(attachment_latency_list)))
     print('---------------------------------------------------')
     print('---------------------------------------------------')
+    print('X Axis Labels:\n{}'.format(','.join(x_labels)))
+    print('X Ticks:\n{}'.format(','.join(map(str, range(len(x_labels))))))
