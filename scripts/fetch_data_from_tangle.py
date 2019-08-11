@@ -168,3 +168,7 @@ if __name__ == '__main__':
     print('---------------------------------------------------')
     print('X Axis Labels:\n{}'.format(','.join(x_labels)))
     print('X Ticks:\n{}'.format(','.join(map(str, range(len(x_labels))))))
+    print('Min broadcast latency is: {}'.format(min(broadcast_latency_list)))
+    print('Max broadcast latency is: {}'.format(max(broadcast_latency_list)))
+    print('Min attachment latency is: {}'.format(min(attachment_latency_list)))
+    print('Max attachment latency is: {}'.format(max(attachment_latency_list)))
