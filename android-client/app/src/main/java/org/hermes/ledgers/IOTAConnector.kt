@@ -23,10 +23,7 @@ import org.hermes.iota.IOTA
 import org.hermes.iota.Seed
 import org.hermes.repositories.MetadataRepository
 import org.hermes.repositories.SensorRepository
-import org.hermes.utils.prepend
-import org.hermes.utils.sign
-import org.hermes.utils.splitInChunks
-import org.hermes.utils.toTrytes
+import org.hermes.utils.*
 
 
 class IOTAConnector(val seed: Seed, private val privateKey: SecP256K1PrivKey, app: HermesClientApp) {
@@ -92,7 +89,8 @@ class IOTAConnector(val seed: Seed, private val privateKey: SecP256K1PrivKey, ap
             Log.d(loggingTag, "There is another  broadcast already in progress for $clientUUID. Returning.")
             return samples
         }
-        Log.d(loggingTag, "Broadcasting data of client with id $clientUUID")
+        Log.d(loggingTag, "Broadcasting data of client with id $clientUUID at " +
+                "${SQLiteTypeConverter.fromOffsetDateTime(OffsetDateTime.now())}")
         val (previousAddress, newAddress, nextAddress) = addressManager.getAddress(clientUUID)
         val trytes = prepareTransactions(previousAddress, newAddress, nextAddress, clientUUID, *samples)
 
