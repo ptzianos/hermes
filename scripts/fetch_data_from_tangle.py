@@ -33,7 +33,8 @@ YYLPWKFAZQNZJPIDZANQJLHLRTOAO9VPHNKFPZNCUTLZGAMCQMXAEUPNKVOLRSTXZWKRLAZG9BIPICLS
 '''
 
 stream_root_addresses = [
-    'OCEXMTLLCLOFZXYBDHPBYJIYYM9XTUALRVHGOEU9UUDDJFABFYEOWOUYUVNMCAEYFVIFVAQREUKKWYFBXYSKFQ9USZ',
+    # 'OCEXMTLLCLOFZXYBDHPBYJIYYM9XTUALRVHGOEU9UUDDJFABFYEOWOUYUVNMCAEYFVIFVAQREUKKWYFBXYSKFQ9USZ',
+    'JWVSBYYXDPBFOHFOUMVDYXMB9IRHVPEP9XQUXWPAIZEBL9WKCHTZBKP9AKDOULOJ9WIHYVNKUZGWYSQAAVUGLBFHW9',
 ]
 
 explored_txs = list()
@@ -62,7 +63,10 @@ def process_transaction_bundle_data(transactions: Iterable[Transaction]) -> Tupl
         tx_hash = str(transaction.hash)
         tx_data = transaction.signature_message_fragment.as_string()
         if transaction.current_index == 0:
-            fields = tx_data.split('::')  # type: List[str]
+            fields = (tx_data
+                      .replace('next_address:', '')
+                      .replace('previous_address:', '')
+                      .split('::'))  # type: List[str]
             next_address = fields[1]
             previous_address = fields[2]
             transaction_samples[tx_hash] = fields[3:]  # type: List[str]
