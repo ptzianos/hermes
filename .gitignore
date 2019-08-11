@@ -47,3 +47,4 @@ ansible/roles/hermes-node/files/*.apk
 
 # Random stuff
 **/*.csv
+**/*.csv#
