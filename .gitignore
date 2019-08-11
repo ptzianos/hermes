@@ -10,6 +10,7 @@ ansible/inventory/nodes/**/*.yml
 **/.pyi
 **/__pycache__/
 **/*.egg-info/
+**/.venv
 
 # SQLite
 **/*.db
@@ -43,3 +44,6 @@ ansible/roles/hermes-node/files/*.apk
 
 # MYPY
 **/.mypy_cache/
+
+# Random stuff
+**/*.csv
