@@ -4,7 +4,7 @@ from datetime import datetime
 from string import ascii_lowercase
 from typing import Dict, Iterable, List, Optional, Tuple
 
-from iota import Transaction, TryteString
+from iota import Transaction
 from iota.api import Iota
 from iota.commands.extended.utils import find_transaction_objects
 
