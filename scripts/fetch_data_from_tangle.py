@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import statistics
+from collections import Counter
 from datetime import datetime
 from string import ascii_lowercase
 from typing import Dict, Iterable, List, Optional, Tuple
@@ -123,6 +124,10 @@ if __name__ == '__main__':
 
         bundle_index += 1
 
+    count = Counter(map(lambda t: t[1] - t[0], zip(broadcast_latency_list, attachment_latency_list)))
+    delay_count = sum(count.keys())
+    attachment_delays = map(lambda t: (t[1], t[0]/24), count.items())
+
     print('\n'.join(lines))
     print('---------------------------------------------------')
     print('---------------------------------------------------')
@@ -144,6 +149,9 @@ if __name__ == '__main__':
     print('---------------------------------------------------')
     print('Average attachment latency is: {}'.format(statistics.mean(attachment_latency_list)))
     print('Standard deviation of attachment latency is: {}'.format(statistics.stdev(attachment_latency_list)))
+    print('---------------------------------------------------')
+    print('---------------------------------------------------')
+    print('Latency delays are:\n{}'.format(','.join(map(str, attachment_delays))))
     print('---------------------------------------------------')
     print('---------------------------------------------------')
     print('X Axis Labels:\n{}'.format(','.join(x_labels)))
