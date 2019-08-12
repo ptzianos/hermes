@@ -121,7 +121,6 @@ def parse_csv(csv_file_name: str = 'iota-data.csv'):
 def extract_metadata():
     index = 0
     for key, samples in sample_db.items():
-        counter = 0
         for sample in samples:
             address = sample['address']
             metadata_db[key] = append(metadata_db, key, {
@@ -131,9 +130,6 @@ def extract_metadata():
                 'address': address,
             })
             index += 1
-            counter += 1
-            if counter == 10:
-                break
 
 
 def extract_latencies(latency_type):
