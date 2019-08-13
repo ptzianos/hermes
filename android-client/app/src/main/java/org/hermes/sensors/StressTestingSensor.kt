@@ -49,11 +49,13 @@ class StressTestingSensor @Inject constructor(
 
     override fun beginScrappingData(ledgerService: LedgerService) {
         Log.i(loggingTag, "Starting generating data with uuid $uuid")
+        val lengthOfHeader = calculateHeaderSize()
+        val textLength = (iotaTransactionNum * IOTA.Transaction.SIGNATURE_MESSAGE_FRAGMENT) / 2  - lengthOfHeader
+        Log.d(loggingTag, "Length of text length for stress test will be: $textLength")
         CoroutineScope(BACKGROUND.asCoroutineDispatcher()).launch {
-            val lengthOfHeader = calculateHeaderSize()
-            val textLength = iotaTransactionNum * IOTA.Transaction.SIGNATURE_MESSAGE_FRAGMENT - lengthOfHeader
             while (true) {
-                val msg = 0.until(textLength).joinToString { (random.nextInt(74) + 48).toChar().toString() }
+                val msg = 0.until(textLength).joinToString(separator = "") { (random.nextInt(25) + 97).toChar().toString() }
+                Log.d(loggingTag, "Produced messaged with length: ${msg.length}")
                 ledgerService.iHermesService?.sendDataString(uuid, msg,
                     null, null, null, null, null, null, -1, null)
                 delay(10 * 1000)
@@ -63,6 +65,6 @@ class StressTestingSensor @Inject constructor(
 
     init {
         sensorRepository.eventBus.sendMessage(sensorRepository.eventBus.obtainMessage().apply {
-            obj = Pair(SensorRepository.MessageType.ADD_SENSOR, this) })
+            obj = Pair(SensorRepository.MessageType.ADD_SENSOR, this@StressTestingSensor) })
     }
 }
