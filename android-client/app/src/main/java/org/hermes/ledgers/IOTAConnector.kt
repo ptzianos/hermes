@@ -100,6 +100,7 @@ class IOTAConnector(val seed: Seed, private val privateKey: SecP256K1PrivKey, ap
                 Log.e(loggingTag, "Could not broadcast transactions. Aborting!")
                 metadataRepository.eventBus.sendMessage(metadataRepository.eventBus.obtainMessage().apply{
                     obj = Pair(MetadataRepository.MessageType.NOTIFY_FAILED_BROADCAST, null) })
+                addressManager.failBroadcast(clientUUID)
                 return samples
             }
             Thread.sleep(10 * 1000)
@@ -146,16 +147,15 @@ class IOTAConnector(val seed: Seed, private val privateKey: SecP256K1PrivKey, ap
         val minWeightMagnitude = 14
 
         val eventMessage = StringBuilder()
-            .append("$clientUUID -- Broadcasting ")
+            .append("$clientUUID -- ")
+            .append(address)
+            .append(" -- Broadcasting ")
             .append(bundleTrytes.size)
             .append(" transaction" + (if (bundleTrytes.size > 1) "s" else ""))
-            .append(" to address: ")
-            .append(address)
             .append(" ($currentTry/$maxTries tries)")
             .toString()
 
         Log.i(loggingTag, eventMessage)
-        val msg = "There was an error while trying to broadcast packets to the Tangle: "
         try {
             Log.d(loggingTag, "Attempting to broadcast transactions to address $address")
             api.sendTrytes(bundleTrytes, depth, minWeightMagnitude, null)
@@ -163,9 +163,15 @@ class IOTAConnector(val seed: Seed, private val privateKey: SecP256K1PrivKey, ap
             metadataRepository.eventBus.sendMessage(metadataRepository.eventBus.obtainMessage().apply{
                 obj = Pair(MetadataRepository.MessageType.PACKETS_BROADCAST, sampleNum) })
         } catch (e: Throwable) {
-            Log.e(loggingTag, "$clientUUID -- $msg ${e.message}")
+            Log.e(loggingTag, StringBuilder()
+                .append("$clientUUID -- ")
+                .append(address)
+                .append(" -- Broadcasting failed: ")
+                .append(e.message)
+                .append(" ($currentTry/$maxTries tries)")
+                .toString())
             db.eventDao().insertAll(Event(action = "broadcast failure ($currentTry/$maxTries)", resource = "iota",
-                extraInfo = "$msg ${e.message}"))
+                extraInfo = "There was an error while trying to broadcast packets to the Tangle: ${e.message}"))
             return false
         }
 
