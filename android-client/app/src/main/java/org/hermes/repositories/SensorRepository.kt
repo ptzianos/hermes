@@ -114,13 +114,14 @@ class SensorRepository @Inject constructor(
     }
 
     fun add(sensor: Sensor, store: Boolean = true, force: Boolean = false) = lock.withLock {
-        Log.d(loggingTag, "Sensor uuid: ${sensor.uuid} $force $store")
+        Log.d(loggingTag, "Adding sensor: ${sensor.uuid} ${sensor.dataId} $force $store")
         if (!force && registry.containsKey(sensor.uuid)) return
         // Do this to notify clients that the data has changed
-        sensorListData.postValue(sensorListData.value?.filter { it.uuid != sensor.uuid }?.toMutableList()?.apply {
+        val newSensorList = sensorListData.value?.filter { it.uuid != sensor.uuid }?.toMutableList()?.apply {
             add(sensor)
-        })
-        activeSensorNum.postValue(sensorListData.value?.filter { it.active.get() }?.size ?: 0)
+        }
+        sensorListData.value = newSensorList
+        activeSensorNum.value = sensorListData.value?.filter { it.active.get() }?.size ?: 0
         registry[sensor.uuid] = sensor
         reverseRegistry[sensor.dataId] = sensor.uuid
         rootAddresses[sensor.uuid] = initLiveData(sensor.rootAddress ?: "")
