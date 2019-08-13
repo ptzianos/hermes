@@ -70,6 +70,8 @@ class IOTAAddressManager @Inject constructor(
         unConfirmedAddresses.remove(clientUUID)
     }
 
+    fun failBroadcast(clientUUID: String) = unConfirmedAddresses.remove(clientUUID)
+
     fun hasUnconfirmedAddressFor(clientUUID: String): Boolean = unConfirmedAddresses.contains(clientUUID)
 
 }
