@@ -150,7 +150,7 @@ class LedgerService : Service() {
     @Inject
     lateinit var randomSensor: RandomSensor
 
-    private val stressTestingSensors by lazy { Array(10) { StressTestingSensor(sensorRepository, it + 3) }}
+    private val stressTestingSensors by lazy { Array(0) { StressTestingSensor(sensorRepository, it  + 3) }}
 
     @Inject
     lateinit var app: HermesClientApp
