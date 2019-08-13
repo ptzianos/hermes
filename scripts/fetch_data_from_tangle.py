@@ -124,9 +124,12 @@ if __name__ == '__main__':
 
         bundle_index += 1
 
-    count = Counter(map(lambda t: t[1] - t[0], zip(broadcast_latency_list, attachment_latency_list)))
-    delay_count = sum(count.keys())
-    attachment_delays = map(lambda t: (t[1], t[0]/24), count.items())
+    latency_distribution = Counter(map(lambda t: t[1] - t[0], zip(broadcast_latency_list, attachment_latency_list)))
+    latency_distribution_count = sum(latency_distribution.values())
+    latency_percentages = [(key, (value/latency_distribution_count)*100) for key, value in latency_distribution.items()]
+
+    del transaction_samples['']
+    samples_per_bundle = Counter([len(value) for value in transaction_samples.values()]).items()
 
     print('\n'.join(lines))
     print('---------------------------------------------------')
@@ -151,11 +154,12 @@ if __name__ == '__main__':
     print('Standard deviation of attachment latency is: {}'.format(statistics.stdev(attachment_latency_list)))
     print('---------------------------------------------------')
     print('---------------------------------------------------')
-    print('Latency delays are:\n{}'.format(','.join(map(str, attachment_delays))))
+    print('Latency delays are:\n{}'.format(','.join(map(str, latency_percentages))))
     print('---------------------------------------------------')
     print('---------------------------------------------------')
     print('X Axis Labels:\n{}'.format(','.join(x_labels)))
     print('X Ticks:\n{}'.format(','.join(map(str, range(len(x_labels))))))
+    print('Samples per bundle: {}'.format(' '.join(map(str, samples_per_bundle))))
     print('Min broadcast latency is: {}'.format(min(broadcast_latency_list)))
     print('Max broadcast latency is: {}'.format(max(broadcast_latency_list)))
     print('Min attachment latency is: {}'.format(min(attachment_latency_list)))

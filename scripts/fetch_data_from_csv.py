@@ -166,10 +166,8 @@ def extract_latencies(latency_type):
 
 
 def get_statistics():
-    transaction_hash_lists = list()
-    for sample_list in sample_db.values():
-        transaction_hash_lists.append(list(map(lambda s: s['address'], sample_list)))
-    sample_counter = Counter(Counter(chain(*transaction_hash_lists)).values())
+    samples_per_bundle = Counter(Counter([s for s in map(lambda s: s['address'],
+                                                         chain.from_iterable(sample_db.values()))]).values())
     broadcast_latency_lists = list()
     for sample_list in metadata_db.values():
         broadcast_latency_lists.append(list(map(lambda s: s['broadcast_latency'], sample_list)))
@@ -185,10 +183,16 @@ def get_statistics():
     avg_attachment_latency = statistics.mean(chain.from_iterable(attachment_latency_lists))
     stdev_attachment_latency = statistics.stdev(chain.from_iterable(attachment_latency_lists))
 
-    return (sample_counter, max_broadcast_latency, min_broadcast_latency,
+    zipped_latencies = zip(chain.from_iterable(broadcast_latency_lists), chain.from_iterable(attachment_latency_lists))
+    latency_distribution = Counter(map(lambda t: t[1] - t[0], zipped_latencies))
+    latency_distribution_count = sum(latency_distribution.values())
+    latency_percentages = [(key, (value/latency_distribution_count)*100) for key, value in latency_distribution.items()]
+
+    return (samples_per_bundle, max_broadcast_latency, min_broadcast_latency,
             avg_broadcast_latency, stdev_broadcast_latency,
             max_attachment_latency, min_attachment_latency,
-            avg_attachment_latency, stdev_attachment_latency)
+            avg_attachment_latency, stdev_attachment_latency,
+            latency_percentages)
 
 
 if __name__ == '__main__':
@@ -208,7 +212,8 @@ if __name__ == '__main__':
     print('---------------------------------------------------')
     print('Broadcast X Axis Indices')
     print('---------------------------------------------------')
-    print(','.join(map(lambda t: '({},{})'.format(t[0], t[1]), broadcast_x_axis_indices)))
+    # print(','.join(map(lambda t: '({},{})'.format(t[0], t[1]), broadcast_x_axis_indices)))
+    print(','.join(map(lambda t: '{}.{}'.format(t[0], t[1]), broadcast_x_axis_indices)))
     print('---------------------------------------------------')
     print('Attachment X Axis Indices')
     print('---------------------------------------------------')
@@ -228,9 +233,11 @@ if __name__ == '__main__':
     print('---------------------------------------------------')
     print('Sample number distribution')
     print('---------------------------------------------------')
-    (sample_counter, max_broadcast_latency, min_broadcast_latency, avg_broadcast_latency, stdev_broadcast_latency,
-     max_attachment_latency, min_attachment_latency, avg_attachment_latency, stdev_attachment_latency) = get_statistics()
-    print(f'Sample distribution: {sample_counter}')
+    (samples_per_bundle, max_broadcast_latency, min_broadcast_latency, avg_broadcast_latency, stdev_broadcast_latency,
+     max_attachment_latency, min_attachment_latency, avg_attachment_latency, stdev_attachment_latency,
+     latency_percentages) = get_statistics()
+    print(f'Samples per bundle: {samples_per_bundle}')
+    print(f'Latency distribution: {latency_percentages}')
     print(f'Max broadcast latency: {max_broadcast_latency}')
     print(f'Min broadcast latency: {min_broadcast_latency}')
     print(f'Avg broadcast latency: {avg_broadcast_latency}')
