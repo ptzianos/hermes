@@ -1,7 +1,7 @@
 [tool.poetry]
-name = "pan"
+name = "carbon-ledger"
 version = "0.1.0"
-description = "The follower of Hermes. Used to follow streams of data broadcast from an Hermes client"
+description = "Daemon used to fetch data from a ledger and route them to a carbon daemon."
 authors = ["Pavlos Tzianos <pavlos.tzianos@gmail.com>"]
 
 [tool.poetry.dependencies]
