@@ -48,3 +48,7 @@ ansible/roles/hermes-node/files/*.apk
 # Random stuff
 **/*.csv
 **/*.csv#
+
+# Carbon Ledger Stuff
+scripts/build
+scripts/dist
