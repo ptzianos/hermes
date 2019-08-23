@@ -1,5 +1,8 @@
 from datetime import datetime
-from typing import Any, List, Optional
+from typing import Any, List, Optional, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from carbon.ledger.ledgers import Block
 
 
 class InvalidPacket(Exception):
@@ -14,15 +17,17 @@ class Packet:
     """
 
     def __init__(self, raw: Optional[str] = '', tag: Optional[str] = '', other_tags: Optional[List[str]] = '',
-                 timestamp: Optional[datetime] = '', data: Optional[Any] = None) -> None:
-        if not self._raw and (not self._tag or not self._timestamp or not self._data):
-            raise InvalidPacket()
+                 timestamp: Optional[datetime] = '', data: Optional[Any] = None, block: Optional[Block] = None
+                 ) -> None:
         self._tag = tag
         self._tags = other_tags
         self._raw = ''
         self._timestamp = timestamp
         self._data = data
         self._raw = raw
+        self._block = block
+        if not self._raw and (not self._tag or not self._timestamp or not self._data):
+            raise InvalidPacket()
 
     def _parse_raw(self) -> None:
         if not self._raw:
