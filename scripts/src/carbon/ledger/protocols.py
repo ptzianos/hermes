@@ -1,8 +1,21 @@
 from abc import ABC
+from datetime import datetime
 from typing import List, TYPE_CHECKING
 
 if TYPE_CHECKING:
+    from carbon.ledger.data import Packet
     from carbon.ledger.ledgers import Block
+
+
+def epoch_to_datetime(ts):
+    try:
+        return datetime.utcfromtimestamp(int(ts))
+    except ValueError:
+        return datetime.utcfromtimestamp(int(ts)/1000)
+
+
+def datetime_to_string(dt):
+    return dt.strftime('%Y-%m-%d %H:%M:%S')
 
 
 class ProtocolParser(ABC):
@@ -10,13 +23,17 @@ class ProtocolParser(ABC):
         pass
 
     @staticmethod
-    def parse(address: str, raw_data: str) -> Block:
+    def parse_headers(address: str, raw_data: str) -> Block:
+        raise NotImplemented()
+
+    @staticmethod
+    def parse_data(block: Block) -> List[Packet]:
         raise NotImplemented()
 
 
 class HermesPlaintextParser(ProtocolParser):
     @staticmethod
-    def parse(address: str, raw_data: str) -> Block:
+    def parse_headers(address: str, raw_data: str) -> Block:
         fields = (raw_data
                   .replace('next_address:', '')
                   .replace('previous_address:', '')
@@ -24,4 +41,13 @@ class HermesPlaintextParser(ProtocolParser):
         if len(fields) < 4:
             raise ProtocolParser.InvalidData()
         return Block(address=address, next_link=fields[1], previous_link=fields[2],
-                     data={'transactions': fields[3:]}, metadata={'digest': fields[0]})
+                     data={'samples': fields[3:]}, metadata={'digest': fields[0]})
+
+    @staticmethod
+    def parse_data(block: Block) -> List[Packet]:
+        packets = list()
+        for sample in block.data['samples']:
+            tags, timestamp, data = sample.split(' ')
+            tags = tags.split(';')
+            packets.append(Packet(sample, tags[0], tags[1:], epoch_to_datetime(timestamp), data, block))
+        return packets
