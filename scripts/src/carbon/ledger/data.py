@@ -5,20 +5,19 @@ if TYPE_CHECKING:
     from carbon.ledger.ledgers import Block
 
 
-class InvalidPacket(Exception):
-    pass
-
-
 class Packet:
-    """ A class that represents a data sample.
+    """Represents a data sample.
 
     The encoding of the data sample is done using the Carbon 2.0 protocol.
     TODO: Add Carbon2.0 stuff here
     """
 
+    class InvalidPacket(Exception):
+        pass
+
     def __init__(self, raw: Optional[str] = '', tag: Optional[str] = '', other_tags: Optional[List[str]] = '',
-                 timestamp: Optional[datetime] = '', data: Optional[Any] = None, block: Optional[Block] = None
-                 ) -> None:
+                 timestamp: Optional[datetime] = '', data: Optional[Any] = None, block: Optional[Block] = None,
+                 previous_packet: Optional['Packet'] = None, next_packet: Optional['Packet'] = None) -> None:
         self._tag = tag
         self._tags = other_tags
         self._raw = ''
@@ -26,12 +25,14 @@ class Packet:
         self._data = data
         self._raw = raw
         self._block = block
+        self._previous = previous_packet
+        self._next = next_packet
         if not self._raw and (not self._tag or not self._timestamp or not self._data):
-            raise InvalidPacket()
+            raise Packet.InvalidPacket()
 
     def _parse_raw(self) -> None:
         if not self._raw:
-            raise InvalidPacket()
+            raise Packet.InvalidPacket()
         _tags, self._timestamp, self._data = self._raw.split(' ')
         split_tags = _tags.split(',')
         self._tag = split_tags[0]
