@@ -46,8 +46,12 @@ class HermesPlaintextParser(ProtocolParser):
     @staticmethod
     def parse_data(block: Block) -> List[Packet]:
         packets = list()
+        previous = None
         for sample in block.data['samples']:
             tags, timestamp, data = sample.split(' ')
             tags = tags.split(';')
-            packets.append(Packet(sample, tags[0], tags[1:], epoch_to_datetime(timestamp), data, block))
+            packets.append(Packet(sample, tags[0], tags[1:], epoch_to_datetime(timestamp), data, block,
+                                  previous_packet=previous))
+        for index in range(len(packets) - 1):
+            packets[index]._next = packets[index + 1]
         return packets
