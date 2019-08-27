@@ -25,6 +25,8 @@ class Packet:
         self._data = data
         self._raw = raw
         self._block = block
+        # These extra markers are needed because the list of packets cached by the application
+        # does not necessarily coincide with the list of samples posted on the storage medium
         self._previous = previous_packet
         self._next = next_packet
         if not self._raw and (not self._tag or not self._timestamp or not self._data):
