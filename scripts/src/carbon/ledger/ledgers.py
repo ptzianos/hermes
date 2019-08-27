@@ -12,13 +12,14 @@ from carbon.ledger.protocols import ProtocolParser
 class Block:
     """Represents a block posted on a ledger that contains one or more data packets."""
 
-    def __init__(self, address: str, next_link: str, previous_link: str, data: List[Packet],
+    def __init__(self, address: str, next_link: str, previous_link: str, data: Dict[str, Any],
                  metadata: Dict[str, Any]) -> None:
         self.data = data
         self.address = address
         self.next_link = next_link
         self.previous_link = previous_link
         self.metadata = metadata
+        self.samples = list()
 
 
 class LedgerConnector(ABC):
