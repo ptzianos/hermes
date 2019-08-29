@@ -1,0 +1,7 @@
+[[streams]]
+root_address = 'OCEXMTLLCLOFZXYBDHPBYJIYYM9XTUALRVHGOEU9UUDDJFABFYEOWOUYUVNMCAEYFVIFVAQREUKKWYFBXYSKFQ9USZ'
+network = 'IOTA'
+protocol = 'plaintext'
+
+[[ads]]
+uuid = ''
