@@ -1,10 +1,15 @@
 from abc import ABC
 from datetime import datetime
-from typing import List, TYPE_CHECKING
+from enum import Enum
+from typing import List, Type, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from carbon.ledger.data import Packet
     from carbon.ledger.ledgers import Block
+
+
+class Protocol(str, Enum):
+    PLAINTEXT = 'plaintext'
 
 
 def epoch_to_datetime(ts):
@@ -49,3 +54,9 @@ class HermesPlaintextParser(ProtocolParser):
             tags, timestamp, data = sample.split(' ')
             tags = tags.split(';')
             block.samples.append(Packet(sample, tags[0], tags[1:], epoch_to_datetime(timestamp), data, block))
+
+
+def get_protocol_parser(protocol: str) -> Type[ProtocolParser]:
+    protocol = Protocol[protocol.lower()]
+    if protocol == Protocol.PLAINTEXT:
+        return HermesPlaintextParser

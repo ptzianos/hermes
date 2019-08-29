@@ -1,12 +1,17 @@
 from abc import ABC
+from enum import Enum
 from logging import Logger
-from typing import Any, Dict, Iterable, Iterator, List, Optional, Tuple
+from typing import Any, Dict, Iterable, Iterator, List, Optional, Tuple, Type
 
 from iota.api import Iota
 from iota.commands.extended.utils import find_transaction_objects
 
 from carbon.ledger.data import Packet
 from carbon.ledger.protocols import ProtocolParser
+
+
+class Network(str, Enum):
+    IOTA = 'IOTA'
 
 
 class Block:
@@ -151,3 +156,9 @@ class Stream(Iterable):
     @property
     def data(self) -> Iterator[Packet]:
         return Stream.LazyDataIterator(self, reverse_order=False)
+
+
+def get_connector(ledger: str) -> Type[LedgerConnector]:
+    network = Network[ledger.upper()]
+    if network == Network.IOTA:
+        return IOTAConnector
