@@ -2,13 +2,13 @@ import argparse
 import logging
 import os
 import signal
-from asyncio import get_event_loop, Task
+from asyncio import create_task, get_event_loop, Task
 from typing import Dict
 
 import toml
 from cerberus import Validator
 
-from carbon.ledger.ledgers import Stream, get_connector
+from carbon.ledger.connectors import Stream, get_connector
 from carbon.ledger.protocols import get_protocol_parser
 
 
@@ -54,6 +54,9 @@ async def follow_stream(stream: Stream,
         except StopIteration:
             if stop_at_the_end:
                 return
+        except Exception as e:
+            log.error(f'There was an error while trying to fetch the next '
+                      f'packet: {repr(e)}')
 
 
 async def explore_stream_backwards(stream: Stream) -> None:
