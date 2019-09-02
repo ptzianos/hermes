@@ -34,7 +34,7 @@ class LedgerConnector(ABC):
     def __init__(self, protocol: ProtocolParser):
         self._protocol = protocol
 
-    def fetch(self, address: str) -> Block:
+    def fetch(self, address: str, log: Logger) -> Block:
         raise NotImplemented()
 
 
@@ -50,7 +50,7 @@ class IOTAConnector(LedgerConnector):
         super().__init__(*args,  **kwargs)
         self._iota_api = Iota(node_address)
 
-    def fetch(self, address: str) -> Block:
+    def fetch(self, address: str, log: Logger) -> Block:
         """Fetches a block from IOTA with an address.
 
         Since IOTA does not support exactly blocks, what is fetched is all the
@@ -74,7 +74,8 @@ class IOTAConnector(LedgerConnector):
             raise IOTAConnector.NoDataFetched()
         raw_data = ''.join(map(get_signature_string, transactions))
         block = self._protocol.parse_headers(address=address,
-                                             raw_data=raw_data)
+                                             raw_data=raw_data,
+                                             log=log)
         return block
 
 
@@ -150,7 +151,8 @@ class Stream(Iterable):
         """Fetch a block from the ledger and update the state of the stream."""
         try:
             # Fetch block from the ledger
-            self._address_index[address] = self._connector.fetch(address)
+            self._address_index[address] = self._connector.fetch(address,
+                                                                 self._logger)
             # Add block to the registry
             self._logger.info(f'Fetched block with address {address}')
         except Exception as e:
