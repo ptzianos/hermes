@@ -89,15 +89,15 @@ async def schedule_streams(config_file: str) -> None:
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         description='Explore Carbon streams from ledgers.')
-    parser.add_argument('config-file', type=str, default='config.example.toml')
-    parser.add_argument('no-follow', type=bool, action='store_true',
+    parser.add_argument('--config-file', type=str, default='config.example.toml')
+    parser.add_argument('--no-follow', action='store_true',
                         help="Follow a stream but don't wait for it to continue")
-    parser.add_argument('stream-window-size', type=int,
+    parser.add_argument('--stream-window-size', type=int,
                         help='Size of the buffer used to store data samples '
                              'of a stream')
-    parser.add_argument('logging-level', type=str, default='INFO',
+    parser.add_argument('--logging-level', type=str, default='INFO',
                         help='Logging level of the application')
-    parser.add_argument('show-data', type=str, help='')
+    parser.add_argument('--show-data', type=str, help='')
 
     args = parser.parse_args()
 
@@ -110,7 +110,6 @@ if __name__ == '__main__':
 
     # Initialize event loop
     event_loop = get_event_loop()
-    event_loop.add_signal_handler(signal.SIGKILL, signal_handler)
     event_loop.add_signal_handler(signal.SIGTERM, signal_handler)
 
     if args.no_follow:
