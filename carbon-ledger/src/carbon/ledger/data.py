@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Any, List, Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from carbon.ledger.ledgers import Block
+    from carbon.ledger.connectors import Block
 
 
 class Packet:
@@ -16,7 +16,7 @@ class Packet:
         pass
 
     def __init__(self, raw: Optional[str] = '', tag: Optional[str] = '', other_tags: Optional[List[str]] = '',
-                 timestamp: Optional[datetime] = '', data: Optional[Any] = None, block: Optional[Block] = None,
+                 timestamp: Optional[datetime] = '', data: Optional[Any] = None, block: Optional['Block'] = None,
                  ) -> None:
         self._tag = tag
         self._tags = other_tags
