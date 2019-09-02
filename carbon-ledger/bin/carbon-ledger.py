@@ -81,8 +81,8 @@ async def schedule_streams(config_file: str) -> None:
             root_address=stream_config['root_address'], logger=log)
         log.info(f'Scheduling coroutines for IOTA stream with root address'
                  f' {stream_config["root_address"]}')
-        following_task = follow_stream(stream)
-        backwards_task = explore_stream_backwards(stream)
+        following_task = create_task(follow_stream(stream, log, True))
+        backwards_task = create_task(explore_stream_backwards(stream))
 
 
 if __name__ == '__main__':
