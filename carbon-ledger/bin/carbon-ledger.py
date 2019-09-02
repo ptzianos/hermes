@@ -2,7 +2,7 @@ import argparse
 import logging
 import os
 import signal
-from asyncio import create_task, get_event_loop, Task
+from asyncio import create_task, get_event_loop, sleep, Task
 from typing import Dict
 
 import toml
@@ -57,6 +57,7 @@ async def follow_stream(stream: Stream,
         except Exception as e:
             log.error(f'There was an error while trying to fetch the next '
                       f'packet: {repr(e)}')
+            await sleep(5)
 
 
 async def explore_stream_backwards(stream: Stream, log: logging.Logger) -> None:
