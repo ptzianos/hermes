@@ -81,6 +81,7 @@ async def schedule_streams(
     logging.basicConfig(level=logging_level.upper(),
                         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     log = logging.getLogger('carbon-ledger')
+    logging.getLogger('urllib3').setLevel('ERROR')
     config = toml.load(open(config_file, 'r'))
     if not validator.validate(config):
         log.error(f'Invalid configuration file: {repr(validator.errors)}')
