@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import argparse
 import logging
 import os
@@ -91,7 +92,7 @@ async def schedule_streams(
             root_address=stream_config['root_address'], logger=log)
         log.info(f'Scheduling coroutines for IOTA stream with root address'
                  f' {stream_config["root_address"]}')
-        # event_loop.create_task(follow_stream(stream, log, True))
+        event_loop.create_task(follow_stream(stream, log, True))
         event_loop.create_task(explore_stream_backwards(stream, log))
 
 
@@ -104,7 +105,7 @@ if __name__ == '__main__':
     parser.add_argument('--stream-window-size', type=int,
                         help='Size of the buffer used to store data samples '
                              'of a stream')
-    parser.add_argument('--logging-level', type=str, default='INFO',
+    parser.add_argument('--log-level', type=str, default='INFO',
                         help='Logging level of the application')
     parser.add_argument('--show-data', type=str, help='')
 
@@ -120,6 +121,6 @@ if __name__ == '__main__':
 
     if args.no_follow:
         event_loop.run_until_complete(
-            schedule_streams(args.config_file, args.logging_level.upper()))
+            schedule_streams(args.config_file, args.log_level.upper()))
     else:
         event_loop.run_forever()
