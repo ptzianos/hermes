@@ -28,17 +28,18 @@ class ProtocolParser(ABC):
         pass
 
     @staticmethod
-    def parse_headers(address: str, raw_data: str) -> Block:
+    def parse_headers(address: str, raw_data: str) -> 'Block':
         raise NotImplemented()
 
     @staticmethod
-    def parse_data(block: Block) -> List[Packet]:
+    def parse_data(block: 'Block') -> List['Packet']:
         raise NotImplemented()
 
 
 class HermesPlaintextParser(ProtocolParser):
     @staticmethod
-    def parse_headers(address: str, raw_data: str) -> Block:
+    def parse_headers(address: str, raw_data: str) -> 'Block':
+        from carbon.ledger.connectors import Block
         fields = (raw_data
                   .replace('next_address:', '')
                   .replace('previous_address:', '')
@@ -49,11 +50,13 @@ class HermesPlaintextParser(ProtocolParser):
                      data={'samples': fields[3:]}, metadata={'digest': fields[0]})
 
     @staticmethod
-    def parse_data(block: Block) -> None:
+    def parse_data(block: 'Block') -> None:
+        from carbon.ledger.data import Packet
         for sample in block.data['samples']:
             tags, timestamp, data = sample.split(' ')
             tags = tags.split(';')
-            block.samples.append(Packet(sample, tags[0], tags[1:], epoch_to_datetime(timestamp), data, block))
+            block.samples.append(Packet(sample, tags[0], tags[1:],
+                                        epoch_to_datetime(timestamp), data, block))
 
 
 def get_protocol_parser(protocol: str) -> Type[ProtocolParser]:
