@@ -9,7 +9,7 @@ if TYPE_CHECKING:
 
 
 class Protocol(str, Enum):
-    PLAINTEXT = 'plaintext'
+    PLAINTEXT = 'PLAINTEXT'
 
 
 def epoch_to_datetime(ts):
@@ -59,7 +59,7 @@ class HermesPlaintextParser(ProtocolParser):
                                         epoch_to_datetime(timestamp), data, block))
 
 
-def get_protocol_parser(protocol: str) -> Type[ProtocolParser]:
-    protocol = Protocol[protocol.lower()]
+def get_protocol_parser(protocol_id: str) -> Type[ProtocolParser]:
+    protocol = Protocol[protocol_id.upper()]
     if protocol == Protocol.PLAINTEXT:
         return HermesPlaintextParser
