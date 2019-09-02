@@ -3,9 +3,6 @@ from enum import Enum
 from logging import Logger
 from typing import Any, Dict, Iterable, Iterator, List, Optional, Tuple, Type
 
-from iota.api import Iota
-from iota.commands.extended.utils import find_transaction_objects
-
 from carbon.ledger.data import Packet
 from carbon.ledger.protocols import ProtocolParser
 
@@ -44,6 +41,7 @@ class IOTAConnector(LedgerConnector):
 
     def __init__(self, node_address: str = 'https://nodes.thetangle.org', *args, **kwargs):
         super().__init__(*args,  **kwargs)
+        from iota.api import Iota
         self._iota_api = Iota(node_address)
 
     def fetch(self, address: str) -> Block:
@@ -57,6 +55,7 @@ class IOTAConnector(LedgerConnector):
         """
         if not address:
             raise IOTAConnector.InvalidAddress()
+        from iota.commands.extended.utils import find_transaction_objects
         transactions = sorted(find_transaction_objects(self._iota_api.adapter, addresses=[address]),
                               key=lambda t: t.timestamp)
         if not transactions:
