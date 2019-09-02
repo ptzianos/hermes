@@ -59,9 +59,11 @@ async def follow_stream(stream: Stream,
                       f'packet: {repr(e)}')
 
 
-async def explore_stream_backwards(stream: Stream) -> None:
+async def explore_stream_backwards(stream: Stream, log: logging.Logger) -> None:
     """Explore a stream backwards from the root address."""
-    pass
+    log.info(f'Exploring stream with root address {stream.root_address} backwards')
+    for _ in reversed(stream):
+        pass
 
 
 async def schedule_streams(config_file: str) -> None:
