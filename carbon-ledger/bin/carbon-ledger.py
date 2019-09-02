@@ -75,7 +75,7 @@ async def schedule_streams(config_file: str) -> None:
     if not validator.validate(config):
         log.error(f'Invalid configuration file: {repr(validator.errors)}')
     for stream_config in config['streams']:
-        LedgerConnector = get_connector(stream_config['ledger'])
+        LedgerConnector = get_connector(stream_config['network'])
         ProtocolParser = get_protocol_parser(stream_config['protocol'])
         stream = Stream(
             ledger_connector=LedgerConnector(protocol=ProtocolParser),
