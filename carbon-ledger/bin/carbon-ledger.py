@@ -2,8 +2,7 @@ import argparse
 import logging
 import os
 import signal
-from asyncio import create_task, get_event_loop, sleep, Task
-from typing import Dict
+from asyncio import get_event_loop, sleep
 
 import toml
 from cerberus import Validator
@@ -60,17 +59,27 @@ async def follow_stream(stream: Stream,
             await sleep(5)
 
 
-async def explore_stream_backwards(stream: Stream, log: logging.Logger) -> None:
+async def explore_stream_backwards(
+    stream: Stream, log: logging.Logger
+) -> None:
     """Explore a stream backwards from the root address."""
-    log.info(f'Exploring stream with root address {stream.root_address} backwards')
+    original_root_address = stream.root_address
+    log.info(f'Exploring stream with root address'
+             f' {original_root_address} backwards')
     for _ in reversed(stream):
         pass
+    log.info(f'Finished exploring stream with original root address'
+             f' {original_root_address} backwards')
 
 
-async def schedule_streams(config_file: str) -> None:
+async def schedule_streams(
+    config_file: str, logging_level: str = 'INFO'
+) -> None:
     event_loop = get_event_loop()
-    coroutine_registry = dict()  # type: Dict[str, Task]
-    log = logging.getLogger('asyncio')
+    # coroutine_registry = dict()  # type: Dict[str, Task]
+    logging.basicConfig(level=logging_level.upper(),
+                        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    log = logging.getLogger('carbon-ledger')
     config = toml.load(open(config_file, 'r'))
     if not validator.validate(config):
         log.error(f'Invalid configuration file: {repr(validator.errors)}')
@@ -82,8 +91,8 @@ async def schedule_streams(config_file: str) -> None:
             root_address=stream_config['root_address'], logger=log)
         log.info(f'Scheduling coroutines for IOTA stream with root address'
                  f' {stream_config["root_address"]}')
-        following_task = create_task(follow_stream(stream, log, True))
-        backwards_task = create_task(explore_stream_backwards(stream))
+        # event_loop.create_task(follow_stream(stream, log, True))
+        event_loop.create_task(explore_stream_backwards(stream, log))
 
 
 if __name__ == '__main__':
@@ -105,14 +114,12 @@ if __name__ == '__main__':
         print('Config file does not exist')
         exit(1)
 
-    # Configure logging
-    logging.getLogger('asyncio').setLevel(args.logging_level.upper())
-
     # Initialize event loop
     event_loop = get_event_loop()
     event_loop.add_signal_handler(signal.SIGTERM, signal_handler)
 
     if args.no_follow:
-        event_loop.run_until_complete(schedule_streams(args.config_file))
+        event_loop.run_until_complete(
+            schedule_streams(args.config_file, args.logging_level.upper()))
     else:
         event_loop.run_forever()
