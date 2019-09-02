@@ -5,7 +5,7 @@ description = "Daemon used to fetch data from a ledger and route them to a carbo
 authors = ["Pavlos Tzianos <pavlos.tzianos@gmail.com>"]
 
 [tool.poetry.dependencies]
-python = "^3.7"
+python = "^3.6"
 PyOTA = "^2.0"
 toml = "^0.10.0"
 cerberus = "^1.3"
