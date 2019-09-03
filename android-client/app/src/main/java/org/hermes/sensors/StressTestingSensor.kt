@@ -41,10 +41,15 @@ class StressTestingSensor @Inject constructor(
     private val random = SecureRandom.getInstance("SHA1PRNG")
 
     private fun calculateHeaderSize(): Int {
-        return 272 + // size of header until the beginning of the dataId tag with things such as the digest, previous/next address, etc.
-               dataId.length +
-               ";unit=$unit;mtype=$mtype;".length +
-               35 // length of the last tag plus the unix epoch
+        // size of header until the beginning of the dataId tag with things such as the digest, previous/next address, etc.
+        return "digest:".length +
+                128 + // size of the digest
+                90 +  // size of previous address
+                90 +  // size of the next address
+                6 +   // separators between the fields
+                dataId.length +
+                ";unit=$unit;mtype=$mtype;".length +
+                35 // length of the last tag plus the unix epoch
     }
 
     override fun beginScrappingData(ledgerService: LedgerService) {
