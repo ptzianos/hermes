@@ -28,7 +28,7 @@ import org.bouncycastle.util.io.pem.PemWriter
 import org.hermes.utils.toByteArray
 
 
-class SecP256K1PrivKey : PrivateKey {
+open class SecP256K1PrivKey : PrivateKey {
 
     companion object {
         fun random(): SecP256K1PrivKey {
@@ -49,7 +49,7 @@ class SecP256K1PrivKey : PrivateKey {
 
     constructor(key: BigInteger) {
         val N = Secp256K1Curve.X9ECParameters.n.bitLength().toBigInteger()
-        value  = if (key.bitLength().toBigInteger() > N) key.mod(N) else key
+        value = if (key.bitLength().toBigInteger() > N) key.mod(N) else key
     }
 
     constructor(hexStr: String) {
@@ -58,6 +58,9 @@ class SecP256K1PrivKey : PrivateKey {
 
     // Make sure that the value of the key is not larger than the order of the group
     val value: BigInteger
+
+    val point: ECPoint
+        get() = FixedPointCombMultiplier().multiply(Secp256K1Curve.ecDomainParameters.g, value).normalize()
 
     /**
      * Signs a message according to RFC 6979 with a deterministic K.
@@ -185,10 +188,12 @@ class SecP256K1PrivKey : PrivateKey {
         val twiceHashed = digest.digest(digest.digest(byteArray))
         val checksum = ByteArray(4) { i -> twiceHashed[i] }
         val checkSummedHex = extendedHex + Hex.toHexString(checksum)
-        return Base58.encode(Hex.decode(checkSummedHex))
+        return Base58.toBase58String(Hex.decode(checkSummedHex))
     }
 
     override fun getFormat(): String = "PKCS#8"
 
     fun asHex(): String = Hex.toHexString(value.toByteArray())
+
+    fun asBytes(): ByteArray = value.toByteArray()
 }
