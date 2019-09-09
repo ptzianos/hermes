@@ -8,7 +8,7 @@ internal class LedgerServiceTest {
 
     @Test
     fun testSensorBufferCounter() {
-        val sensor = Sensor("1", "test", "m/s", "int", null, null, "", "")
+        val sensor = Sensor("1", "test", "m/s", "int", null, null, "", "", 1000)
         for (i in 1..2 * Sensor.SENSOR_BUFFER_SIZE) {
             sensor.putSample(Metric20("pkHash", i))
             assertEquals(if (i < Sensor.SENSOR_BUFFER_SIZE) i else Sensor.SENSOR_BUFFER_SIZE, sensor.counter)
@@ -17,7 +17,7 @@ internal class LedgerServiceTest {
 
     @Test
     fun testSensorBuffering() {
-        val sensor = Sensor("1", "test", "m/s", "int", null, null, "", "")
+        val sensor = Sensor("1", "test", "m/s", "int", null, null, "", "", 1000)
         for (i in 1 .. 5)
             sensor.putSample(Metric20("pkHash", i))
         assertEquals(5, sensor.counter)
