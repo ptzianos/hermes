@@ -1,6 +1,7 @@
 package org.hermes.utils
 
 import java.lang.IndexOutOfBoundsException
+import java.math.BigInteger
 import java.util.*
 import org.bouncycastle.util.encoders.Base64
 import org.bouncycastle.util.encoders.Hex
@@ -12,6 +13,8 @@ fun ByteArray.toHexStr(): String = Hex.toHexString(this)
 fun ByteArray.toBase64Str(): String = Base64.toBase64String(this)
 
 fun ByteArray.toBase58Str(appendChecksum: Boolean = false): String = Base58.toBase58String(this, appendChecksum)
+
+fun ByteArray.toBigInt(): BigInteger = BigInteger(this)
 
 fun ByteArray.countLeft(predicate: (Byte) -> Boolean): Int {
     var count = 0
