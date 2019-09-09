@@ -7,7 +7,6 @@ import java.security.SecureRandom
 import java.util.*
 import kotlinx.io.IOException
 import kotlinx.io.StringWriter
-import org.bitcoinj.core.Base58
 import org.bouncycastle.asn1.ASN1Object
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier
@@ -25,6 +24,7 @@ import org.bouncycastle.util.encoders.Hex
 import org.bouncycastle.util.io.pem.PemObject
 import org.bouncycastle.util.io.pem.PemWriter
 
+import org.hermes.hd.Base58
 import org.hermes.utils.toByteArray
 
 
