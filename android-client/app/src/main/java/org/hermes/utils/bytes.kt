@@ -5,9 +5,13 @@ import java.util.*
 import org.bouncycastle.util.encoders.Base64
 import org.bouncycastle.util.encoders.Hex
 
+import org.hermes.hd.Base58
+
 fun ByteArray.toHexStr(): String = Hex.toHexString(this)
 
 fun ByteArray.toBase64Str(): String = Base64.toBase64String(this)
+
+fun ByteArray.toBase58Str(appendChecksum: Boolean = false): String = Base58.toBase58String(this, appendChecksum)
 
 fun ByteArray.countLeft(predicate: (Byte) -> Boolean): Int {
     var count = 0
