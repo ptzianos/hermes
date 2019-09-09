@@ -12,34 +12,49 @@ import org.hermes.crypto.Secp256K1Curve
 import org.hermes.utils.toByteArray
 
 
-interface BIP32Key {
-    class InvalidIndex: Exception()
+object BIP32 {
 
     class InvalidPath: Exception()
+
+    /**
+     * Verifies a BIP32 compliant key path.
+     */
+    fun verify(path: String) {
+        if (!Regex("^m(/[0-9]+'?)*\$").matches(path))
+            throw InvalidPath()
+        for (fragment in path.split("/").drop(1)) {
+            if (fragment.contains("'")) {
+                val cleanFragment = fragment.dropLast(1).toInt()
+                if ((cleanFragment >= pow(2, 31)) or (cleanFragment < 0)) {
+                    throw InvalidPath()
+                }
+            } else if (!fragment.contains("'")) {
+                if ((fragment.toInt() >= pow(2, 32)) or (fragment.toInt() < 0)) {
+                    throw InvalidPath()
+                }
+            }
+        }
+    }
+
+    /**
+     * Converts a path of BIP32 path into a list of indices.
+     */
+    fun normalize(path: String): Iterable<Int> = path
+        .split("/")
+        .map { when {
+            it == "m" -> pow(2, 31)
+            it.endsWith("'") -> it.dropLast(1).toInt()
+            else -> it.toInt()
+        } }
+}
+
+
+interface BIP32Key {
+    class InvalidIndex: Exception()
 
     class NoSibling: Exception()
 
     companion object {
-        /**
-         * Verifies a BIP32 compliant key path.
-         */
-        fun verifyPath(path: String) {
-            if (!Regex("^m(/[0-9]+'?)*\$").matches(path))
-                throw InvalidPath()
-            for (fragment in path.split("/").drop(1)) {
-                if (fragment.contains("'")) {
-                    val cleanFragment = fragment.dropLast(1).toInt()
-                    if ((cleanFragment >= pow(2, 31)) or (cleanFragment < 0)) {
-                        throw InvalidPath()
-                    }
-                } else if (!fragment.contains("'")) {
-                    if ((fragment.toInt() >= pow(2, 32)) or (fragment.toInt() < 0)) {
-                        throw InvalidPath()
-                    }
-                }
-            }
-        }
-
         /**
          * Returns the index of the current key.
          */
@@ -91,7 +106,7 @@ class ExPrivKey(
     key: BigInteger
 ) : BIP32Key, SecP256K1PrivKey(key) {
 
-    init { BIP32Key.verifyPath(path) }
+    init { BIP32.verify(path) }
 
     override fun child(index: Int): BIP32Key {
         if ((index < 0) or (index >= pow(2, 32)))
@@ -116,6 +131,3 @@ class ExPrivKey(
 
 // TODO: Fix me
 class ExPubKey(index: Int, parent: ExPubKey?, chainCode: ByteArray)
-
-// TODO: Fix me
-object MasterNode
