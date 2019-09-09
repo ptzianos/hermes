@@ -179,7 +179,7 @@ open class SecP256K1PrivKey : PrivateKey {
     }
 
     /**
-     * Export the private key using the Waller Import Format.
+     * Export the private key using the Wallet Import Format.
      */
     fun asWIF(): String {
         val extendedHex = "80" + asHex()
