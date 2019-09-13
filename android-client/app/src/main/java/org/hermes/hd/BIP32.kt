@@ -5,7 +5,6 @@ import java.math.BigInteger
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
 import org.bouncycastle.pqc.math.linearalgebra.IntegerFunctions.pow
-import org.bouncycastle.util.encoders.Hex
 
 import org.hermes.crypto.CryptoAlgorithms.HMAC_SHA512
 import org.hermes.crypto.RIPEMD
