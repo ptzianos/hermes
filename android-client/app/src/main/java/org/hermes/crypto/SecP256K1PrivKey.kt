@@ -194,6 +194,4 @@ open class SecP256K1PrivKey : PrivateKey {
     override fun getFormat(): String = "PKCS#8"
 
     fun asHex(): String = Hex.toHexString(value.toByteArray())
-
-    fun asBytes(): ByteArray = value.toByteArray()
 }
