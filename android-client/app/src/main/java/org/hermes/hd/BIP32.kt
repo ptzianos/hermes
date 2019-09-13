@@ -141,3 +141,84 @@ class ExPrivKey(
 
 // TODO: Implement me
 class ExPubKey(index: Int, parent: ExPubKey?, chainCode: ByteArray)
+
+interface KeyRegistry {
+    class DuplicateKey: Exception()
+
+    /**
+     * Return the key that corresponds to this path.
+     *
+     * If the key does not exist, a null will be returned
+     */
+    fun get(path: String): BIP32Key?
+
+    /**
+     * Map a key to a path.
+     *
+     * If the key is already mapped, an exception will be thrown.
+     * Keys can not be overwritten!
+     */
+    fun put(path: String, key: BIP32Key)
+}
+
+abstract class KeyEncoder<in K : BIP32Key> {
+    abstract fun encodePrivateKey(key: K, options: Map<String, Any>): String
+
+// TODO: add this as soon as the public keys are finished
+//    fun encodePublicKey(): String
+}
+
+interface Signer {
+    fun sign(key: BIP32Key, data: ByteArray): ByteArray
+}
+
+/**
+ * Simplest possible implementation of a KeyRegistry that is backed by
+ * an in-memory HashMap. When an application is shut down, all keys are
+ * lost.
+ */
+class InMemoryKeyRegistry: KeyRegistry {
+    private val registry = HashMap<String, BIP32Key>()
+
+    override fun get(path: String): BIP32Key? {
+        return registry[path]
+    }
+
+    override fun put(path: String, key: BIP32Key) {
+        if (registry.containsKey(path))
+            throw KeyRegistry.DuplicateKey()
+        registry[path] = key
+    }
+}
+
+class Wallet(seed: ByteArray, private val keyRegistry: KeyRegistry = InMemoryKeyRegistry()) {
+
+    operator fun get(path: String): BIP32Key {
+        BIP32.verify(path)
+        val cachedKey = keyRegistry.get(path)
+        if (cachedKey != null) return cachedKey
+        var key: BIP32Key = master
+        for (fragment in BIP32.normalize(path).drop(1)) {
+            key = key.child(fragment)
+        }
+        return key
+    }
+
+    /**
+     * Master node will always be a standard Extended Private Key. The other nodes might be of
+     * different kinds depending on the network they will be used for.
+     */
+    private val master: ExPrivKey
+
+    init {
+        val I = Mac.getInstance(HMAC_SHA512)
+            .apply { init(SecretKeySpec("Bitcoin seed".toByteArray(), HMAC_SHA512)) }
+            .doFinal(seed)
+
+        master = ExPrivKey(
+            path = "m",
+            parent = null,
+            chainCode = I.sliceArray(32 until 64),
+            key = I.sliceArray(0 until 32).toBigInt(positive = true))
+    }
+}
