@@ -48,7 +48,6 @@ object BIP32 {
         } }
 }
 
-
 interface BIP32Key {
     class InvalidIndex: Exception()
 
@@ -60,8 +59,9 @@ interface BIP32Key {
          */
         fun currentIndex(path: String): Int {
             val currentIndex = path.split("/").last()
-            return when (currentIndex.endsWith("'")) {
-                true -> currentIndex.replace("'", "").toInt() + pow(2, 31)
+            return when {
+                currentIndex.endsWith("'") -> currentIndex.replace("'", "").toInt() + pow(2, 31)
+                currentIndex == "m" -> 0
                 else -> currentIndex.toInt()
             }
         }
