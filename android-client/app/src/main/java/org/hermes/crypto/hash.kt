@@ -36,8 +36,6 @@ object PasswordHasher {
 
     class WrongHashFormatException: Exception()
 
-    class WrongHashingAlgoException: Exception()
-
     /**
      * Unpacks the components of a hash from the string and returns them.
      */
