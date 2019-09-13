@@ -110,7 +110,8 @@ class ExPrivKey(
     override val path: String,
     override val parent: ExPrivKey?,
     override val chainCode: ByteArray,
-    key: BigInteger
+    key: BigInteger,
+    val encoder: KeyEncoder<ExPrivKey> = BTCKeyEncoder
 ) : BIP32Key, SecP256K1PrivKey(key) {
 
     init { BIP32.verify(path) }
@@ -129,12 +130,14 @@ class ExPrivKey(
             BIP32Key.pathOfChild(path, index),
             this,
             I.sliceArray(32 until 64),
-            BigInteger(I.sliceArray(0 until 32)) + value.mod(n)
+            I.sliceArray(0 until 32).toBigInt() + value.mod(n)
         )
     }
 
     override val public by lazy { "" }
+
+    override fun toString(): String = encoder.encodePrivateKey(this, hashMapOf())
 }
 
-// TODO: Fix me
+// TODO: Implement me
 class ExPubKey(index: Int, parent: ExPubKey?, chainCode: ByteArray)
