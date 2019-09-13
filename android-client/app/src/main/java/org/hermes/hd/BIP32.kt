@@ -5,10 +5,14 @@ import java.math.BigInteger
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
 import org.bouncycastle.pqc.math.linearalgebra.IntegerFunctions.pow
+import org.bouncycastle.util.encoders.Hex
 
 import org.hermes.crypto.CryptoAlgorithms.HMAC_SHA512
+import org.hermes.crypto.RIPEMD
+import org.hermes.crypto.SHA256
 import org.hermes.crypto.SecP256K1PrivKey
 import org.hermes.crypto.Secp256K1Curve
+import org.hermes.utils.toBigInt
 import org.hermes.utils.toByteArray
 
 
@@ -82,7 +86,10 @@ interface BIP32Key {
         get() = index >= pow(2, 31)
 
     val depth: Int
-        get() = path.split("/").size
+        get() = path.split("/").size - 1
+
+    val fingerprint: ByteArray
+        get() = RIPEMD.hash(SHA256.hash(chainCode))
 
     // TODO: Fix me
     val public: String
