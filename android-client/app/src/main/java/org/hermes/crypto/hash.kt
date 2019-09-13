@@ -1,6 +1,8 @@
 package org.hermes.crypto
 
+import org.bouncycastle.jcajce.provider.digest.RIPEMD160
 import java.lang.Exception
+import java.security.MessageDigest
 import javax.crypto.SecretKeyFactory
 import javax.crypto.spec.PBEKeySpec
 
@@ -73,3 +75,20 @@ object PasswordHasher {
     }
 
 }
+
+open class Hasher(val impl: MessageDigest) {
+
+    fun hash(b: ByteArray): ByteArray {
+        return impl.digest(b)
+    }
+
+    fun hashTwice(b: ByteArray): ByteArray {
+        return hash(hash(b))
+    }
+}
+
+object SHA256: Hasher(MessageDigest.getInstance("SHA-256"))
+
+object SHA512: Hasher(MessageDigest.getInstance("SHA-512"))
+
+object RIPEMD: Hasher(RIPEMD160.Digest())
