@@ -14,7 +14,12 @@ fun ByteArray.toBase64Str(): String = Base64.toBase64String(this)
 
 fun ByteArray.toBase58Str(appendChecksum: Boolean = false): String = Base58.toBase58String(this, appendChecksum)
 
-fun ByteArray.toBigInt(): BigInteger = BigInteger(this)
+fun ByteArray.toBigInt(positive: Boolean = false): BigInteger = when {
+    positive -> BigInteger(1, this)
+    else ->     BigInteger(this)
+}
+
+fun ByteArray.extend(digits: Int, byteToAdd: Byte = 0.toByte()): ByteArray = this + ByteArray(digits) { byteToAdd }
 
 fun ByteArray.countLeft(predicate: (Byte) -> Boolean): Int {
     var count = 0
