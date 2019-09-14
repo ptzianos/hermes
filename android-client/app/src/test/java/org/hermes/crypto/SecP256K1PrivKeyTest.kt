@@ -10,16 +10,16 @@ internal class SecP256K1PrivKeyTest {
     fun testPrivateKeyImportAndWIF() {
         val privateKey = SecP256K1PrivKey("0C28FCA386C7A227600B2FE50B7CAE11EC86D3BF1FBE471BE89827E19D72AA1D")
         assertEquals("0c28fca386c7a227600b2fe50b7cae11ec86d3bf1fbe471be89827e19d72aa1d", privateKey.asHex())
-        assertEquals("5HueCGU8rMjxEXxiPuD5BDku4MkFqeZyd4dZ1jvhTVqvbTLvyTJ", privateKey.asWIF())
-        assertTrue(SecP256K1PrivKey.validateWIFCheckSum(privateKey.asWIF()))
+        assertEquals("5HueCGU8rMjxEXxiPuD5BDku4MkFqeZyd4dZ1jvhTVqvbTLvyTJ", privateKey.toString())
+        assertTrue(SecP256K1PrivKey.validateWIFCheckSum(privateKey.toString()))
     }
 
     @Test
     fun testPrivateKeyWith0xImportAndWIF() {
         val privateKey = SecP256K1PrivKey("0x0C28FCA386C7A227600B2FE50B7CAE11EC86D3BF1FBE471BE89827E19D72AA1D")
         assertEquals("0c28fca386c7a227600b2fe50b7cae11ec86d3bf1fbe471be89827e19d72aa1d", privateKey.asHex())
-        assertEquals("5HueCGU8rMjxEXxiPuD5BDku4MkFqeZyd4dZ1jvhTVqvbTLvyTJ", privateKey.asWIF())
-        assertTrue(SecP256K1PrivKey.validateWIFCheckSum(privateKey.asWIF()))
+        assertEquals("5HueCGU8rMjxEXxiPuD5BDku4MkFqeZyd4dZ1jvhTVqvbTLvyTJ", privateKey.toString())
+        assertTrue(SecP256K1PrivKey.validateWIFCheckSum(privateKey.toString()))
     }
 
     @Test

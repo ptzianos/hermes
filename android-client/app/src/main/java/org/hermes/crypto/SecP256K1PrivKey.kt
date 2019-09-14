@@ -181,15 +181,10 @@ open class SecP256K1PrivKey : PrivateKey {
     /**
      * Export the private key using the Wallet Import Format.
      */
-    fun asWIF(): String {
-        val extendedHex = "80" + asHex()
-        val byteArray = Hex.decode(extendedHex)
-        val digest = MessageDigest.getInstance("SHA-256")
-        val twiceHashed = digest.digest(digest.digest(byteArray))
-        val checksum = ByteArray(4) { i -> twiceHashed[i] }
-        val checkSummedHex = extendedHex + Hex.toHexString(checksum)
-        return Base58.toBase58String(Hex.decode(checkSummedHex))
-    }
+    override fun toString(): String = Base58.toBase58String(
+        Hex.decode("80") + value.toByteArray(),
+        appendChecksum = true
+    )
 
     override fun getFormat(): String = "PKCS#8"
 
