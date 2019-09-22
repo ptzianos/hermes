@@ -2,15 +2,13 @@ package org.hermes.hd
 
 import java.lang.Exception
 import java.math.BigInteger
+import java.security.PrivateKey
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
 import org.bouncycastle.pqc.math.linearalgebra.IntegerFunctions.pow
 
 import org.hermes.crypto.CryptoAlgorithms.HMAC_SHA512
-import org.hermes.crypto.RIPEMD
-import org.hermes.crypto.SHA256
-import org.hermes.crypto.SecP256K1PrivKey
-import org.hermes.crypto.Secp256K1Curve
+import org.hermes.crypto.*
 import org.hermes.utils.toBigInt
 import org.hermes.utils.toByteArray
 
@@ -172,8 +170,8 @@ abstract class KeyEncoder<in K : BIP32Key> {
 //    fun encodePublicKey(): String
 }
 
-interface Signer {
-    fun sign(key: BIP32Key, data: ByteArray): ByteArray
+interface Signer<in K : PrivateKey> {
+    fun sign(key: K, data: ByteArray): ByteArray
 }
 
 /**
