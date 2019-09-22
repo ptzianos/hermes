@@ -1,5 +1,7 @@
 package org.hermes.crypto
 
+import org.bouncycastle.util.encoders.Hex
+import org.hermes.hd.BTCSigner
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.Assertions.*
 
@@ -9,7 +11,7 @@ internal class SecP256K1PrivKeyTest {
     @Test
     fun testPrivateKeyImportAndWIF() {
         val privateKey = SecP256K1PrivKey("0C28FCA386C7A227600B2FE50B7CAE11EC86D3BF1FBE471BE89827E19D72AA1D")
-        assertEquals("0c28fca386c7a227600b2fe50b7cae11ec86d3bf1fbe471be89827e19d72aa1d", privateKey.asHex())
+        assertEquals("0c28fca386c7a227600b2fe50b7cae11ec86d3bf1fbe471be89827e19d72aa1d", Hex.toHexString(privateKey.value.toByteArray()))
         assertEquals("5HueCGU8rMjxEXxiPuD5BDku4MkFqeZyd4dZ1jvhTVqvbTLvyTJ", privateKey.toString())
         assertTrue(SecP256K1PrivKey.validateWIFCheckSum(privateKey.toString()))
     }
@@ -17,7 +19,7 @@ internal class SecP256K1PrivKeyTest {
     @Test
     fun testPrivateKeyWith0xImportAndWIF() {
         val privateKey = SecP256K1PrivKey("0x0C28FCA386C7A227600B2FE50B7CAE11EC86D3BF1FBE471BE89827E19D72AA1D")
-        assertEquals("0c28fca386c7a227600b2fe50b7cae11ec86d3bf1fbe471be89827e19d72aa1d", privateKey.asHex())
+        assertEquals("0c28fca386c7a227600b2fe50b7cae11ec86d3bf1fbe471be89827e19d72aa1d", Hex.toHexString(privateKey.value.toByteArray()))
         assertEquals("5HueCGU8rMjxEXxiPuD5BDku4MkFqeZyd4dZ1jvhTVqvbTLvyTJ", privateKey.toString())
         assertTrue(SecP256K1PrivKey.validateWIFCheckSum(privateKey.toString()))
     }
@@ -26,22 +28,25 @@ internal class SecP256K1PrivKeyTest {
     fun signWithPrivateKeyElectrumStyle() {
         assertEquals(
             "G0orznlzaawDMgoOYJHpeNc70XycJ6V45ktP0aoir1eXG8lIAQ6/44Evyh3jWeYxGtzaSIQ+pPNSzfAtHjU7ei0=",
-            SecP256K1PrivKey("0x0c28fca386c7a227600b2fe50b7cae11ec86d3bf1fbe471be89827e19d72aa1d").electrumSign("blaa")
+            BTCSigner.sign(SecP256K1PrivKey("0x0c28fca386c7a227600b2fe50b7cae11ec86d3bf1fbe471be89827e19d72aa1d"),
+                "blaa".toByteArray())
         )
         assertEquals(
             "HFzue2eFvZYqIGEo1hvQDuk7flI/a6xQ5H5YvOCq/07pYFFyUjCJcrSFUXU79uLw6Vxt3i+Qcotyi7L3UAY2bKc=",
-            SecP256K1PrivKey("0x0c28fca386c7a227600b2fe50b7cae11ec86d3bf1fbe471be89827e19d72aa1d")
-                .electrumSign("""
+            BTCSigner.sign(
+                SecP256K1PrivKey("0x0c28fca386c7a227600b2fe50b7cae11ec86d3bf1fbe471be89827e19d72aa1d"),
+                """
 By signing this with your private key you verify that you are the sole rightful owner of the key pair whose
 public key has a SHA3-512 digest that starts with aaaaaaaaaa.
 
 Expires on: 2019-06-27 10:36:07.726093
-""")
+""".toByteArray())
         )
         assertEquals(
             "GyZWBvo2roM7eKXOTNz0n3keGGQ10isWKouWe1mhaXTJIukPe5d+MuTUTD05bP4NR4f6txCCb1XpF/7RKYQKtII=",
-            SecP256K1PrivKey("0x0c28fca386c7a227600b2fe50b7cae11ec86d3bf1fbe471be89827e19d72aa1d")
-                .electrumSign("""
+            BTCSigner.sign(
+                SecP256K1PrivKey("0x0c28fca386c7a227600b2fe50b7cae11ec86d3bf1fbe471be89827e19d72aa1d"),
+                """
 By signing this with your private key you verify that you are the sole rightful owner of the key pair whose
 public key has a SHA3-512 digest that starts with aaaaaaaaaaaaaaaaaaaaaabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
 ccccccccccccccccccccccccccccccccccccddddddddddddddddddddddddddddddddddddddddddddddddddddeeeeeeeeeeeeeeeeeee
@@ -53,7 +58,7 @@ nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnoooooooooooooooooooooooooooooooooo
 .
 
 Expires on: 2019-06-27 10:36:07.726093
-""")
+""".toByteArray())
         )
     }
 
