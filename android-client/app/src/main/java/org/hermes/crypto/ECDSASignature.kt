@@ -61,24 +61,6 @@ class ECDSASignature(val r: BigInteger, val s: BigInteger, val rY: BigInteger? =
         return completeArray
     }
 
-    fun toBTCFormat(): String {
-        if (vb == null) throw NoEvenBit()
-        val completeArray = ByteArray(65)
-        completeArray[0] = vb
-        System.arraycopy(rb, 0, completeArray, 1, 32)
-        System.arraycopy(canonicalSb, 0, completeArray, 33, 32)
-        return Base64.toBase64String(completeArray)
-    }
-
-    fun toETHFormat(): String {
-        if (vb == null) throw NoEvenBit()
-        val completeArray = ByteArray(65)
-        System.arraycopy(rb, 0, completeArray, 0, 32)
-        System.arraycopy(sb, 0, completeArray, 32, 32)
-        completeArray[64] = vb
-        return Hex.toHexString(completeArray)
-    }
-
     /**
      * Returns the ECDSA signature as a hexed string
      */
