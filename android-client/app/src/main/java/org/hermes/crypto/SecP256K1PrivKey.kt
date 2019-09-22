@@ -16,7 +16,6 @@ import org.bouncycastle.crypto.digests.SHA256Digest
 import org.bouncycastle.crypto.params.ECDomainParameters
 import org.bouncycastle.crypto.signers.DSAKCalculator
 import org.bouncycastle.crypto.signers.HMacDSAKCalculator
-import org.bouncycastle.jcajce.provider.digest.Keccak
 import org.bouncycastle.math.ec.ECMultiplier
 import org.bouncycastle.math.ec.ECPoint
 import org.bouncycastle.math.ec.FixedPointCombMultiplier
@@ -25,7 +24,6 @@ import org.bouncycastle.util.io.pem.PemObject
 import org.bouncycastle.util.io.pem.PemWriter
 
 import org.hermes.hd.Base58
-import org.hermes.utils.toByteArray
 
 
 open class SecP256K1PrivKey : PrivateKey {
@@ -58,9 +56,6 @@ open class SecP256K1PrivKey : PrivateKey {
 
     // Make sure that the value of the key is not larger than the order of the group
     val value: BigInteger
-
-    val point: ECPoint
-        get() = FixedPointCombMultiplier().multiply(Secp256K1Curve.ecDomainParameters.g, value).normalize()
 
     /**
      * Signs a message according to RFC 6979 with a deterministic K.
@@ -111,53 +106,6 @@ open class SecP256K1PrivKey : PrivateKey {
         return ECDSASignature(r, s, rY)
     }
 
-    private tailrec fun recDigest(msg: ByteArray, round: Int, digest: MessageDigest = MessageDigest.getInstance("SHA-256")): ByteArray {
-        val d = digest.digest(msg)
-        return when(round) {
-            1 -> d
-            else -> recDigest(d, round - 1, digest)
-        }
-    }
-
-    /**
-     * Base method for signing messages for various different blockchains, that loosely follow
-     * the Electrum style signatures.
-     */
-    private fun chainSign(prefix: String, message: String, hashRounds: Int = 1,
-                          digest: MessageDigest): ECDSASignature {
-        val prefixLength = prefix.length
-        val messageLength = message.length
-        val messageLengthExtraByte = when {
-            messageLength < 253 -> ByteArray(0)
-            messageLength < 65536 -> 253.toByteArray()
-            messageLength < 4294967296 -> 254.toByteArray()
-            else -> 255.toByteArray()
-        }
-
-        val msgBytes = prefixLength.toByteArray() +
-                prefix.toByteArray() +
-                messageLengthExtraByte +
-                messageLength.toByteArray().reversedArray() +
-                message.toByteArray()
-
-        val hashed = recDigest(msgBytes, hashRounds, digest)
-        val (r, s, rY) = rawSign(hashed)
-        return ECDSASignature(r, s, rY)
-    }
-
-    fun electrumSign(message: String): String =
-        chainSign(
-            prefix = "Bitcoin Signed Message:\n",
-            message = message,
-            hashRounds = 2,
-            digest = MessageDigest.getInstance("SHA-256")
-        )
-        .toBTCFormat()
-
-    fun ethSign(message: String): String =
-        chainSign(prefix = "Ethereum Signed Message:\n", message = message, digest = Keccak.Digest256())
-            .toETHFormat()
-
     override fun getAlgorithm(): String = "EC"
 
     override fun getEncoded(): ByteArray? {
@@ -187,6 +135,4 @@ open class SecP256K1PrivKey : PrivateKey {
     )
 
     override fun getFormat(): String = "PKCS#8"
-
-    fun asHex(): String = Hex.toHexString(value.toByteArray())
 }
