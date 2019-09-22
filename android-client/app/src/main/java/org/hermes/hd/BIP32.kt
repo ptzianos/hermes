@@ -123,7 +123,7 @@ class ExPrivKey(
         val digest = Mac.getInstance(HMAC_SHA512).apply { init(SecretKeySpec(chainCode, HMAC_SHA512)) }
         val I = when (index >= pow(2, 31)) {
             true -> digest.doFinal(ByteArray(1) + value.toByteArray() + index.toByteArray())
-            else -> digest.doFinal(ByteArray(1) + point.getEncoded(true) + index.toByteArray())
+            else -> digest.doFinal(ByteArray(1) + exPubKey.encoded + index.toByteArray())
         }
         return ExPrivKey(
             BIP32Key.pathOfChild(path, index),
@@ -133,13 +133,18 @@ class ExPrivKey(
         )
     }
 
-    override val public by lazy { "" }
+    val exPubKey: ExPubKey by lazy { ExPubKey(index, parent?.exPubKey, chainCode, ) }
 
     override fun toString(): String = encoder.encodePrivateKey(this, hashMapOf())
 }
 
 // TODO: Implement me
-class ExPubKey(index: Int, parent: ExPubKey?, chainCode: ByteArray)
+class ExPubKey(val index: Int, val parent: ExPubKey?, val chainCode: ByteArray, x :BigInteger, y: BigInteger):
+    SecP256K1PubKey(x, y) {
+
+    override val encoded: ByteArray by lazy { bcPoint.getEncoded(true) }
+
+}
 
 interface KeyRegistry {
     class DuplicateKey: Exception()
