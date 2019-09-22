@@ -15,16 +15,6 @@ open class SecP256K1PubKey(val x: BigInteger, val y: BigInteger) {
                 x = BigInteger(Hex.decode(pubKey.drop(2).dropLast(64))),
                 y = BigInteger(Hex.decode(pubKey.drop(2 + 64))))
         }
-
-        fun fromPrivateKey(privateKey: SecP256K1PrivKey): SecP256K1PubKey {
-            val publicKeyBCECPoint: ECPoint = FixedPointCombMultiplier()
-                .multiply(
-                    Secp256K1Curve.X9ECParameters.g,
-                    privateKey.value)
-                .normalize()
-            publicKeyBCECPoint.getEncoded(false)
-            return SecP256K1PubKey(publicKeyBCECPoint)
-        }
     }
 
     // Store public key in a form that is compatible with the standard Java libraries
@@ -54,4 +44,13 @@ open class SecP256K1PubKey(val x: BigInteger, val y: BigInteger) {
     constructor(publicKeyECPoint: ECPoint): this(
         publicKeyECPoint.affineXCoord.toBigInteger(),
         publicKeyECPoint.affineYCoord.toBigInteger())
+
+    constructor(privateKey: SecP256K1PrivKey):
+        this(
+            FixedPointCombMultiplier()
+            .multiply(
+                Secp256K1Curve.X9ECParameters.g,
+                privateKey.value)
+            .normalize()
+        )
 }
