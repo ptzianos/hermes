@@ -26,7 +26,7 @@ open class SecP256K1PubKey(val x: BigInteger, val y: BigInteger) {
     // This field stores the public key in a standard encoded form:
     // one byte at the beginning (0x04), the affine x coordinate as a big endian integer byte array
     // and the affine y coordinate as a big endian integer byte array.
-    val encoded: ByteArray by lazy {
+    open val encoded: ByteArray by lazy {
         val xB = x.toByteArray()
         val yB = y.toByteArray()
         val xOffset = if (xB[0] == 0.toByte()) 1 else 0
