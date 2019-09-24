@@ -3,19 +3,22 @@ package org.hermes.repositories
 import android.app.Application
 import android.content.SharedPreferences
 import android.util.Log
-import org.bouncycastle.jcajce.provider.digest.SHA3
+
 import java.security.*
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
+
 import org.bouncycastle.jce.provider.BouncyCastleProvider
+import org.bouncycastle.jcajce.provider.digest.SHA3
 import org.bouncycastle.util.encoders.Hex
+
 import org.hermes.HermesRoomDatabase
 import org.hermes.R
-
 import org.hermes.crypto.PasswordHasher
 import org.hermes.crypto.SecP256K1PrivKey
 import org.hermes.crypto.SecP256K1PubKey
+import org.hermes.hd.BTCSigner
 import org.hermes.iota.Seed
 
 
@@ -85,6 +88,7 @@ class CryptoRepository @Inject constructor(
         seed = Seed.new()
         privateKey = SecP256K1PrivKey.random()
 
+        // TODO: Eventually find a way to put the EC Keys into the secure element of the Android Phone
 //        val parameterSpec: KeyGenParameterSpec = KeyGenParameterSpec.Builder(
 //            application.getString(R.string.auth_private_key),
 //            KeyProperties.PURPOSE_SIGN or KeyProperties.PURPOSE_VERIFY
@@ -160,7 +164,7 @@ class CryptoRepository @Inject constructor(
                 .toCharArray()
         )
         privateKey = SecP256K1PrivKey(sharedPref.getString(application.getString(R.string.auth_private_key), "") as String)
-        publicKey = SecP256K1PubKey.fromPrivateKey(privateKey!!)
+        publicKey = SecP256K1PubKey(privateKey!!)
 
 //        val privateKeyEntry =
 //            ks.getEntry(application.getString(R.string.auth_private_key), null)
@@ -185,7 +189,10 @@ class CryptoRepository @Inject constructor(
 
     fun publicKeyHex(): String = publicKey?.encodedHex ?: ""
 
-    fun signMessageElectrumStyle(msg: String): String = privateKey?.electrumSign(msg) ?: ""
+    fun signMessageElectrumStyle(msg: String): String = when (privateKey) {
+        null -> ""
+        else -> BTCSigner.sign(privateKey!!, msg.toByteArray()).toString()
+    }
 
     fun IOTASeed(): Seed = seed
 
