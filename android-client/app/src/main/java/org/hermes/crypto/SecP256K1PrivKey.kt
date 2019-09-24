@@ -136,5 +136,5 @@ open class SecP256K1PrivKey : PrivateKey {
 
     override fun getFormat(): String = "PKCS#8"
 
-    val public: SecP256K1PubKey by lazy { SecP256K1PubKey(this) }
+    open val public: SecP256K1PubKey by lazy { SecP256K1PubKey(this) }
 }
