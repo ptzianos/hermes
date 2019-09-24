@@ -4,9 +4,12 @@ import java.lang.Exception
 import java.math.BigInteger
 import java.security.PrivateKey
 import java.security.PublicKey
+
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
 
+import org.bouncycastle.math.ec.ECPoint
+import org.bouncycastle.math.ec.FixedPointCombMultiplier
 import org.bouncycastle.pqc.math.linearalgebra.IntegerFunctions.pow
 
 import org.hermes.crypto.CryptoAlgorithms.HMAC_SHA512
@@ -148,7 +151,7 @@ class ExPrivKey(
         )
     }
 
-    val exPubKey: ExPubKey by lazy { ExPubKey(index, parent?.exPubKey, chainCode, ) }
+    override val public: ExPubKey by lazy { ExPubKey(index, parent?.public, chainCode, path, this) }
 
     override fun toString(): String = encoder.encodePrivateKey(this, hashMapOf())
 }
@@ -165,8 +168,22 @@ class ExPubKey(
 
     override fun getEncoded(): ByteArray = bcPoint.getEncoded(true)
 
-    override val encoded: ByteArray by lazy { bcPoint.getEncoded(true) }
+    constructor(index: Int, parent: BIP32PubKey?, chainCode: ByteArray, path: String, publicKeyECPoint: ECPoint):
+        this(
+            index, parent, chainCode, path,
+            publicKeyECPoint.affineXCoord.toBigInteger(),
+            publicKeyECPoint.affineYCoord.toBigInteger()
+        )
 
+    constructor(index: Int, parent: BIP32PubKey?, chainCode: ByteArray, path: String, privateKey: SecP256K1PrivKey):
+            this(
+                index, parent, chainCode, path,
+                FixedPointCombMultiplier()
+                    .multiply(
+                        Secp256K1Curve.X9ECParameters.g,
+                        privateKey.value)
+                    .normalize()
+            )
 }
 
 interface KeyRegistry {
