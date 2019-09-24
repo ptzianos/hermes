@@ -4,9 +4,12 @@ import java.math.BigInteger
 import java.security.MessageDigest
 import java.security.PrivateKey
 import java.security.SecureRandom
+import java.security.interfaces.ECPrivateKey
 import java.util.*
+
 import kotlinx.io.IOException
 import kotlinx.io.StringWriter
+
 import org.bouncycastle.asn1.ASN1Object
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier
@@ -24,10 +27,10 @@ import org.bouncycastle.util.io.pem.PemObject
 import org.bouncycastle.util.io.pem.PemWriter
 
 import org.hermes.hd.Base58
+import java.security.spec.ECParameterSpec
 
 
-open class SecP256K1PrivKey : PrivateKey {
-
+open class SecP256K1PrivKey : PrivateKey, ECPrivateKey {
     companion object {
         fun random(): SecP256K1PrivKey {
             return SecP256K1PrivKey(key = BigInteger(256, SecureRandom.getInstance("SHA1PRNG")))
@@ -137,4 +140,8 @@ open class SecP256K1PrivKey : PrivateKey {
     override fun getFormat(): String = "PKCS#8"
 
     open val public: SecP256K1PubKey by lazy { SecP256K1PubKey(this) }
+
+    override fun getParams(): ECParameterSpec = Secp256K1Curve.ecParameterSpec
+
+    override fun getS(): BigInteger = value
 }
