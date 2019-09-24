@@ -153,9 +153,17 @@ class ExPrivKey(
     override fun toString(): String = encoder.encodePrivateKey(this, hashMapOf())
 }
 
-// TODO: Implement me
-class ExPubKey(val index: Int, val parent: ExPubKey?, val chainCode: ByteArray, x :BigInteger, y: BigInteger):
-    SecP256K1PubKey(x, y) {
+class ExPubKey(
+    override val index: Int,
+    override val parent: BIP32PubKey?,
+    override val chainCode: ByteArray,
+    override val path: String,
+    x :BigInteger,
+    y: BigInteger
+):
+    SecP256K1PubKey(x, y), BIP32PubKey {
+
+    override fun getEncoded(): ByteArray = bcPoint.getEncoded(true)
 
     override val encoded: ByteArray by lazy { bcPoint.getEncoded(true) }
 
