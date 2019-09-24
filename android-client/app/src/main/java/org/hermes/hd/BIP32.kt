@@ -51,7 +51,7 @@ object BIP32 {
         } }
 }
 
-interface BIP32Key {
+interface BIP32Key: PrivateKey {
     class InvalidIndex: Exception()
 
     class NoSibling: Exception()
@@ -90,8 +90,7 @@ interface BIP32Key {
     val fingerprint: ByteArray
         get() = RIPEMD.hash(SHA256.hash(chainCode))
 
-    // TODO: Fix me
-    val public: String
+    val public: BIP32PubKey
 
     fun child(index: Int = 0): BIP32Key
 
