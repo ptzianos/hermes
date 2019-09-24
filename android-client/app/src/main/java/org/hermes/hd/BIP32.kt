@@ -207,9 +207,7 @@ interface Signer<in K : PrivateKey> {
 class InMemoryKeyRegistry: KeyRegistry {
     private val registry = HashMap<String, BIP32Key>()
 
-    override fun get(path: String): BIP32Key? {
-        return registry[path]
-    }
+    override fun get(path: String): BIP32Key? = registry[path]
 
     override fun put(path: String, key: BIP32Key) {
         if (registry.containsKey(path))
