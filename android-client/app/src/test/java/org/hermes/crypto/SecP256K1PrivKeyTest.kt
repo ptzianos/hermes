@@ -75,7 +75,7 @@ Expires on: 2019-06-27 10:36:07.726093
     @Test
     fun producePublicKey() {
         val privateKey = SecP256K1PrivKey("0x0c28fca386c7a227600b2fe50b7cae11ec86d3bf1fbe471be89827e19d72aa1d")
-        val publicKey = SecP256K1PubKey.fromPrivateKey(privateKey)
+        val publicKey = SecP256K1PubKey(privateKey)
         assertEquals(
             "04d0de0aaeaefad02b8bdc8a01a1b8b11c696bd3d66a2c5f10780d95b7df42645cd85228a6fb29940e858e7e55842ae2bd115d1ed7cc0e82d934e929c97648cb0a",
             publicKey.encodedHex)
