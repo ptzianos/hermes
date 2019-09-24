@@ -3,8 +3,10 @@ package org.hermes.hd
 import java.lang.Exception
 import java.math.BigInteger
 import java.security.PrivateKey
+import java.security.PublicKey
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
+
 import org.bouncycastle.pqc.math.linearalgebra.IntegerFunctions.pow
 
 import org.hermes.crypto.CryptoAlgorithms.HMAC_SHA512
@@ -101,6 +103,22 @@ interface BIP32Key {
         index >= pow(2, 32) - 1 -> throw NoSibling()
         else -> parent?.child(index + 1) ?: throw NoSibling()
     }
+}
+
+interface BIP32PubKey: PublicKey {
+
+    val path: String
+
+    val index: Int
+        get() = BIP32Key.currentIndex(path)
+
+    val parent: BIP32PubKey?
+
+    val chainCode: ByteArray
+
+    val depth: Int
+        get() = path.split("/").size - 1
+
 }
 
 class ExPrivKey(
