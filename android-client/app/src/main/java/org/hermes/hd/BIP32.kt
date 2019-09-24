@@ -138,7 +138,7 @@ class ExPrivKey(
         val digest = Mac.getInstance(HMAC_SHA512).apply { init(SecretKeySpec(chainCode, HMAC_SHA512)) }
         val I = when (index >= pow(2, 31)) {
             true -> digest.doFinal(ByteArray(1) + value.toByteArray() + index.toByteArray())
-            else -> digest.doFinal(ByteArray(1) + exPubKey.encoded + index.toByteArray())
+            else -> digest.doFinal(ByteArray(1) + public.encoded + index.toByteArray())
         }
         return ExPrivKey(
             BIP32Key.pathOfChild(path, index),
