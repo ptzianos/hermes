@@ -128,7 +128,7 @@ class ExPrivKey(
     override val parent: ExPrivKey?,
     override val chainCode: ByteArray,
     key: BigInteger,
-    val encoder: KeyEncoder<ExPrivKey> = BTCKeyEncoder
+    val encoder: KeyEncoder<ExPrivKey, ExPubKey> = BTCKeyEncoder
 ) : BIP32Key, SecP256K1PrivKey(key) {
 
     init { BIP32.verify(path) }
@@ -205,11 +205,10 @@ interface KeyRegistry {
     fun put(path: String, key: BIP32Key)
 }
 
-abstract class KeyEncoder<in K : BIP32Key> {
-    abstract fun encodePrivateKey(key: K, options: Map<String, Any>): String
+abstract class KeyEncoder<in PrK : BIP32Key, in PuK> {
+    abstract fun encodePrivateKey(key: PrK, options: Map<String, Any>): String
 
-// TODO: add this as soon as the public keys are finished
-//    fun encodePublicKey(): String
+    abstract fun encodePublicKey(key: PuK, options: Map<String, Any>): String
 }
 
 interface Signer<in K : PrivateKey> {
