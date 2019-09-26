@@ -20,6 +20,8 @@ open class SecP256K1PubKey(val x: BigInteger, val y: BigInteger): PublicKey, ECP
         }
     }
 
+    // TODO: Make sure that X is on the SecP256K1 curve
+
     // Store public key in a form that is compatible with the standard Java libraries
     val point: java.security.spec.ECPoint = java.security.spec.ECPoint(x, y)
 
