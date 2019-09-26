@@ -134,6 +134,7 @@ class ExPrivKey(
     init { BIP32.verify(path) }
 
     override fun child(index: Int): BIP32Key {
+        // TODO: Move this check to parent
         if ((index < 0) or (index >= pow(2, 32)))
             throw BIP32Key.InvalidIndex()
 
