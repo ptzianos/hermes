@@ -90,9 +90,6 @@ interface BIP32Key: PrivateKey {
     val depth: Int
         get() = path.split("/").size - 1
 
-    val fingerprint: ByteArray
-        get() = RIPEMD.hash(SHA256.hash(chainCode))
-
     val public: BIP32PubKey
 
     fun child(index: Int = 0): BIP32Key
@@ -121,6 +118,8 @@ interface BIP32PubKey: PublicKey {
     val depth: Int
         get() = path.split("/").size - 1
 
+    val fingerprint: ByteArray
+        get() = RIPEMD.hash(SHA256.hash(encoded))
 }
 
 class ExPrivKey(
