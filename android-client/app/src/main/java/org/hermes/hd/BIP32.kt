@@ -112,6 +112,8 @@ interface BIP32Key: PrivateKey {
 
 interface BIP32PubKey: PublicKey {
 
+    class NoPubKey: Exception()
+
     val path: String
 
     val index: Long
@@ -158,13 +160,12 @@ class ExPrivKey(
         )
     }
 
-    override val public: ExPubKey by lazy { ExPubKey(index, parent?.public, chainCode, path, this) }
+    override val public: ExPubKey by lazy { ExPubKey(parent?.public, chainCode, path, this) }
 
     override fun toString(): String = encoder.encodePrivateKey(this, hashMapOf())
 }
 
 class ExPubKey(
-    override val index: Int,
     override val parent: BIP32PubKey?,
     override val chainCode: ByteArray,
     override val path: String,
@@ -176,24 +177,49 @@ class ExPubKey(
 
     override fun getEncoded(): ByteArray = bcPoint.getEncoded(true)
 
-    constructor(index: Int, parent: BIP32PubKey?, chainCode: ByteArray, path: String, publicKeyECPoint: ECPoint):
+    constructor(parent: BIP32PubKey?, chainCode: ByteArray, path: String, publicKeyECPoint: ECPoint):
         this(
-            index, parent, chainCode, path,
+            parent, chainCode, path,
             publicKeyECPoint.affineXCoord.toBigInteger(),
             publicKeyECPoint.affineYCoord.toBigInteger()
         )
 
-    constructor(index: Int, parent: BIP32PubKey?, chainCode: ByteArray, path: String, privateKey: SecP256K1PrivKey):
-            this(
-                index, parent, chainCode, path,
-                FixedPointCombMultiplier()
-                    .multiply(
-                        Secp256K1Curve.X9ECParameters.g,
-                        privateKey.value)
-                    .normalize()
-            )
+    constructor(parent: BIP32PubKey?, chainCode: ByteArray, path: String, rawKey: BigInteger):
+        this(
+            parent, chainCode, path,
+            FixedPointCombMultiplier()
+                .multiply(Secp256K1Curve.X9ECParameters.g, rawKey)
+                .normalize()
+        )
+
+    constructor(parent: BIP32PubKey?, chainCode: ByteArray, path: String, privateKey: SecP256K1PrivKey):
+        this(
+            parent, chainCode, path,
+            FixedPointCombMultiplier()
+                .multiply(Secp256K1Curve.X9ECParameters.g, privateKey.value)
+                .normalize()
+        )
 
     override fun toString(): String = encoder.encodePublicKey(this, hashMapOf())
+
+    override fun child(index: Long): BIP32PubKey {
+        if ((index < 0) or (index >= BIP32.maxKeyIndex))
+            throw BIP32Key.InvalidIndex()
+
+        if (index >= BIP32.maxKeyIndexWithMark)
+            throw BIP32PubKey.NoPubKey()
+
+        val I = Mac.getInstance(HMAC_SHA512)
+            .apply { init(SecretKeySpec(chainCode, HMAC_SHA512)) }
+            .doFinal(ByteArray(1) + encoded + index.toByteArray())
+
+        return ExPubKey(
+            this,
+            I.sliceArray(32 until 64),
+            BIP32Key.pathOfChild(path, index),
+            I.sliceArray(0 until 32).toBigInt()
+        )
+    }
 }
 
 interface KeyRegistry {
