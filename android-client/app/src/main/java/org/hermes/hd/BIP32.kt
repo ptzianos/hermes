@@ -162,7 +162,8 @@ class ExPubKey(
     override val chainCode: ByteArray,
     override val path: String,
     x :BigInteger,
-    y: BigInteger
+    y: BigInteger,
+    val encoder: KeyEncoder<ExPrivKey, ExPubKey> = BTCKeyEncoder
 ):
     SecP256K1PubKey(x, y), BIP32PubKey {
 
@@ -184,6 +185,8 @@ class ExPubKey(
                         privateKey.value)
                     .normalize()
             )
+
+    override fun toString(): String = encoder.encodePublicKey(this, hashMapOf())
 }
 
 interface KeyRegistry {
