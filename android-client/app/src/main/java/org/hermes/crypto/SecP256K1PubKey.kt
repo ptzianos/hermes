@@ -23,7 +23,7 @@ open class SecP256K1PubKey(val x: BigInteger, val y: BigInteger): PublicKey, ECP
     // TODO: Make sure that X is on the SecP256K1 curve
 
     // Store public key in a form that is compatible with the standard Java libraries
-    val point: java.security.spec.ECPoint = java.security.spec.ECPoint(x, y)
+    override fun getW(): java.security.spec.ECPoint = java.security.spec.ECPoint(x, y)
 
     // Store public key in a form that is compatible with the Bouncy Castle internal data structures
     val bcPoint: ECPoint = Secp256K1Curve.ecDomainParameters.curve.createPoint(x, y)
@@ -67,6 +67,4 @@ open class SecP256K1PubKey(val x: BigInteger, val y: BigInteger): PublicKey, ECP
     override fun getFormat(): String = "ASN.1"
 
     override fun getParams(): ECParameterSpec = Secp256K1Curve.ecParameterSpec
-
-    override fun getW(): java.security.spec.ECPoint = this.point
 }
