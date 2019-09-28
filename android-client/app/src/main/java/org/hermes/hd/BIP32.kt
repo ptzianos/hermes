@@ -14,6 +14,7 @@ import org.bouncycastle.pqc.math.linearalgebra.IntegerFunctions.pow
 
 import org.hermes.crypto.CryptoAlgorithms.HMAC_SHA512
 import org.hermes.crypto.*
+import org.hermes.utils.endsWithAnyOf
 import org.hermes.utils.toBigInt
 import org.hermes.utils.toByteArray
 
@@ -26,15 +27,15 @@ object BIP32 {
      * Verifies a BIP32 compliant key path.
      */
     fun verify(path: String) {
-        if (!Regex("^m(/[0-9]+'?)*\$").matches(path))
+        if (!Regex("^m(/[0-9]+['H]?)*\$").matches(path))
             throw InvalidPath()
         for (fragment in path.split("/").drop(1)) {
-            if (fragment.contains("'")) {
+            if (fragment.endsWithAnyOf("'", "H")) {
                 val cleanFragment = fragment.dropLast(1).toInt()
                 if ((cleanFragment >= pow(2, 31)) or (cleanFragment < 0)) {
                     throw InvalidPath()
                 }
-            } else if (!fragment.contains("'")) {
+            } else {
                 if ((fragment.toInt() >= pow(2, 32)) or (fragment.toInt() < 0)) {
                     throw InvalidPath()
                 }
@@ -49,7 +50,7 @@ object BIP32 {
         .split("/")
         .map { when {
             it == "m" -> pow(2, 31)
-            it.endsWith("'") -> it.dropLast(1).toInt()
+            it.endsWithAnyOf("'", "H") -> it.dropLast(1).toInt()
             else -> it.toInt()
         } }
 }
@@ -67,6 +68,7 @@ interface BIP32Key: PrivateKey {
             val currentIndex = path.split("/").last()
             return when {
                 currentIndex.endsWith("'") -> currentIndex.replace("'", "").toInt() + pow(2, 31)
+                currentIndex.endsWith("H") -> currentIndex.replace("H", "").toInt() + pow(2, 31)
                 currentIndex == "m" -> 0
                 else -> currentIndex.toInt()
             }

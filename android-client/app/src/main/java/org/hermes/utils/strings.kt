@@ -69,3 +69,10 @@ fun String.sign(header: String = "", privateKey: SecP256K1PrivKey,
         this
     }
 }
+
+fun String.endsWithAnyOf(vararg s: String): Boolean {
+    for (_s in s)
+        if (this.endsWith(_s))
+            return true
+    return false
+}
