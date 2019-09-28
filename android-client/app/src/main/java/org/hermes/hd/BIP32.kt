@@ -23,6 +23,9 @@ object BIP32 {
 
     class InvalidPath: Exception()
 
+    val maxKeyIndex = pow(2.toLong(), 32)
+    val maxKeyIndexWithMark = pow(2.toLong(), 31)
+
     /**
      * Verifies a BIP32 compliant key path.
      */
@@ -30,29 +33,30 @@ object BIP32 {
         if (!Regex("^m(/[0-9]+['H]?)*\$").matches(path))
             throw InvalidPath()
         for (fragment in path.split("/").drop(1)) {
-            if (fragment.endsWithAnyOf("'", "H")) {
-                val cleanFragment = fragment.dropLast(1).toInt()
-                if ((cleanFragment >= pow(2, 31)) or (cleanFragment < 0)) {
-                    throw InvalidPath()
-                }
-            } else {
-                if ((fragment.toInt() >= pow(2, 32)) or (fragment.toInt() < 0)) {
-                    throw InvalidPath()
-                }
+            val (cleanFragment, maxValue) = when (fragment.endsWithAnyOf("'", "H")) {
+                true -> Pair(fragment.dropLast(1).toLong(), maxKeyIndexWithMark)
+                else -> Pair(fragment.toLong(), maxKeyIndex)
             }
+            if ((cleanFragment >= maxValue) or (cleanFragment < 0))
+                throw InvalidPath()
         }
     }
 
     /**
      * Converts a path of BIP32 path into a list of indices.
      */
-    fun normalize(path: String): Iterable<Int> = path
+    fun normalize(path: String): Iterable<Long> = path
         .split("/")
         .map { when {
-            it == "m" -> pow(2, 31)
-            it.endsWithAnyOf("'", "H") -> it.dropLast(1).toInt()
-            else -> it.toInt()
+            it == "m" -> pow(2.toLong(), 31)
+            it.endsWithAnyOf("'", "H") -> it.dropLast(1).toLong()
+            else -> it.toLong()
         } }
+
+    fun verifyAndNormalize(path: String): Iterable<Long> {
+        verify(path)
+        return normalize(path)
+    }
 }
 
 interface BIP32Key: PrivateKey {
@@ -64,22 +68,22 @@ interface BIP32Key: PrivateKey {
         /**
          * Returns the index of the current key.
          */
-        fun currentIndex(path: String): Int {
+        fun currentIndex(path: String): Long {
             val currentIndex = path.split("/").last()
             return when {
-                currentIndex.endsWith("'") -> currentIndex.replace("'", "").toInt() + pow(2, 31)
-                currentIndex.endsWith("H") -> currentIndex.replace("H", "").toInt() + pow(2, 31)
+                currentIndex.endsWith("'") -> currentIndex.replace("'", "").toLong() + BIP32.maxKeyIndexWithMark
+                currentIndex.endsWith("H") -> currentIndex.replace("H", "").toLong() + BIP32.maxKeyIndexWithMark
                 currentIndex == "m" -> 0
-                else -> currentIndex.toInt()
+                else -> currentIndex.toLong()
             }
         }
 
-        fun pathOfChild(currentPath: String, childIndex: Int): String = "$currentPath/$childIndex"
+        fun pathOfChild(currentPath: String, childIndex: Long): String = "$currentPath/$childIndex"
     }
 
     val path: String
 
-    val index: Int
+    val index: Long
         get() = currentIndex(path)
 
     val parent: BIP32Key?
@@ -94,14 +98,14 @@ interface BIP32Key: PrivateKey {
 
     val public: BIP32PubKey
 
-    fun child(index: Int = 0): BIP32Key
+    fun child(index: Long = 0): BIP32Key
 
     /**
      * Returns the BIP32Key key that belongs in the same chain and has the next index.
      * @throws NoSibling when it's the master node or the index is greater than 2^32 - 1.
      */
     fun sibling(): BIP32Key = when {
-        index >= pow(2, 32) - 1 -> throw NoSibling()
+        index >= BIP32.maxKeyIndex - 1 -> throw NoSibling()
         else -> parent?.child(index + 1) ?: throw NoSibling()
     }
 }
@@ -110,7 +114,7 @@ interface BIP32PubKey: PublicKey {
 
     val path: String
 
-    val index: Int
+    val index: Long
         get() = BIP32Key.currentIndex(path)
 
     val parent: BIP32PubKey?
@@ -122,6 +126,8 @@ interface BIP32PubKey: PublicKey {
 
     val fingerprint: ByteArray
         get() = RIPEMD.hash(SHA256.hash(encoded))
+
+    fun child(index: Long): BIP32PubKey
 }
 
 class ExPrivKey(
@@ -134,9 +140,8 @@ class ExPrivKey(
 
     init { BIP32.verify(path) }
 
-    override fun child(index: Int): BIP32Key {
-        // TODO: Move this check to parent
-        if ((index < 0) or (index >= pow(2, 32)))
+    override fun child(index: Long): BIP32Key {
+        if ((index < 0) or (index >= BIP32.maxKeyIndex))
             throw BIP32Key.InvalidIndex()
 
         val n = Secp256K1Curve.X9ECParameters.n
