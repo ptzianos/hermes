@@ -16,17 +16,27 @@ enum class BTCKey(val prefix: String) {
     PRIVATE_TEST_NET("04358394")
 }
 
-object BTCKeyEncoder: KeyEncoder<ExPrivKey>() {
+object BTCKeyEncoder: KeyEncoder<ExPrivKey, ExPubKey>() {
     // TODO: Find a way to remove the options map
     override fun encodePrivateKey(key: ExPrivKey, options: Map<String, Any>): String = Base58.toBase58String(
         Hex.decode(BTCKey.PRIVATE_MAIN_NET.prefix) +
                 key.depth.toByte() +
-                (key.parent?.fingerprint ?: Hex.decode("00000000")) +
+                (key.parent?.public?.fingerprint ?: Hex.decode("00000000")) +
                 key.index.toByteArray().extend(3) +
                 key.chainCode +
                 key.value.toByteArray(),
             appendChecksum = true
         )
+
+    override fun encodePublicKey(key: ExPubKey, options: Map<String, Any>): String = Base58.toBase58String(
+        Hex.decode(BTCKey.PUBLIC_MAIN_NET.prefix) +
+                key.depth.toByte() +
+                (key.parent?.fingerprint ?: Hex.decode("00000000")) +
+                key.index.toByteArray().extend(3) +
+                key.chainCode +
+                key.encoded,
+        appendChecksum = true
+    )
 }
 
 object BTCSigner: BaseECDSASigner() {
