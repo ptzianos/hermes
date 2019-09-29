@@ -49,7 +49,7 @@ object BIP32 {
     fun normalize(path: String): Iterable<Long> = path
         .split("/")
         .map { when {
-            it == "m" -> HARDENED_KEY_OFFSET
+            it == "m" -> 0
             it.endsWithAnyOf("'", "H") -> it.dropLast(1).toLong() + HARDENED_KEY_OFFSET
             else -> it.toLong()
         } }
@@ -74,7 +74,7 @@ interface BIP32Key: PrivateKey {
             return when {
                 currentIndex.endsWith("'") -> currentIndex.replace("'", "").toLong() + BIP32.HARDENED_KEY_OFFSET
                 currentIndex.endsWith("H") -> currentIndex.replace("H", "").toLong() + BIP32.HARDENED_KEY_OFFSET
-                currentIndex == "m" -> BIP32.HARDENED_KEY_OFFSET
+                currentIndex == "m" -> 0
                 else -> currentIndex.toLong()
             }
         }
