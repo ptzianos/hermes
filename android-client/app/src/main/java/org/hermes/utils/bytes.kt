@@ -19,7 +19,10 @@ fun ByteArray.toBigInt(positive: Boolean = false): BigInteger = when {
     else ->     BigInteger(this)
 }
 
-fun ByteArray.extend(digits: Int, byteToAdd: Byte = 0.toByte()): ByteArray = this + ByteArray(digits) { byteToAdd }
+fun ByteArray.extend(digits: Int, byteToAdd: Byte = 0.toByte()): ByteArray = when {
+    this.size < digits -> this + ByteArray(digits - this.size) { byteToAdd }
+    else -> this
+}
 
 fun ByteArray.countLeft(predicate: (Byte) -> Boolean): Int {
     var count = 0
