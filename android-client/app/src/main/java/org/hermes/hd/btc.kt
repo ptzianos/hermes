@@ -1,6 +1,7 @@
 package org.hermes.hd
 
 import java.security.MessageDigest
+
 import org.bouncycastle.util.encoders.Base64
 import org.bouncycastle.util.encoders.Hex
 
@@ -18,11 +19,12 @@ enum class BTCKey(val prefix: String) {
 
 object BTCKeyEncoder: KeyEncoder<ExPrivKey, ExPubKey>() {
     // TODO: Find a way to remove the options map
-    override fun encodePrivateKey(key: ExPrivKey, options: Map<String, Any>): String = Base58.toBase58String(
-        Hex.decode(BTCKey.PRIVATE_MAIN_NET.prefix) +
-                key.depth.toByte() +
-                (key.parent?.public?.fingerprint ?: Hex.decode("00000000")) +
-                key.index.toByteArray().extend(3) +
+    override fun encodePrivateKey(key: ExPrivKey, options: Map<String, Any>): String =
+        Base58.toBase58String(
+            Hex.decode(BTCKey.PRIVATE_MAIN_NET.prefix) +
+                key.depth.toByteArray() +
+                (key.parent?.public?.fingerprint?.extend(4) ?: Hex.decode("00000000")) +
+                key.index.toByteArray().extend(4) +
                 key.chainCode +
                 key.value.toByteArray(),
             appendChecksum = true
