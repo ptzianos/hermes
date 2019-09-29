@@ -31,7 +31,7 @@ object Base58 {
         val inputClone = input.clone() +
                 (if (appendChecksum) SHA256.hashTwice(input).sliceArray(0 until 4) else ByteArray(0))
 
-        val encoded = CharArray(input.size * 2) // upper bound
+        val encoded = CharArray(inputClone.size * 2) // upper bound
         var outputStart = encoded.size
 
         // Count how many zeros there are in the beginning of the byte array
