@@ -300,5 +300,7 @@ class Wallet(seed: ByteArray, private val keyRegistry: KeyRegistry = InMemoryKey
             parent = null,
             chainCode = I.sliceArray(32 until 64),
             key = I.sliceArray(0 until 32).toBigInt(positive = true))
+
+        keyRegistry.put("m", master)
     }
 }
