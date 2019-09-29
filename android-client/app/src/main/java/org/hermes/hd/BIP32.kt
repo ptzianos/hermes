@@ -23,8 +23,8 @@ object BIP32 {
 
     class InvalidPath: Exception()
 
-    val HARDENED_BIT = pow(2.toLong(), 32)
-    val HARDENED_KEY_OFFSET = pow(2.toLong(), 32)
+    val HARDENED_BIT = pow(2.toLong(), 31)
+    val HARDENED_KEY_OFFSET = pow(2.toLong(), 31)
     val MAX_KEY_INDEX = pow(2.toLong(), 32)
 
     /**
