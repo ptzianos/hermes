@@ -278,6 +278,8 @@ class Wallet(seed: ByteArray, private val keyRegistry: KeyRegistry = InMemoryKey
         var key: BIP32Key = master
         for (fragment in BIP32.normalize(path).drop(1)) {
             key = key.child(fragment)
+            if (keyRegistry.get(key.path) == null)
+                keyRegistry.put(key.path, key)
         }
         return key
     }
