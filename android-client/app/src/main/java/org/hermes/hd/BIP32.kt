@@ -23,8 +23,9 @@ object BIP32 {
 
     class InvalidPath: Exception()
 
-    val maxKeyIndex = pow(2.toLong(), 32)
-    val maxKeyIndexWithMark = pow(2.toLong(), 31)
+    val HARDENED_BIT = pow(2.toLong(), 32)
+    val HARDENED_KEY_OFFSET = pow(2.toLong(), 32)
+    val MAX_KEY_INDEX = pow(2.toLong(), 32)
 
     /**
      * Verifies a BIP32 compliant key path.
@@ -33,11 +34,11 @@ object BIP32 {
         if (!Regex("^m(/[0-9]+['H]?)*\$").matches(path))
             throw InvalidPath()
         for (fragment in path.split("/").drop(1)) {
-            val (cleanFragment, maxValue) = when (fragment.endsWithAnyOf("'", "H")) {
-                true -> Pair(fragment.dropLast(1).toLong(), maxKeyIndexWithMark)
-                else -> Pair(fragment.toLong(), maxKeyIndex)
+            val cleanFragment = when (fragment.endsWithAnyOf("'", "H")) {
+                true -> fragment.dropLast(1).toLong() + HARDENED_KEY_OFFSET
+                else -> fragment.toLong()
             }
-            if ((cleanFragment >= maxValue) or (cleanFragment < 0))
+            if ((cleanFragment >= MAX_KEY_INDEX) or (cleanFragment < 0))
                 throw InvalidPath()
         }
     }
@@ -48,8 +49,8 @@ object BIP32 {
     fun normalize(path: String): Iterable<Long> = path
         .split("/")
         .map { when {
-            it == "m" -> pow(2.toLong(), 31)
-            it.endsWithAnyOf("'", "H") -> it.dropLast(1).toLong()
+            it == "m" -> HARDENED_KEY_OFFSET
+            it.endsWithAnyOf("'", "H") -> it.dropLast(1).toLong() + HARDENED_KEY_OFFSET
             else -> it.toLong()
         } }
 
@@ -71,9 +72,9 @@ interface BIP32Key: PrivateKey {
         fun currentIndex(path: String): Long {
             val currentIndex = path.split("/").last()
             return when {
-                currentIndex.endsWith("'") -> currentIndex.replace("'", "").toLong() + BIP32.maxKeyIndexWithMark
-                currentIndex.endsWith("H") -> currentIndex.replace("H", "").toLong() + BIP32.maxKeyIndexWithMark
-                currentIndex == "m" -> 0
+                currentIndex.endsWith("'") -> currentIndex.replace("'", "").toLong() + BIP32.HARDENED_KEY_OFFSET
+                currentIndex.endsWith("H") -> currentIndex.replace("H", "").toLong() + BIP32.HARDENED_KEY_OFFSET
+                currentIndex == "m" -> BIP32.HARDENED_KEY_OFFSET
                 else -> currentIndex.toLong()
             }
         }
@@ -91,7 +92,7 @@ interface BIP32Key: PrivateKey {
     val chainCode: ByteArray
 
     val hardened: Boolean
-        get() = index >= pow(2, 31)
+        get() = index >= BIP32.HARDENED_KEY_OFFSET
 
     val depth: Int
         get() = path.split("/").size - 1
@@ -105,7 +106,7 @@ interface BIP32Key: PrivateKey {
      * @throws NoSibling when it's the master node or the index is greater than 2^32 - 1.
      */
     fun sibling(): BIP32Key = when {
-        index >= BIP32.maxKeyIndex - 1 -> throw NoSibling()
+        index >= BIP32.MAX_KEY_INDEX - 1 -> throw NoSibling()
         else -> parent?.child(index + 1) ?: throw NoSibling()
     }
 }
@@ -143,14 +144,14 @@ class ExPrivKey(
     init { BIP32.verify(path) }
 
     override fun child(index: Long): BIP32Key {
-        if ((index < 0) or (index >= BIP32.maxKeyIndex))
+        if ((index < 0) or (index >= BIP32.MAX_KEY_INDEX))
             throw BIP32Key.InvalidIndex()
 
         val n = Secp256K1Curve.X9ECParameters.n
         val digest = Mac.getInstance(HMAC_SHA512).apply { init(SecretKeySpec(chainCode, HMAC_SHA512)) }
         val I = when (index >= pow(2, 31)) {
             true -> digest.doFinal(ByteArray(1) + value.toByteArray() + index.toByteArray())
-            else -> digest.doFinal(ByteArray(1) + public.encoded + index.toByteArray())
+            else -> digest.doFinal(public.encoded + index.toByteArray())
         }
         return ExPrivKey(
             BIP32Key.pathOfChild(path, index),
@@ -203,10 +204,10 @@ class ExPubKey(
     override fun toString(): String = encoder.encodePublicKey(this, hashMapOf())
 
     override fun child(index: Long): BIP32PubKey {
-        if ((index < 0) or (index >= BIP32.maxKeyIndex))
+        if ((index < 0) or (index >= BIP32.MAX_KEY_INDEX))
             throw BIP32Key.InvalidIndex()
 
-        if (index >= BIP32.maxKeyIndexWithMark)
+        if (index >= BIP32.HARDENED_KEY_OFFSET)
             throw BIP32PubKey.NoPubKey()
 
         val I = Mac.getInstance(HMAC_SHA512)
