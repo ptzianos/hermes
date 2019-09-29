@@ -49,8 +49,7 @@ open class SecP256K1PrivKey : PrivateKey, ECPrivateKey {
     }
 
     constructor(key: BigInteger) {
-        val N = Secp256K1Curve.X9ECParameters.n.bitLength().toBigInteger()
-        value = if (key.bitLength().toBigInteger() > N) key.mod(N) else key
+        value = key.mod(Secp256K1Curve.X9ECParameters.n)
     }
 
     constructor(hexStr: String) {
