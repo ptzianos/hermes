@@ -149,7 +149,7 @@ class ExPrivKey(
 
         val n = Secp256K1Curve.X9ECParameters.n
         val digest = Mac.getInstance(HMAC_SHA512).apply { init(SecretKeySpec(chainCode, HMAC_SHA512)) }
-        val I = when (index >= pow(2, 31)) {
+        val I = when (index >= BIP32.HARDENED_KEY_OFFSET) {
             true -> digest.doFinal(ByteArray(1) + value.toByteArray() + index.toByteArray())
             else -> digest.doFinal(public.encoded + index.toByteArray())
         }
