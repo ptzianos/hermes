@@ -158,7 +158,8 @@ class ExPrivKey(
         val I = when (index >= HARDENED_KEY_OFFSET) {
             true -> digest.doFinal(value.toByteArray().extendOrReduceTo(33, padStart = true) +
                                     index.toByteArray().extendOrReduceTo(4))
-            else -> digest.doFinal(public.encoded + index.toByteArray())
+            else -> digest.doFinal(public.encoded +
+                                    index.toByteArray().extendOrReduceTo(4, padStart = true))
         }
         return ExPrivKey(
             BIP32Key.pathOfChild(path, index),
