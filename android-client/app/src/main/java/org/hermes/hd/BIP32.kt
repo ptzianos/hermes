@@ -11,10 +11,13 @@ import javax.crypto.spec.SecretKeySpec
 import org.bouncycastle.math.ec.ECPoint
 import org.bouncycastle.math.ec.FixedPointCombMultiplier
 import org.bouncycastle.pqc.math.linearalgebra.IntegerFunctions.pow
+import org.bouncycastle.util.encoders.Hex
 
 import org.hermes.crypto.CryptoAlgorithms.HMAC_SHA512
 import org.hermes.crypto.*
+import org.hermes.hd.BIP32.HARDENED_KEY_OFFSET
 import org.hermes.utils.endsWithAnyOf
+import org.hermes.utils.extendOrReduceTo
 import org.hermes.utils.toBigInt
 import org.hermes.utils.toByteArray
 
@@ -127,8 +130,11 @@ interface BIP32PubKey: PublicKey {
     val depth: Int
         get() = path.split("/").size - 1
 
-    val fingerprint: ByteArray
+    val identifier: ByteArray
         get() = RIPEMD.hash(SHA256.hash(encoded))
+
+    val fingerprint: ByteArray
+        get() = identifier.sliceArray(0 until 4)
 
     fun child(index: Long): BIP32PubKey
 }
