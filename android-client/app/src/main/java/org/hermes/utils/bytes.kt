@@ -24,6 +24,16 @@ fun ByteArray.extend(digits: Int, byteToAdd: Byte = 0.toByte()): ByteArray = whe
     else -> this
 }
 
+fun ByteArray.extendOrReduceTo(digits: Int, byteToAdd: Byte = 0.toByte(),
+                               chipFromEnd: Boolean = false,
+                               padStart: Boolean = false): ByteArray = when {
+    this.size < digits -> if (padStart)    this + ByteArray(digits - this.size) { byteToAdd }
+                          else             ByteArray(digits - this.size) { byteToAdd } + this
+    this.size > digits -> if (chipFromEnd) this.sliceArray(0 until digits)
+                          else             this.sliceArray(this.size - digits until this.size)
+    else -> this
+}
+
 fun ByteArray.countLeft(predicate: (Byte) -> Boolean): Int {
     var count = 0
     var i = 0
