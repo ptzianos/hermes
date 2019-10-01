@@ -164,7 +164,7 @@ class ExPrivKey(
             BIP32Key.pathOfChild(path, index),
             this,
             I.sliceArray(32 until 64),
-            I.sliceArray(0 until 32).toBigInt() + value.mod(n)
+            (I.sliceArray(0 until 32).toBigInt() + value).mod(n)
         )
     }
 
