@@ -24,9 +24,9 @@ object BTCKeyEncoder: KeyEncoder<ExPrivKey, ExPubKey>() {
             Hex.decode(BTCKey.PRIVATE_MAIN_NET.prefix) +
                     key.depth.toByteArray() +
                     (key.parent?.public?.fingerprint ?: Hex.decode("00000000")) +
-                    key.index.toByteArray().extendOrReduceTo(4) +
+                    key.index.toByteArray().extendOrReduceTo(4, padStart = true) +
                     key.chainCode +
-                    key.value.toByteArray(),
+                    key.value.toByteArray().extendOrReduceTo(33, padStart = true),
             appendChecksum = true
         )
 
@@ -35,7 +35,7 @@ object BTCKeyEncoder: KeyEncoder<ExPrivKey, ExPubKey>() {
             Hex.decode(BTCKey.PUBLIC_MAIN_NET.prefix) +
                     key.depth.toByteArray() +
                     (key.parent?.fingerprint ?: Hex.decode("00000000")) +
-                    key.index.toByteArray().extendOrReduceTo(4) +
+                    key.index.toByteArray().extendOrReduceTo(4, padStart = true) +
                     key.chainCode +
                     key.encoded,
             appendChecksum = true
