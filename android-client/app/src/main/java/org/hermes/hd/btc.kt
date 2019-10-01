@@ -7,7 +7,7 @@ import org.bouncycastle.util.encoders.Hex
 
 import org.hermes.crypto.NoEvenBit
 import org.hermes.crypto.SecP256K1PrivKey
-import org.hermes.utils.extend
+import org.hermes.utils.extendOrReduceTo
 import org.hermes.utils.toByteArray
 
 enum class BTCKey(val prefix: String) {
@@ -22,24 +22,26 @@ object BTCKeyEncoder: KeyEncoder<ExPrivKey, ExPubKey>() {
     override fun encodePrivateKey(key: ExPrivKey, options: Map<String, Any>): String =
         Base58.toBase58String(
             Hex.decode(BTCKey.PRIVATE_MAIN_NET.prefix) +
-                key.depth.toByteArray() +
-                (key.parent?.public?.fingerprint?.extend(4) ?: Hex.decode("00000000")) +
-                key.index.toByteArray().extend(4) +
-                key.chainCode +
-                key.value.toByteArray(),
+                    key.depth.toByteArray() +
+                    (key.parent?.public?.fingerprint ?: Hex.decode("00000000")) +
+                    key.index.toByteArray().extendOrReduceTo(4) +
+                    key.chainCode +
+                    key.value.toByteArray(),
             appendChecksum = true
         )
 
-    override fun encodePublicKey(key: ExPubKey, options: Map<String, Any>): String = Base58.toBase58String(
-        Hex.decode(BTCKey.PUBLIC_MAIN_NET.prefix) +
-                key.depth.toByte() +
-                (key.parent?.fingerprint ?: Hex.decode("00000000")) +
-                key.index.toByteArray().extend(3) +
-                key.chainCode +
-                key.encoded,
-        appendChecksum = true
-    )
+    override fun encodePublicKey(key: ExPubKey, options: Map<String, Any>): String =
+        Base58.toBase58String(
+            Hex.decode(BTCKey.PUBLIC_MAIN_NET.prefix) +
+                    key.depth.toByteArray() +
+                    (key.parent?.fingerprint ?: Hex.decode("00000000")) +
+                    key.index.toByteArray().extendOrReduceTo(4) +
+                    key.chainCode +
+                    key.encoded,
+            appendChecksum = true
+        )
 }
+
 
 object BTCSigner: BaseECDSASigner() {
 
