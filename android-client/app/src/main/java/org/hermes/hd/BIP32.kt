@@ -232,8 +232,7 @@ class ExPubKey(
         )
     }
 
-    override val address: String =
-        Base58.toBase58String(ByteArray(1) + identifier, appendChecksum = true)
+    override val address: String = encoder.address(this, hashMapOf())
 }
 
 interface KeyRegistry {
@@ -259,6 +258,8 @@ abstract class KeyEncoder<in PrK : BIP32Key, in PuK> {
     abstract fun encodePrivateKey(key: PrK, options: Map<String, Any>): String
 
     abstract fun encodePublicKey(key: PuK, options: Map<String, Any>): String
+
+    abstract fun address(key: PuK, options: Map<String, Any>): String
 }
 
 interface Signer<in K : PrivateKey> {

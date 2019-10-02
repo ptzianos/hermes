@@ -40,6 +40,9 @@ object BTCKeyEncoder: KeyEncoder<ExPrivKey, ExPubKey>() {
                     key.encoded,
             appendChecksum = true
         )
+
+    override fun address(key: ExPubKey, options: Map<String, Any>): String =
+        Base58.toBase58String(ByteArray(1) + key.identifier, appendChecksum = true)
 }
 
 
