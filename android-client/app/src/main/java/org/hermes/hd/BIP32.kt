@@ -137,6 +137,8 @@ interface BIP32PubKey: PublicKey {
         get() = identifier.sliceArray(0 until 4)
 
     fun child(index: Long): BIP32PubKey
+
+    val address: String
 }
 
 class ExPrivKey(
@@ -229,6 +231,9 @@ class ExPubKey(
             I.sliceArray(0 until 32).toBigInt()
         )
     }
+
+    override val address: String =
+        Base58.toBase58String(ByteArray(1) + identifier, appendChecksum = true)
 }
 
 interface KeyRegistry {
