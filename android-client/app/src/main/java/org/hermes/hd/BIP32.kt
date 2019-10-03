@@ -286,7 +286,7 @@ class InMemoryKeyRegistry: KeyRegistry {
     }
 }
 
-class Wallet(seed: ByteArray, private val keyRegistry: KeyRegistry = InMemoryKeyRegistry()) {
+open class Wallet(seed: ByteArray, private val keyRegistry: KeyRegistry = InMemoryKeyRegistry()) {
 
     operator fun get(path: String): BIP32Key {
         BIP32.verify(path)
