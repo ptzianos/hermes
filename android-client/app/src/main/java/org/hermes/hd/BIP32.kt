@@ -171,7 +171,7 @@ class ExPrivKey(
         )
     }
 
-    override val public: ExPubKey by lazy { ExPubKey(parent?.public, chainCode, path, this) }
+    override val public: ExPubKey by lazy { ExPubKey(parent?.public, chainCode, path, this, encoder) }
 
     override fun toString(): String = encoder.encodePrivateKey(this, hashMapOf())
 }
@@ -188,11 +188,13 @@ class ExPubKey(
 
     override fun getEncoded(): ByteArray = bcPoint.getEncoded(true)
 
-    constructor(parent: BIP32PubKey?, chainCode: ByteArray, path: String, publicKeyECPoint: ECPoint):
+    constructor(parent: BIP32PubKey?, chainCode: ByteArray, path: String, publicKeyECPoint: ECPoint,
+                encoder: KeyEncoder<ExPrivKey, ExPubKey> = BTCKeyEncoder):
         this(
             parent, chainCode, path,
             publicKeyECPoint.affineXCoord.toBigInteger(),
-            publicKeyECPoint.affineYCoord.toBigInteger()
+            publicKeyECPoint.affineYCoord.toBigInteger(),
+            encoder
         )
 
     constructor(parent: BIP32PubKey?, chainCode: ByteArray, path: String, rawKey: BigInteger):
@@ -203,12 +205,13 @@ class ExPubKey(
                 .normalize()
         )
 
-    constructor(parent: BIP32PubKey?, chainCode: ByteArray, path: String, privateKey: SecP256K1PrivKey):
-        this(
-            parent, chainCode, path,
+    constructor(parent: BIP32PubKey?, chainCode: ByteArray, path: String, privateKey: SecP256K1PrivKey,
+                encoder: KeyEncoder<ExPrivKey, ExPubKey> = BTCKeyEncoder):
+        this(parent, chainCode, path,
             FixedPointCombMultiplier()
                 .multiply(Secp256K1Curve.X9ECParameters.g, privateKey.value)
-                .normalize()
+                .normalize(),
+            encoder
         )
 
     override fun toString(): String = encoder.encodePublicKey(this, hashMapOf())
