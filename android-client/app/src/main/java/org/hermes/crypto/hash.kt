@@ -1,5 +1,6 @@
 package org.hermes.crypto
 
+import org.bouncycastle.jcajce.provider.digest.Keccak
 import org.bouncycastle.jcajce.provider.digest.RIPEMD160
 import java.lang.Exception
 import java.security.MessageDigest
@@ -92,3 +93,5 @@ object SHA256: Hasher(MessageDigest.getInstance("SHA-256"))
 object SHA512: Hasher(MessageDigest.getInstance("SHA-512"))
 
 object RIPEMD: Hasher(RIPEMD160.Digest())
+
+object Keccak: Hasher(Keccak.Digest256())
