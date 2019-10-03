@@ -169,13 +169,9 @@ class MnemonicTest {
     @ParameterizedTest
     @MethodSource(value = [ "BIP39TestVectors" ])
     fun testBIP39EnglishWord(entropy: String, words: String, seed: String, xPriv: String) {
-        assertEquals(
-            entropy,
-            Hex.toHexString(Mnemonic.fromWordList(words.split(' ').toTypedArray(), passphrase).entropy)
-        )
-        assertEquals(
-            seed,
-            Hex.toHexString(Mnemonic.fromWordList(words.split(' ').toTypedArray(), passphrase).seed)
-        )
+        val mnemonic = Mnemonic.fromWordList(words.split(' ').toTypedArray(), passphrase)
+        assertEquals(entropy, Hex.toHexString(mnemonic.entropy))
+        assertEquals(seed, Hex.toHexString(mnemonic.seed))
+        assertEquals(xPriv, Wallet(mnemonic.seed).master.toString())
     }
 }

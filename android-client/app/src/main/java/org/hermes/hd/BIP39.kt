@@ -103,20 +103,5 @@ class Mnemonic(val entropy: ByteArray, val network: Network, checksum: Byte,
             "mnemonic$passphrase".toByteArray(), 2048, 512)
         val factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA512")
         seed = factory.generateSecret(keySpec).encoded
-
-        // Get extended private key
-        // Serialization format can be found at: https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki#Serialization_format
-//        val masterKey = byteArrayOf(*Hex.decode("0488ade4"),
-//                // Nine empty bytes for depth(1), parent fingerprint(4) and child number(4)
-//                *ByteArray(9),
-//                // Second of seed as the chain code
-//                *seed.sliceArray(32 until 64),
-//                0.toByte(),
-//                // The master key derived from the seed
-//                *seed.sliceArray(0 until 32))
-//
-//        //  SHA256.hashTwice(addressBytes)
-//
-//        val masterKeyChecksum = SHA256.hashTwice(masterKey).sliceArray(0 until 4)
     }
 }

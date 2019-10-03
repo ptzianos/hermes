@@ -305,7 +305,7 @@ class Wallet(seed: ByteArray, private val keyRegistry: KeyRegistry = InMemoryKey
      * Master node will always be a standard Extended Private Key. The other nodes might be of
      * different kinds depending on the network they will be used for.
      */
-    private val master: ExPrivKey
+    val master: ExPrivKey
 
     init {
         val I = Mac.getInstance(HMAC_SHA512)
