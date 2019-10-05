@@ -143,7 +143,7 @@ interface BIP32PubKey: PublicKey {
 
 class ExPrivKey(
     override val path: String,
-    override val parent: ExPrivKey?,
+    override val parent: BIP32Key?,
     override val chainCode: ByteArray,
     key: BigInteger,
     val encoder: KeyEncoder<ExPrivKey, ExPubKey> = BTCKeyEncoder
