@@ -292,7 +292,7 @@ class InMemoryKeyRegistry: KeyRegistry {
 
 open class Wallet(seed: ByteArray, private val keyRegistry: KeyRegistry = InMemoryKeyRegistry()) {
 
-    operator fun get(path: String): BIP32Key {
+    open operator fun get(path: String): BIP32Key {
         BIP32.verify(path)
         val cachedKey = keyRegistry.get(path)
         if (cachedKey != null) return cachedKey
