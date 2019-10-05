@@ -151,7 +151,7 @@ class ExPrivKey(
 
     init { BIP32.verify(path) }
 
-    override fun child(index: Long): BIP32Key {
+    fun rawChild(index: Long): Triple<String, ByteArray, BigInteger> {
         if ((index < 0) or (index >= BIP32.MAX_KEY_INDEX))
             throw BIP32Key.InvalidIndex()
 
@@ -159,16 +159,20 @@ class ExPrivKey(
         val digest = Mac.getInstance(HMAC_SHA512).apply { init(SecretKeySpec(chainCode, HMAC_SHA512)) }
         val I = when (index >= HARDENED_KEY_OFFSET) {
             true -> digest.doFinal(value.toByteArray().extendOrReduceTo(33, padStart = true) +
-                                    index.toByteArray().extendOrReduceTo(4))
+                    index.toByteArray().extendOrReduceTo(4))
             else -> digest.doFinal(public.encoded +
-                                    index.toByteArray().extendOrReduceTo(4, padStart = true))
+                    index.toByteArray().extendOrReduceTo(4, padStart = true))
         }
-        return ExPrivKey(
+        return Triple(
             BIP32Key.pathOfChild(path, index),
-            this,
             I.sliceArray(32 until 64),
             (I.sliceArray(0 until 32).toBigInt(positive = true) + value).mod(n)
         )
+    }
+
+    override fun child(index: Long): BIP32Key {
+        val (childPath, chainCode, key) = rawChild(index)
+        return ExPrivKey(childPath, this, chainCode, key)
     }
 
     override val public: ExPubKey by lazy { ExPubKey(parent?.public, chainCode, path, this, encoder) }
