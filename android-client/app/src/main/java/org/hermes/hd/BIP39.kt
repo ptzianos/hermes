@@ -7,6 +7,7 @@ import javax.crypto.SecretKeyFactory
 import javax.crypto.spec.PBEKeySpec
 import kotlin.math.pow
 import org.bouncycastle.util.encoders.Hex
+import org.hermes.crypto.CryptoAlgorithms
 
 import org.hermes.crypto.SHA256
 import org.hermes.utils.*
@@ -101,7 +102,7 @@ class Mnemonic(val entropy: ByteArray, val network: Network, checksum: Byte,
         val keySpec = PBEKeySpec(
             words.joinToString(" ").toCharArray(),
             "mnemonic$passphrase".toByteArray(), 2048, 512)
-        val factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA512")
+        val factory = SecretKeyFactory.getInstance(CryptoAlgorithms.PBKDF2_HMC_SHA512)
         seed = factory.generateSecret(keySpec).encoded
     }
 }
