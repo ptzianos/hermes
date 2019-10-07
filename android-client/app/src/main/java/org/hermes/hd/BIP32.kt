@@ -159,7 +159,7 @@ class ExPrivKey(
         val digest = Mac.getInstance(HMAC_SHA512).apply { init(SecretKeySpec(chainCode, HMAC_SHA512)) }
         val I = when (index >= HARDENED_KEY_OFFSET) {
             true -> digest.doFinal(value.toByteArray().extendOrReduceTo(33, padStart = true) +
-                    index.toByteArray().extendOrReduceTo(4))
+                    index.toByteArray().extendOrReduceTo(4, padStart = true))
             else -> digest.doFinal(public.encoded +
                     index.toByteArray().extendOrReduceTo(4, padStart = true))
         }
