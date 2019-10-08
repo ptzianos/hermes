@@ -578,6 +578,12 @@ class TryteArray {
         trytes = Array(charArray.size) { i ->  Tryte(charArray[i]) }
     }
 
+    constructor(byteArray: ByteArray) : this(
+        byteArray.flatMap { listOf(
+            BalancedTernary.TRYTE_ALPHABET[it % 27],
+            BalancedTernary.TRYTE_ALPHABET[it / 27]
+        ) }.toCharArray() )
+
     constructor(vararg trytes: Tryte) {
         this.trytes = Array(trytes.size) { i -> trytes[i] }
     }
