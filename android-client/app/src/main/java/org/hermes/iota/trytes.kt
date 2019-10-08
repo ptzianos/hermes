@@ -582,29 +582,24 @@ class TryteArray {
         this.trytes = Array(trytes.size) { i -> trytes[i] }
     }
 
-    fun asCharArray(): CharArray {
-        return this.trytes
-                .map { t: Tryte -> BalancedTernary.TRYTE_ALPHABET[t.decimalValue] }
-                .toCharArray()
-    }
+    fun asCharArray(): CharArray = trytes
+        .map { t: Tryte -> BalancedTernary.TRYTE_ALPHABET[t.decimalValue] }
+        .toCharArray()
 
-    fun asTritArray(): TritArray {
-        return this.trytes
-                .map { tryte -> tryte.asTritArray() }
-                .reduce { tritArray1, tritArray2 -> tritArray1.conc(tritArray2) }
-    }
+    fun asTritArray(): TritArray = trytes
+        .map { tryte -> tryte.asTritArray() }
+        .reduce { tritArray1, tritArray2 -> tritArray1.conc(tritArray2) }
 
-    override fun toString(): String {
-        return this.asCharArray().toString()
-    }
+    fun asByteArray(): ByteArray = trytes
+        .map { byteArrayOf(it.trits.first.i.toByte(), it.trits.second.i.toByte(), it.trits.third.i.toByte()) }
+        .reduce { acc, bytes -> acc + bytes }
 
-    fun plus(tryte: Tryte): TryteArray {
-        return TryteArray(*trytes.clone().plus(tryte))
-    }
+    override fun toString(): String = this.asCharArray().toString()
 
-    operator fun plus(otherArray: TryteArray): TryteArray {
-        return (this.asTritArray() + otherArray.asTritArray()).asTryteArray()
-    }
+    fun plus(tryte: Tryte): TryteArray = TryteArray(*trytes.clone().plus(tryte))
+
+    operator fun plus(otherArray: TryteArray): TryteArray =
+        (this.asTritArray() + otherArray.asTritArray()).asTryteArray()
 
     fun toDecimal(): Int {
         var sum = 0
