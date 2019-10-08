@@ -71,10 +71,31 @@ class BalancedTrinaryTests {
         @Test
         fun powers() {
             assertEquals(
-                    Tryte.decimal10()
-                            .toPowerOf(2)
-                            .toDecimal(),
-                    100)
+                100,
+                Tryte.decimal10()
+                    .toPowerOf(2)
+                    .toDecimal())
+        }
+
+        @Test
+        fun `convert bytes to tryte array`() {
+//            "bla".forEach {
+//                println(it.toByte())
+//                println(it.toByte() / 27)
+//                println(it.toByte() % 27)
+//            }
+
+            "bla".flatMap { listOf(
+                BalancedTernary.TRYTE_ALPHABET[it.toByte() % 27],
+                BalancedTernary.TRYTE_ALPHABET[it.toByte() / 27]
+            ) }.forEach {
+                println(it)
+            }
+
+            assertEquals(
+                "QC9DPC",
+                TryteArray("bla".map { it.toByte() }.toByteArray()).toString()
+            )
         }
     }
 
