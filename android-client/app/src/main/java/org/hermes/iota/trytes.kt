@@ -589,7 +589,7 @@ class TryteArray {
     }
 
     fun asCharArray(): CharArray = trytes
-        .map { t: Tryte -> BalancedTernary.TRYTE_ALPHABET[t.decimalValue] }
+        .map { t: Tryte -> BalancedTernary.TRYTE_ALPHABET[t.decimalValue + 13] }
         .toCharArray()
 
     fun asTritArray(): TritArray = trytes
@@ -600,7 +600,7 @@ class TryteArray {
         .map { byteArrayOf(it.trits.first.i.toByte(), it.trits.second.i.toByte(), it.trits.third.i.toByte()) }
         .reduce { acc, bytes -> acc + bytes }
 
-    override fun toString(): String = this.asCharArray().toString()
+    override fun toString(): String = asCharArray().joinToString("")
 
     fun plus(tryte: Tryte): TryteArray = TryteArray(*trytes.clone().plus(tryte))
 
