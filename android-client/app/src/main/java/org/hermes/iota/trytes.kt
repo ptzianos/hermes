@@ -1,9 +1,14 @@
 package org.hermes.iota
 
+import java.math.BigInteger
 import java.security.SecureRandom
 import java.util.*
+
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
+
+import org.bouncycastle.pqc.math.linearalgebra.IntegerFunctions.pow
+
 import org.hermes.collections.ImmutableHashSet
 import org.hermes.collections.OrderedImmutableHashSet
 
@@ -77,7 +82,7 @@ object BalancedTernary {
         if (i < -13 || i > 13) {
             throw OutOfTernaryBounds()
         }
-        return TRYTES[i + 13]
+        return TRYTES[i]
     }
 
     /**
@@ -97,7 +102,7 @@ object BalancedTernary {
             // No, I don't mean LSD as in the drug but Least Significant Decimal.
             val lsd = value % 10
             value = (value / 10)
-            intermediate += TRYTES[lsd + 13].asTritArray() * Tryte.decimal10().asTritArray().toPowerOf(pow)
+            intermediate += TRYTES[lsd + 13].toTritArray() * Tryte.ten.toTritArray().toPowerOf(pow)
             pow += 1
         }
         intermediate = intermediate.fill()
@@ -107,13 +112,9 @@ object BalancedTernary {
         }
     }
 
-    fun fromChar(char: Char): Tryte {
-        return byCharacter[char] ?: throw OutOfTernaryBounds()
-    }
+    fun fromChar(char: Char): Tryte = byCharacter[char] ?: throw OutOfTernaryBounds()
 
-    fun fromTrits(triple: Triple<Trit, Trit, Trit>): Tryte {
-        return byTrits[triple] ?: throw OutOfTernaryBounds()
-    }
+    fun fromTrits(triple: Triple<Trit, Trit, Trit>): Tryte = byTrits[triple] ?: throw OutOfTernaryBounds()
 }
 
 
@@ -155,13 +156,9 @@ class Trit(i: Int) {
         return Pair(Trit(finalCurry), Trit(sum2))
     }
 
-    operator fun times(other: Trit): Trit {
-        return Trit(this.i * other.i)
-    }
+    operator fun times(other: Trit): Trit = Trit(this.i * other.i)
 
-    operator fun unaryMinus(): Trit {
-        return Trit(this.i * -1)
-    }
+    operator fun unaryMinus(): Trit = Trit(this.i * -1)
 
     override operator fun equals(other: Any?): Boolean {
         if (other is Trit) {
@@ -169,6 +166,8 @@ class Trit(i: Int) {
         }
         return false
     }
+
+    override fun toString(): String = i.toString()
 }
 
 
@@ -183,18 +182,11 @@ class TritArray {
     private val tritArray: Array<Trit>
 
     companion object {
+        fun empty(): TritArray = TritArray(emptyArray())
 
-        fun empty(): TritArray {
-            return TritArray(emptyArray())
-        }
+        fun emptyArray(): Array<Trit> = Array(0) { Trit(0) }
 
-        fun emptyArray(): Array<Trit> {
-            return Array(0) { Trit(0) }
-        }
-
-        fun zeroedArray(i: Int = 0): TritArray {
-            return TritArray(i) { Trit(0) }
-        }
+        fun zeroedArray(i: Int = 0): TritArray = TritArray(i) { Trit(0) }
     }
 
     constructor(size: Int) {
@@ -278,11 +270,10 @@ class TritArray {
 
     operator fun times(otherArray: TritArray): TritArray {
         var sum = TritArray.empty()
+        val intermediateSum = TritArray.zeroedArray(size() + otherArray.size() + 1)
         for (i: Int in 0 until otherArray.size()) {
-            val intermediateSum = TritArray.zeroedArray(size() + i)
-            for (j: Int in 0 until size()) {
+            for (j: Int in 0 until size())
                 intermediateSum[i + j] = this[j] * otherArray[i]
-            }
             sum += intermediateSum
             intermediateSum.makeZero()
         }
@@ -312,9 +303,8 @@ class TritArray {
      */
     fun trim(): TritArray {
         val zerosEnd = firstNonZeroIndex()
-        if (zerosEnd != -1) {
+        if (zerosEnd != -1)
             return TritArray(tritArray.sliceArray(0..zerosEnd))
-        }
         return this
     }
 
@@ -361,9 +351,7 @@ class TritArray {
         }
     }
 
-    fun asArray(): Array<Trit> {
-        return tritArray.clone()
-    }
+    fun toArray(): Array<Trit> = tritArray.clone()
 
     /**
      * Raise the trit array to the power.
@@ -389,29 +377,26 @@ class TritArray {
      * If the array contains more than three trits, they are ignored and
      * no error or exception is thrown.
      */
-    fun asTryte(): Tryte {
-        return Tryte(safeGet(0), safeGet(1), safeGet(2))
-    }
+    fun toTryte(): Tryte = Tryte(safeGet(0), safeGet(1), safeGet(2))
 
     /**
      * Returns the i-th element or 0 if i exceeds the size of the array
      */
-    fun safeGet(i: Int): Trit {
-        return if (tritArray.size > i) tritArray[i]
-            else Trit(0)
-    }
+    fun safeGet(i: Int): Trit =
+        if (tritArray.size > i) tritArray[i]
+        else Trit(0)
 
     /**
      * Returns this array as an array of trytes.
      *
      * If the size of the array is not a multiple of
      */
-    fun asTryteArray(): TryteArray {
+    fun toTryteArray(): TryteArray {
         val tryteArraySize = tritArray.size / 3 + when {
             tritArray.size % 3 == 0 -> 0
             else -> 1
         }
-        val array: Array<Tryte> = Array(tryteArraySize) { Tryte.zero() }
+        val array: Array<Tryte> = Array(tryteArraySize) { Tryte.zero }
         for (i in 0 until tryteArraySize) {
             array[i] = Tryte(
                     safeGet(i*3),
@@ -428,6 +413,17 @@ class TritArray {
     fun makeZero() {
        tritArray.fill(Trit(0), 0)
     }
+
+    /**
+     * Returns the trits as an array of ints (-1, 0, 1) in little endian.
+     */
+    fun toTritIntArray(): IntArray = tritArray.map { it.i }.toIntArray()
+
+    fun toDecimal(): Int = tritArray
+        .mapIndexed { i, trit -> pow(3, i) * trit.i }
+        .reduce { acc, i -> acc + i }
+
+    override fun toString(): String = tritArray.joinToString("")
 }
 
 
@@ -446,17 +442,14 @@ class Tryte {
             return Tryte(BalancedTernary.TRYTE_ALPHABET[randomLetter])
         }
 
-        fun zero(): Tryte {
-            return Tryte(Trit(0), Trit(0), Trit(0))
-        }
+        val zero: Tryte
+            get() = Tryte(Trit(0), Trit(0), Trit(0))
 
-        fun one(): Tryte {
-            return Tryte(Trit(1), Trit(0), Trit(0))
-        }
+        val one: Tryte
+            get() = Tryte(Trit(1), Trit(0), Trit(0))
 
-        fun decimal10(): Tryte {
-            return Tryte(Trit(1), Trit(0), Trit(1))
-        }
+        val ten: Tryte
+            get() = Tryte(Trit(1), Trit(0), Trit(1))
     }
 
     /**
@@ -486,15 +479,26 @@ class Tryte {
     }
 
     /**
-     * Return this tryte as an array of trits.
+     * Constructs a Tryte out of an integer.
+     *
+     * The integer must be between -13 and 13.
      */
-    fun asTritArray(): TritArray {
-        return TritArray(trits)
+    constructor(i: Int) {
+        if (i < -13 || i > 13) {
+            throw InvalidTryte()
+        }
+        this.char = BalancedTernary.TRYTE_ALPHABET[i + 13]
+        decimalValue = i
+        val tritArray = BalancedTernary.toTrinary(decimalValue)
+        this.trits = Triple(tritArray[0], tritArray[1], tritArray[2])
     }
 
-    operator fun unaryPlus(): Tryte {
-        return this
-    }
+    /**
+     * Return this tryte as an array of trits.
+     */
+    fun toTritArray(): TritArray = TritArray(trits)
+
+    operator fun unaryPlus(): Tryte = this
 
     operator fun unaryMinus(): Tryte {
         val negativeTritSequence: Triple<Trit, Trit, Trit> = Triple(
@@ -511,9 +515,7 @@ class Tryte {
      * If the Tryte overflows that's not something that will be handled
      * by this method.
      */
-    operator fun inc(): Tryte {
-        return this + one()
-    }
+    operator fun inc(): Tryte = this + one
 
     /**
      * Adds b to this Tryte.
@@ -521,13 +523,11 @@ class Tryte {
      * It throws away the curry if there is an overflow.
      */
     operator fun plus(b: Tryte): Tryte {
-        val newTritArray = asTritArray() + b.asTritArray()
+        val newTritArray = toTritArray() + b.toTritArray()
         return Tryte(newTritArray[0], newTritArray[1], newTritArray[2])
     }
 
-    operator fun times(b: Tryte): Tryte {
-        return (asTritArray() * b.asTritArray()).asTryte()
-    }
+    operator fun times(b: Tryte): Tryte = (toTritArray() * b.toTritArray()).toTryte()
 
     /**
      * Raise the tryte to a power.
@@ -535,9 +535,7 @@ class Tryte {
      * The result can be of arbitrary length, so a TryteArray will be
      * returned instead of a simple Tryte.
      */
-    fun toPowerOf(decimalPower: Int): TryteArray {
-        return asTritArray().toPowerOf(decimalPower).asTryteArray()
-    }
+    fun toPowerOf(decimalPower: Int): TryteArray = toTritArray().toPowerOf(decimalPower).toTryteArray()
 
     override operator fun equals(other: Any?): Boolean {
         if (other is Tryte) {
@@ -578,42 +576,40 @@ class TryteArray {
         trytes = Array(charArray.size) { i ->  Tryte(charArray[i]) }
     }
 
-    constructor(byteArray: ByteArray) : this(
-        byteArray.flatMap { listOf(
-            BalancedTernary.TRYTE_ALPHABET[it % 27],
-            BalancedTernary.TRYTE_ALPHABET[it / 27]
-        ) }.toCharArray() )
+    constructor(byteArray: ByteArray) {
+        val temp = LinkedList<Tryte>()
+        val fourTeen = BigInteger("14")
+        var b = BigInteger(byteArray)
+        while (b != BigInteger.ZERO) {
+            val dividerAndRemainder = b.divideAndRemainder(fourTeen)
+            temp.add(Tryte(dividerAndRemainder[1].toInt()))
+            b = dividerAndRemainder[0]
+        }
+        trytes = temp.toTypedArray()
+    }
 
     constructor(vararg trytes: Tryte) {
         this.trytes = Array(trytes.size) { i -> trytes[i] }
     }
 
-    fun asCharArray(): CharArray = trytes
-        .map { t: Tryte -> BalancedTernary.TRYTE_ALPHABET[t.decimalValue + 13] }
+    fun toCharArray(): CharArray = trytes
+        .map { it.char }
         .toCharArray()
 
-    fun asTritArray(): TritArray = trytes
-        .map { tryte -> tryte.asTritArray() }
+    fun toTritArray(): TritArray = trytes
+        .map { tryte -> tryte.toTritArray() }
         .reduce { tritArray1, tritArray2 -> tritArray1.conc(tritArray2) }
 
-    fun asByteArray(): ByteArray = trytes
-        .map { byteArrayOf(it.trits.first.i.toByte(), it.trits.second.i.toByte(), it.trits.third.i.toByte()) }
-        .reduce { acc, bytes -> acc + bytes }
+    fun sliceArray(indices: IntRange): TryteArray = TryteArray(*trytes.sliceArray(indices))
 
-    override fun toString(): String = asCharArray().joinToString("")
+    override fun toString(): String = toCharArray().joinToString("")
 
     fun plus(tryte: Tryte): TryteArray = TryteArray(*trytes.clone().plus(tryte))
 
     operator fun plus(otherArray: TryteArray): TryteArray =
-        (this.asTritArray() + otherArray.asTritArray()).asTryteArray()
+        (this.toTritArray() + otherArray.toTritArray()).toTryteArray()
 
-    fun toDecimal(): Int {
-        var sum = 0
-        var pow = 0.0
-        for (trit: Trit in asTritArray()) {
-            sum += trit.i * Math.pow(3.0, pow).toInt()
-            pow += 1
-        }
-        return sum
-    }
+    fun toDecimal(): Int = trytes
+        .mapIndexed { i, tryte -> pow(14, i) * tryte.decimalValue }
+        .reduce { acc, i -> acc + i }
 }

@@ -1,7 +1,12 @@
 package org.hermes.iota
 
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertThrows
+import java.math.BigInteger
+
+import org.hermes.utils.toTryteArray
+
+import org.iota.jota.utils.Converter
+
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
@@ -12,16 +17,16 @@ class BalancedTrinaryTests {
     inner class Trytes {
         @Test
         fun `from char works`() {
-            val tritArray = Tryte('A').asTritArray().trimToTryteSize()
+            val tritArray = Tryte('N').toTritArray().trimToTryteSize()
             assertEquals(tritArray.size(), 3)
-            assertEquals(tritArray[0].i, 0)
-            assertEquals(tritArray[1].i, -1)
-            assertEquals(tritArray[2].i, -1)
+            assertEquals(tritArray[0].i, 1)
+            assertEquals(tritArray[1].i, 0)
+            assertEquals(tritArray[2].i, 0)
         }
 
         @Test
         fun `from lowercase char works`() {
-            assertEquals(-12, Tryte('a').decimalValue)
+            assertEquals(1, Tryte('n').decimalValue)
         }
 
         @Test
@@ -31,9 +36,18 @@ class BalancedTrinaryTests {
 
         @Test
         fun addition() {
-            assertEquals(Tryte('A').decimalValue, -12)
-            assertEquals(Tryte('Q').decimalValue, 4)
-            assertEquals((Tryte('A') + Tryte('Q')).decimalValue, -8)
+            assertEquals(1, Tryte('N').decimalValue)
+            assertEquals(Tryte('Y').decimalValue, 12)
+            assertEquals(13, (Tryte('N') + Tryte('Y')).decimalValue)
+        }
+    }
+
+    @Nested
+    inner class TritArrays {
+        @Test
+        fun `tryte array to int array`() {
+            assertEquals(12.toByte(), Converter.bytes(intArrayOf(0, 1, 1))[0])
+            assertArrayEquals(intArrayOf(0, 1, 1), 12.toTryteArray().toTritArray().toTritIntArray())
         }
     }
 
@@ -72,29 +86,24 @@ class BalancedTrinaryTests {
         fun powers() {
             assertEquals(
                 100,
-                Tryte.decimal10()
+                Tryte.ten
+                    .toTritArray()
                     .toPowerOf(2)
                     .toDecimal())
         }
 
         @Test
-        fun `convert bytes to tryte array`() {
-//            "bla".forEach {
-//                println(it.toByte())
-//                println(it.toByte() / 27)
-//                println(it.toByte() % 27)
-//            }
-
-            "bla".flatMap { listOf(
-                BalancedTernary.TRYTE_ALPHABET[it.toByte() % 27],
-                BalancedTernary.TRYTE_ALPHABET[it.toByte() / 27]
-            ) }.forEach {
-                println(it)
-            }
-
+        fun `convert byte array to tryte array`() {
+            assertEquals(200, BigInteger("200").toTryteArray().toDecimal())
+            assertEquals(209, BigInteger("209").toTryteArray().toDecimal())
+            assertEquals(-209, BigInteger("-209").toTryteArray().toDecimal())
             assertEquals(
-                "QC9DPC",
-                TryteArray("bla".map { it.toByte() }.toByteArray()).toString()
+                "ZMPTWNVOYSUPQVRSORMOYPUZS",
+                "Hello World!".toByteArray().toTryteArray().toString()
+            )
+            assertEquals(
+                "XTVYZX",
+                "bla".toByteArray().toTryteArray().toString()
             )
         }
     }
