@@ -2,6 +2,12 @@ package org.hermes.utils
 
 import androidx.lifecycle.MutableLiveData
 
+import java.math.BigInteger
+
+import org.hermes.iota.Trit
+import org.hermes.iota.TritArray
+import org.hermes.iota.TryteArray
+
 object Integers {
     fun max(i1: Int, i2: Int, vararg ints: Int): Int {
         var max = when {
@@ -26,3 +32,9 @@ fun Int.toByteArray(): ByteArray {
         else -> (this / 256).toByteArray() + (this % 256).toByteArray()
     }
 }
+
+fun IntArray.toTritArray(): TritArray = TritArray(this.size) { Trit(this[it]) }
+
+fun Int.toTryteArray(): TryteArray = TryteArray(this.toByteArray())
+
+fun BigInteger.toTryteArray(): TryteArray = TryteArray(this.toByteArray())
