@@ -8,6 +8,7 @@ import org.bouncycastle.util.encoders.Base64
 import org.bouncycastle.util.encoders.Hex
 
 import org.hermes.hd.Base58
+import org.hermes.iota.TryteArray
 
 fun ByteArray.toHexStr(): String = Hex.toHexString(this)
 
@@ -84,3 +85,5 @@ fun BitSet.asString(from: Int, to: Int): String {
         .map { if (this[it]) 1 else 0 }
         .joinToString { it.toString() }
 }
+
+fun ByteArray.toTryteArray(): TryteArray = TryteArray(this)
