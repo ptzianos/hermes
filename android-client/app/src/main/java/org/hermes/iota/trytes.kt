@@ -618,5 +618,5 @@ class TryteArray {
         .flatMap { listOf(it.trits.first.i, it.trits.second.i, it.trits.third.i) }
         .toIntArray()
 
-    fun toByteArray(): ByteArray =
+    fun toByteArray(): ByteArray = toBigDecimal().toByteArray()
 }
