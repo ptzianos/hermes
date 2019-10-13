@@ -612,4 +612,11 @@ class TryteArray {
     fun toDecimal(): Int = trytes
         .mapIndexed { i, tryte -> pow(14, i) * tryte.decimalValue }
         .reduce { acc, i -> acc + i }
+
+    /**
+     * Returns this as an array of integers with trits
+     */
+    fun toTritIntArray(): IntArray = trytes
+        .flatMap { listOf(it.trits.first.i, it.trits.second.i, it.trits.third.i) }
+        .toIntArray()
 }
