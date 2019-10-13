@@ -49,6 +49,29 @@ class IOTAExPrivKey(
             publicKey: ByteArray,
             chainCode: ByteArray
         ): Pair<ByteArray, IntArray> {
+            val I = BIP32Seed(childIndex, key, publicKey, chainCode)
+            val newKey = PrivKey(I.sliceArray(0 until 32).toTryteArray().toTritIntArray(), childIndex)
+            return Pair(I.sliceArray(42 until 74), newKey)
+        }
+
+        /**
+         *
+         */
+        fun PrivKey(seed: IntArray, childIndex: Long): IntArray {
+            val signing = Signing(SpongeFactory.create(SpongeFactory.Mode.KERL))
+            return signing.key(seed, childIndex.toInt(), Seed.DEFAULT_SEED_SECURITY)
+        }
+
+        /**
+         * Produces a seed in a way that resembles the BIP32 spec. The parent key can be
+         * either another IOTAExPrivKey or any BIP32 key.
+         */
+        fun BIP32Seed(
+            childIndex: Long,
+            key: ByteArray,
+            publicKey: ByteArray,
+            chainCode: ByteArray
+        ): ByteArray {
             if ((childIndex < 0) or (childIndex >= BIP32.MAX_KEY_INDEX))
                 throw BIP32Key.InvalidIndex()
 
@@ -57,25 +80,18 @@ class IOTAExPrivKey(
                     true -> key + childIndex.toByteArray().extendOrReduceTo(4, padStart = true)
                     else -> publicKey + childIndex.toByteArray().extendOrReduceTo(4, padStart = true)
                 }
-                .map { it.toChar() }
-                .toCharArray(),
+                    .map { it.toChar() }
+                    .toCharArray(),
                 chainCode,
                 10000,
                 74
             )
-            val I = try {
+            return try {
                 SecretKeyFactory.getInstance(CryptoAlgorithms.PBKDF2_HMC_SHA512)
             } catch (e: NoSuchAlgorithmException) {
                 // TODO: Do some proper exception handling here
                 throw e
             }.generateSecret(spec).encoded
-            val signing = Signing(SpongeFactory.create(SpongeFactory.Mode.KERL))
-            val newKey = signing.key(
-                I.sliceArray(0 until 32).toTryteArray().toTritIntArray(),
-                childIndex.toInt(),
-                Seed.DEFAULT_SEED_SECURITY)
-
-            return Pair(I.sliceArray(42 until 74), newKey)
         }
     }
 
