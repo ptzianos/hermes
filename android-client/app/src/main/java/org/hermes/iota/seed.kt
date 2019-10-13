@@ -1,5 +1,7 @@
 package org.hermes.iota
 
+import org.iota.jota.utils.Converter
+
 class InvalidSeedException: Exception()
 
 /**
@@ -45,11 +47,13 @@ class Seed(val value: CharArray) {
         }
     }
 
-    fun extractPrivateKey(): CharArray {
-        return CharArray(0) { 'C' }
-    }
+    fun extractPrivateKey(): CharArray = CharArray(0) { 'C' }
 
-    override fun toString(): String {
-        return value.joinToString(separator = "")
-    }
+    override fun toString(): String = value.joinToString(separator = "")
+
+    /**
+     * Converts the seed into an integer array in a way that is compatible with the way
+     * IOTA converts chars to trytes.
+     */
+    fun toIntArray(): IntArray = Converter.trits(toString())
 }
