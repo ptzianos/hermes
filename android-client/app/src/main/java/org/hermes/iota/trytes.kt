@@ -236,17 +236,11 @@ class TritArray {
         return zipped
     }
 
-    fun size(): Int {
-        return tritArray.size
-    }
+    fun size(): Int = tritArray.size
 
-    operator fun get(i: Int): Trit {
-        return tritArray[i]
-    }
+    operator fun get(i: Int): Trit = tritArray[i]
 
-    operator fun set(i: Int, t: Trit) {
-        tritArray[i] = t
-    }
+    operator fun set(i: Int, t: Trit) = tritArray.set(i, t)
 
     operator fun plus(otherArray: TritArray): TritArray {
         var curry = Trit(0)
@@ -264,9 +258,7 @@ class TritArray {
         return TritArray(resultArray)
     }
 
-    operator fun iterator(): Iterator<Trit> {
-        return tritArray.iterator()
-    }
+    operator fun iterator(): Iterator<Trit> = tritArray.iterator()
 
     operator fun times(otherArray: TritArray): TritArray {
         var sum = TritArray.empty()
@@ -280,9 +272,7 @@ class TritArray {
         return sum.trim()
     }
 
-    operator fun unaryMinus(): TritArray {
-        return TritArray(tritArray.map { trit -> -trit }.toTypedArray())
-    }
+    operator fun unaryMinus(): TritArray = TritArray(tritArray.map { trit -> -trit }.toTypedArray())
 
     /**
      * Return the index of the first trit that is not zero.
@@ -358,17 +348,16 @@ class TritArray {
      *
      * The power is in decimal.
      */
-    fun toPowerOf(decimalPower: Int): TritArray {
-        if (decimalPower == 0) {
-            return TritArray(1) { Trit(1) }
-        } else if (decimalPower == 1) {
-            return this
-        }
-        var res = this
-        for (i in 2..decimalPower) {
-            res *= res
-        }
-        return res
+    fun toPowerOf(decimalPower: Int): TritArray =
+        when (decimalPower) {
+            0 -> TritArray(1) { Trit(1) }
+            1 -> this
+            else -> {
+                var res = this
+                for (i in 2..decimalPower)
+                    res *= res
+                res
+            }
     }
 
     /**
@@ -410,9 +399,7 @@ class TritArray {
     /**
      * Zero out all the elements of the trit array
      */
-    fun makeZero() {
-       tritArray.fill(Trit(0), 0)
-    }
+    fun makeZero() = tritArray.fill(Trit(0), 0)
 
     /**
      * Returns the trits as an array of ints (-1, 0, 1) in little endian.
@@ -537,14 +524,13 @@ class Tryte {
      */
     fun toPowerOf(decimalPower: Int): TryteArray = toTritArray().toPowerOf(decimalPower).toTryteArray()
 
-    override operator fun equals(other: Any?): Boolean {
-        if (other is Tryte) {
-            return trits.first == other.trits.first &&
+    override operator fun equals(other: Any?): Boolean =
+        when (other is Tryte) {
+            true -> trits.first == other.trits.first &&
                     trits.second == other.trits.second &&
                     trits.third == other.trits.third
+            else -> false
         }
-        return false
-    }
 }
 
 
