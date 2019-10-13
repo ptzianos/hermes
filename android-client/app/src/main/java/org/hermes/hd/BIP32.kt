@@ -151,7 +151,7 @@ class ExPrivKey(
 
     init { BIP32.verify(path) }
 
-    fun rawChild(index: Long): Triple<String, ByteArray, BigInteger> {
+    fun CKDPriv(index: Long): Triple<String, ByteArray, BigInteger> {
         if ((index < 0) or (index >= BIP32.MAX_KEY_INDEX))
             throw BIP32Key.InvalidIndex()
 
@@ -171,7 +171,7 @@ class ExPrivKey(
     }
 
     override fun child(index: Long): BIP32Key {
-        val (childPath, chainCode, key) = rawChild(index)
+        val (childPath, chainCode, key) = CKDPriv(index)
         return ExPrivKey(childPath, this, chainCode, key)
     }
 
