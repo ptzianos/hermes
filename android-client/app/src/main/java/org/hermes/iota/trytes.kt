@@ -595,8 +595,20 @@ class TryteArray {
     operator fun plus(otherArray: TryteArray): TryteArray =
         (this.toTritArray() + otherArray.toTritArray()).toTryteArray()
 
+    /**
+     * Convert the tryte array into an integer.
+     *
+     * Handle with care, because the conversion process could cause an overflow.
+     */
     fun toDecimal(): Int = trytes
         .mapIndexed { i, tryte -> pow(14, i) * tryte.decimalValue }
+        .reduce { acc, i -> acc + i }
+
+    /**
+     * Converts the tryte array into a BigInteger.
+     */
+    fun toBigDecimal(): BigInteger = trytes
+        .mapIndexed { i, tryte -> (pow(14L, i) * tryte.decimalValue).toBigInteger() }
         .reduce { acc, i -> acc + i }
 
     /**
@@ -605,4 +617,6 @@ class TryteArray {
     fun toTritIntArray(): IntArray = trytes
         .flatMap { listOf(it.trits.first.i, it.trits.second.i, it.trits.third.i) }
         .toIntArray()
+
+    fun toByteArray(): ByteArray =
 }
