@@ -167,7 +167,10 @@ class Trit(i: Int) {
         return false
     }
 
-    override fun toString(): String = i.toString()
+    override fun toString(): String = when(i) {
+        -1 -> "T"
+        else -> i.toString()
+    }
 }
 
 
@@ -209,11 +212,11 @@ class TritArray {
     }
 
     fun conc(otherArray: TritArray): TritArray {
-        return TritArray(size() + otherArray.size()) {
+        return TritArray(size + otherArray.size) {
             i: Int ->
             when {
-                i < size() -> tritArray[i]
-                else -> otherArray.tritArray[i - size()]
+                i < size -> tritArray[i]
+                else -> otherArray.tritArray[i - size]
             }
         }
     }
@@ -226,17 +229,18 @@ class TritArray {
      */
     fun zip(otherArray: TritArray): List<Pair<Trit, Trit>> {
         val zipped = LinkedList<Pair<Trit, Trit>>()
-        for (i: Int in 0 until Math.max(size(), otherArray.size())) {
+        for (i: Int in 0 until Math.max(size, otherArray.size)) {
             when{
-                i >= size() -> zipped.add(Pair(Trit(0), otherArray.tritArray[i]))
-                i >= otherArray.size() -> zipped.add(Pair(tritArray[i], Trit(0)))
+                i >= size -> zipped.add(Pair(Trit(0), otherArray.tritArray[i]))
+                i >= otherArray.size -> zipped.add(Pair(tritArray[i], Trit(0)))
                 else -> zipped.add(Pair(tritArray[i], otherArray.tritArray[i]))
             }
         }
         return zipped
     }
 
-    fun size(): Int = tritArray.size
+    val size: Int
+        get() = tritArray.size
 
     operator fun get(i: Int): Trit = tritArray[i]
 
@@ -262,9 +266,9 @@ class TritArray {
 
     operator fun times(otherArray: TritArray): TritArray {
         var sum = TritArray.empty()
-        val intermediateSum = TritArray.zeroedArray(size() + otherArray.size() + 1)
-        for (i: Int in 0 until otherArray.size()) {
-            for (j: Int in 0 until size())
+        val intermediateSum = TritArray.zeroedArray(size + otherArray.size + 1)
+        for (i: Int in 0 until otherArray.size) {
+            for (j: Int in 0 until size)
                 intermediateSum[i + j] = this[j] * otherArray[i]
             sum += intermediateSum
             intermediateSum.makeZero()
@@ -302,7 +306,7 @@ class TritArray {
      * If length is less than 3 add a couple of 0's
      */
     fun fill(): TritArray {
-        if (size() < 3) {
+        if (size < 3) {
             var newTritArray = this.tritArray.clone()
             while (newTritArray.size < 3) {
                 newTritArray = newTritArray.plus(Trit(0))
@@ -322,16 +326,16 @@ class TritArray {
      * zeros will be added to reach the size of at least one tryte.
      */
     fun trimToTryteSize(): TritArray {
-        if (size() <= 3) {
+        if (size <= 3) {
             var normalized = tritArray.clone()
-            while (size() < 3) {
+            while (size < 3) {
                 normalized = normalized.plus(Trit(0))
             }
             return TritArray(normalized)
         }
         var zerosEnd = firstNonZeroIndex()
         if (zerosEnd == -1) {
-            zerosEnd = size() - 1
+            zerosEnd = size - 1
         }
         return if (zerosEnd % 3 == 0) {
             this
@@ -540,6 +544,9 @@ class Tryte {
 class TryteArray {
 
     private val trytes: Array<Tryte>
+
+    val size: Int
+        get() = trytes.size
 
     companion object {
         /**
