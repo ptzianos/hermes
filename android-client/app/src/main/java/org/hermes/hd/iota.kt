@@ -106,9 +106,6 @@ class IOTAExPrivKey(
         )
     }
 
-    constructor(path: String, parent: BIP32Key?, chainCode: ByteArray, value: ByteArray) :
-            this(path, parent, chainCode, value.toTryteArray().sliceArray(0 until 81))
-
     override val public: BIP32PubKey by lazy {
         val pubKeyTrits = Signing(SpongeFactory.create(SpongeFactory.Mode.KERL)).digests(value.toTritIntArray())
         IOTAExPubKey(parent?.public, chainCode, path, pubKeyTrits.toTritArray().toTryteArray())
