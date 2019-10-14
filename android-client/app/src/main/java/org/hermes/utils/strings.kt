@@ -76,3 +76,10 @@ fun String.endsWithAnyOf(vararg s: String): Boolean {
             return true
     return false
 }
+
+fun String.startsWithAnyOf(collection: Collection<String>): Boolean {
+    for (prefix in collection)
+        if (this.startsWith(prefix))
+            return true
+    return false
+}
