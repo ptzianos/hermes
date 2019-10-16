@@ -308,13 +308,20 @@ open class Wallet(seed: ByteArray, private val keyRegistry: KeyRegistry = InMemo
 
     open operator fun get(path: String): BIP32Key {
         BIP32.verify(path)
-        val cachedKey = keyRegistry.get(path)
+        val normalizedPath = normalizeToStr(path)
+        val cachedKey = keyRegistry.get(normalizedPath)
         if (cachedKey != null) return cachedKey
         var key: BIP32Key = master
-        for (fragment in BIP32.normalize(path).drop(1)) {
-            key = key.child(fragment)
-            if (keyRegistry.get(key.path) == null)
+        var partialPath = master.path
+        for (index in BIP32.normalize(path).drop(1)) {
+            partialPath = normalizeToStr(BIP32.pathOfChild(partialPath, index))
+            val intermediateKey = keyRegistry.get(partialPath)
+            if (intermediateKey == null) {
+                key = key.child(index)
                 keyRegistry.put(key.path, key)
+            } else {
+                key = intermediateKey
+            }
         }
         return key
     }
