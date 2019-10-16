@@ -18,7 +18,7 @@ class BalancedTrinaryTests {
         @Test
         fun `from char works`() {
             val tritArray = Tryte('N').toTritArray().trimToTryteSize()
-            assertEquals(tritArray.size(), 3)
+            assertEquals(tritArray.size, 3)
             assertEquals(tritArray[0].i, 1)
             assertEquals(tritArray[1].i, 0)
             assertEquals(tritArray[2].i, 0)
@@ -59,14 +59,14 @@ class BalancedTrinaryTests {
             val array2 = TritArray(Triple(Trit(-1), Trit(0), Trit(1)))
             var elems = 0
             for (t in array1.conc(array2)) {
-                if (elems < array1.size()) {
+                if (elems < array1.size) {
                     assertEquals(t.i, array1[elems].i)
                 } else {
-                    assertEquals(t.i, array2[elems - array1.size()].i)
+                    assertEquals(t.i, array2[elems - array1.size].i)
                 }
                 elems++
             }
-            assertEquals(elems, array1.size() + array2.size())
+            assertEquals(elems, array1.size + array2.size)
         }
 
         @Test
@@ -79,7 +79,7 @@ class BalancedTrinaryTests {
                 assertEquals(t1.i, t2.i)
                 elems++
             }
-            assertEquals(elems, Math.max(array1.size(), array2.size()))
+            assertEquals(elems, Math.max(array1.size, array2.size))
         }
 
         @Test
