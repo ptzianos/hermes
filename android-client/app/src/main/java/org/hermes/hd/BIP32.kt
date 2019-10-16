@@ -11,11 +11,11 @@ import javax.crypto.spec.SecretKeySpec
 import org.bouncycastle.math.ec.ECPoint
 import org.bouncycastle.math.ec.FixedPointCombMultiplier
 import org.bouncycastle.pqc.math.linearalgebra.IntegerFunctions.pow
-import org.bouncycastle.util.encoders.Hex
 
 import org.hermes.crypto.CryptoAlgorithms.HMAC_SHA512
 import org.hermes.crypto.*
 import org.hermes.hd.BIP32.HARDENED_KEY_OFFSET
+import org.hermes.hd.BIP32.normalizeToStr
 import org.hermes.utils.endsWithAnyOf
 import org.hermes.utils.extendOrReduceTo
 import org.hermes.utils.toBigInt
@@ -57,10 +57,17 @@ object BIP32 {
             else -> it.toLong()
         } }
 
+    fun normalizeToStr(path: String): String = when (path) {
+        "m" -> path
+        else -> "m/${normalize(path).drop(1).joinToString("/")}"
+    }
+
     fun verifyAndNormalize(path: String): Iterable<Long> {
         verify(path)
         return normalize(path)
     }
+
+    fun pathOfChild(currentPath: String, childIndex: Long): String = "${normalizeToStr(currentPath)}/$childIndex"
 }
 
 interface BIP32Key: PrivateKey {
@@ -81,8 +88,6 @@ interface BIP32Key: PrivateKey {
                 else -> currentIndex.toLong()
             }
         }
-
-        fun pathOfChild(currentPath: String, childIndex: Long): String = "$currentPath/$childIndex"
     }
 
     val path: String
@@ -181,7 +186,7 @@ class ExPrivKey(
 
     override fun child(index: Long): BIP32Key {
         val (chainCode, key) = CKDPriv(index, value.toByteArray(), public.encoded, chainCode)
-        return ExPrivKey(BIP32Key.pathOfChild(path, index), this, chainCode, key)
+        return ExPrivKey(BIP32.pathOfChild(path, index), this, chainCode, key)
     }
 
     override val public: ExPubKey by lazy { ExPubKey(parent?.public, chainCode, path, this, encoder) }
@@ -233,7 +238,7 @@ class ExPubKey(
         if ((index < 0) or (index >= BIP32.MAX_KEY_INDEX))
             throw BIP32Key.InvalidIndex()
 
-        if (index >= BIP32.HARDENED_KEY_OFFSET)
+        if (index >= HARDENED_KEY_OFFSET)
             throw BIP32PubKey.NoPubKey()
 
         val I = Mac.getInstance(HMAC_SHA512)
@@ -243,7 +248,7 @@ class ExPubKey(
         return ExPubKey(
             this,
             I.sliceArray(32 until 64),
-            BIP32Key.pathOfChild(path, index),
+            BIP32.pathOfChild(path, index),
             I.sliceArray(0 until 32).toBigInt()
         )
     }
