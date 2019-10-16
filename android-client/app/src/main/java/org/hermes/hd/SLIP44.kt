@@ -3,7 +3,9 @@ package org.hermes.hd
 import org.hermes.utils.FrozenHashMap
 
 object SLIP44 {
-    data class Entry(val index: Int, val hex: String, val symbol: String)
+    data class Entry(val index: Int, val hex: String, val symbol: String) {
+        val walletIndex: Long = index + BIP32.HARDENED_KEY_OFFSET
+    }
 
     val entries = arrayOf(
         Entry(0,"0x80000000","BTC"),
@@ -551,6 +553,8 @@ object SLIP44 {
 
     val byIndex: Map<Int, Entry>
 
+    val byWalletIndex: Map<Long, Entry>
+
     val bySymbol: Map<String, Entry>
 
     val byHex: Map<String, Entry>
@@ -559,6 +563,11 @@ object SLIP44 {
         byIndex = FrozenHashMap {
             val map = it
             entries.forEach { map[it.index] = it }
+        }
+
+        byWalletIndex = FrozenHashMap {
+            val map = it
+            entries.forEach { map[it.walletIndex] = it }
         }
 
         bySymbol = FrozenHashMap {
