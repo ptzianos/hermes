@@ -50,16 +50,23 @@ class IOTAExPrivKey(
             chainCode: ByteArray
         ): Pair<ByteArray, IntArray> {
             val I = BIP32Seed(childIndex, key, publicKey, chainCode)
-            val newKey = PrivKey(I.sliceArray(0 until 32).toTryteArray().toTritIntArray(), childIndex)
+            val seed = I.sliceArray(0 until 41)
+                .toTryteArray()
+                .toTritIntArray()
+                .sliceArray(0 until Seed.MAX_SEED_LENGTH * 3)
+            val newKey = PrivKey(seed, childIndex)
             return Pair(I.sliceArray(42 until 74), newKey)
         }
 
-        /**
-         *
-         */
         fun PrivKey(seed: IntArray, childIndex: Long): IntArray {
             val signing = Signing(SpongeFactory.create(SpongeFactory.Mode.KERL))
-            return signing.key(seed, childIndex.toInt(), Seed.DEFAULT_SEED_SECURITY)
+            // Indices can be reused because the hardened key seed will be different than the non-hardened one.
+            // This is done because IOTA can not handle indices that are too large.
+            val index = when (childIndex >= BIP32.HARDENED_KEY_OFFSET) {
+                true -> childIndex - BIP32.HARDENED_KEY_OFFSET
+                else -> childIndex
+            }.toInt()
+            return signing.key(seed, index, Seed.DEFAULT_SEED_SECURITY)
         }
 
         /**
@@ -84,7 +91,7 @@ class IOTAExPrivKey(
                     .toCharArray(),
                 chainCode,
                 10000,
-                74
+                74 * 8
             )
             return try {
                 SecretKeyFactory.getInstance(CryptoAlgorithms.PBKDF2_HMC_SHA512)
@@ -99,7 +106,7 @@ class IOTAExPrivKey(
         val (newChainCode, newKey) = CKDpriv(index, value.toByteArray(), public.encoded, chainCode)
 
         return IOTAExPrivKey(
-            BIP32Key.pathOfChild(path, index),
+            BIP32.pathOfChild(path, index),
             this,
             newChainCode,
             newKey.toTritArray().toTryteArray()
