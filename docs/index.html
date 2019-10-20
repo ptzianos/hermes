@@ -1,0 +1,505 @@
+
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>Architecture and Integration Reference</title>
+
+    <style>
+      .highlight table td { padding: 5px; }
+.highlight table pre { margin: 0; }
+.highlight .gh {
+  color: #999999;
+}
+.highlight .sr {
+  color: #f6aa11;
+}
+.highlight .go {
+  color: #888888;
+}
+.highlight .gp {
+  color: #555555;
+}
+.highlight .gs {
+}
+.highlight .gu {
+  color: #aaaaaa;
+}
+.highlight .nb {
+  color: #f6aa11;
+}
+.highlight .cm {
+  color: #75715e;
+}
+.highlight .cp {
+  color: #75715e;
+}
+.highlight .c1 {
+  color: #75715e;
+}
+.highlight .cs {
+  color: #75715e;
+}
+.highlight .c, .highlight .cd {
+  color: #75715e;
+}
+.highlight .err {
+  color: #960050;
+}
+.highlight .gr {
+  color: #960050;
+}
+.highlight .gt {
+  color: #960050;
+}
+.highlight .gd {
+  color: #49483e;
+}
+.highlight .gi {
+  color: #49483e;
+}
+.highlight .ge {
+  color: #49483e;
+}
+.highlight .kc {
+  color: #66d9ef;
+}
+.highlight .kd {
+  color: #66d9ef;
+}
+.highlight .kr {
+  color: #66d9ef;
+}
+.highlight .no {
+  color: #66d9ef;
+}
+.highlight .kt {
+  color: #66d9ef;
+}
+.highlight .mf {
+  color: #ae81ff;
+}
+.highlight .mh {
+  color: #ae81ff;
+}
+.highlight .il {
+  color: #ae81ff;
+}
+.highlight .mi {
+  color: #ae81ff;
+}
+.highlight .mo {
+  color: #ae81ff;
+}
+.highlight .m, .highlight .mb, .highlight .mx {
+  color: #ae81ff;
+}
+.highlight .sc {
+  color: #ae81ff;
+}
+.highlight .se {
+  color: #ae81ff;
+}
+.highlight .ss {
+  color: #ae81ff;
+}
+.highlight .sd {
+  color: #e6db74;
+}
+.highlight .s2 {
+  color: #e6db74;
+}
+.highlight .sb {
+  color: #e6db74;
+}
+.highlight .sh {
+  color: #e6db74;
+}
+.highlight .si {
+  color: #e6db74;
+}
+.highlight .sx {
+  color: #e6db74;
+}
+.highlight .s1 {
+  color: #e6db74;
+}
+.highlight .s {
+  color: #e6db74;
+}
+.highlight .na {
+  color: #a6e22e;
+}
+.highlight .nc {
+  color: #a6e22e;
+}
+.highlight .nd {
+  color: #a6e22e;
+}
+.highlight .ne {
+  color: #a6e22e;
+}
+.highlight .nf {
+  color: #a6e22e;
+}
+.highlight .vc {
+  color: #ffffff;
+}
+.highlight .nn {
+  color: #ffffff;
+}
+.highlight .nl {
+  color: #ffffff;
+}
+.highlight .ni {
+  color: #ffffff;
+}
+.highlight .bp {
+  color: #ffffff;
+}
+.highlight .vg {
+  color: #ffffff;
+}
+.highlight .vi {
+  color: #ffffff;
+}
+.highlight .nv {
+  color: #ffffff;
+}
+.highlight .w {
+  color: #ffffff;
+}
+.highlight {
+  color: #ffffff;
+}
+.highlight .n, .highlight .py, .highlight .nx {
+  color: #ffffff;
+}
+.highlight .ow {
+  color: #f92672;
+}
+.highlight .nt {
+  color: #f92672;
+}
+.highlight .k, .highlight .kv {
+  color: #f92672;
+}
+.highlight .kn {
+  color: #f92672;
+}
+.highlight .kp {
+  color: #f92672;
+}
+.highlight .o {
+  color: #f92672;
+}
+    </style>
+    <link href="stylesheets/screen.css" rel="stylesheet" media="screen" />
+    <link href="stylesheets/print.css" rel="stylesheet" media="print" />
+      <script src="javascripts/all.js"></script>
+  </head>
+
+  <body class="index" data-languages="[&quot;java&quot;]">
+    <a href="#" id="nav-button">
+      <span>
+        NAV
+        <img src="images/navbar.png" alt="Navbar" />
+      </span>
+    </a>
+    <div class="toc-wrapper">
+      <img src="images/logo.png" class="logo" alt="Logo" />
+        <div class="lang-selector">
+              <a href="#" data-language-name="java">java</a>
+        </div>
+        <div class="search">
+          <input type="text" class="search" id="input-search" placeholder="Search">
+        </div>
+        <ul class="search-results"></ul>
+      <ul id="toc" class="toc-list-h1">
+          <li>
+            <a href="#introduction" class="toc-h1 toc-link" data-title="Introduction">Introduction</a>
+          </li>
+          <li>
+            <a href="#hermes-android-application" class="toc-h1 toc-link" data-title="Hermes Android Application">Hermes Android Application</a>
+              <ul class="toc-list-h2">
+                  <li>
+                    <a href="#integration-with-the-application" class="toc-h2 toc-link" data-title="Integration with the application">Integration with the application</a>
+                  </li>
+                  <li>
+                    <a href="#service-connection" class="toc-h2 toc-link" data-title="Service Connection">Service Connection</a>
+                  </li>
+                  <li>
+                    <a href="#finalizing-the-service-connection-establishment" class="toc-h2 toc-link" data-title="Finalizing the service connection establishment">Finalizing the service connection establishment</a>
+                  </li>
+                  <li>
+                    <a href="#sending-data-to-the-application" class="toc-h2 toc-link" data-title="Sending data to the application">Sending data to the application</a>
+                  </li>
+                  <li>
+                    <a href="#privacy-concerns-and-integration" class="toc-h2 toc-link" data-title="Privacy concerns and integration">Privacy concerns and integration</a>
+                  </li>
+              </ul>
+          </li>
+          <li>
+            <a href="#streaming-protocol" class="toc-h1 toc-link" data-title="Streaming Protocol">Streaming Protocol</a>
+              <ul class="toc-list-h2">
+                  <li>
+                    <a href="#hermes-plaintext" class="toc-h2 toc-link" data-title="Hermes Plaintext">Hermes Plaintext</a>
+                  </li>
+                  <li>
+                    <a href="#hermes-plaintext-v2" class="toc-h2 toc-link" data-title="Hermes Plaintext v2">Hermes Plaintext v2</a>
+                  </li>
+              </ul>
+          </li>
+          <li>
+            <a href="#marketplace" class="toc-h1 toc-link" data-title="Marketplace">Marketplace</a>
+          </li>
+          <li>
+            <a href="#errors" class="toc-h1 toc-link" data-title="Errors">Errors</a>
+          </li>
+      </ul>
+        <ul class="toc-footer">
+            <li><a href='https://github.com/lord/slate'>Documentation Powered by Slate</a></li>
+        </ul>
+    </div>
+    <div class="page-wrapper">
+      <div class="dark-box"></div>
+      <div class="content">
+        <h1 id='introduction'>Introduction</h1>
+<p>Welcome to the documentation of the Hermes project! Hermes is a small, fully
+open-source ecosystem of tools that can be used to store and retrieve data
+using Distributed Ledgers. The tools are especially geared towards pushing,
+selling and retrieving monitoring data.</p>
+
+<p>The main components that comprise the ecosystem are the Hermes Marketplace,
+the Hermes Android Application and the Carbon-ledger project. The Android
+Application is used to gather data from a smartphone, the Marketplace is
+used to post advertisements/requests for data and coordinate transactions,
+and the Carbon-Ledger can be used to retrieve and follow streams of data.</p>
+<h1 id='hermes-android-application'>Hermes Android Application</h1>
+<p>The Android Application is built to be used with Android API version &gt;= 24.
+It allows a user to stream data from a sensor or another application into
+a Distributed Ledger.</p>
+
+<p>Currently supported Distributed Ledgers:
+1. IOTA</p>
+<h2 id='integration-with-the-application'>Integration with the application</h2>
+<p>As mentioned previously, the application allows other external applications
+to connect to it via an AIDL interface. An example, of such an integration
+has been done in the 
+<a href="https://github.com/ntsiam/roomr-android">Roomr application</a>. There is also
+documentation on how to perform the integration also in the official Android
+docs <a href="https://developer.android.com/guide/components/aidl">here</a>. More
+specifically, you need to copy the
+<code>android-client/app/src/main/aidl/org/hermes/IHermesService.aidl</code> file into
+your code and then you just need to import it:</p>
+<pre class="highlight java tab-java"><code><span class="kn">import</span> <span class="nn">org.hermes.IHermesService</span><span class="o">;</span>
+</code></pre>
+<p>This is the interface that is implemented by the Hermes Application and it
+resembles a server that you can stream data into. The first step it to try to
+connect to the service that implements the <code>IHermesService</code>.</p>
+<h2 id='service-connection'>Service Connection</h2>
+<p>If the Hermes application has not been installed in the system or if the
+application has not been started, an error will be thrown at this
+stage. The user must have started and be registered or logged into the
+application, in order for the <code>IHermesService</code> endpoint to be established.
+Once the connection has been established time you need to invoke
+the <code>register</code> method of the stub. If everything works fine, the method will
+return a UUID as a string. You need to keep this string, because it will be
+used as an identifier for your sensor. Every sensor must have it&#39;s own
+UUID, so if you wish to stream data from more than one sensors, you need to
+invoke <code>register</code> once for each sensor, but you can use the same service object
+for all of them. The <code>register</code> method, needs at least three arguments:</p>
+
+<ol>
+<li>The ID of the sensor,</li>
+<li>The type of data that will be streamed,</li>
+<li>The source of the data that will be streamed</li>
+</ol>
+
+<p>The ID of the sensor must be a dot separated string, that can have as many
+components as needed. It must contain words that will help identify the
+stream of data. This tag will be combined with the first 10 characters
+of the digest of the key that the Hermes Application uses to sign all data
+streams, so it can be uniquely identified in a secure way.</p>
+<pre class="highlight java tab-java"><code><span class="n">ServiceConnection</span> <span class="n">serviceConnection</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ServiceConnection</span><span class="o">()</span> <span class="o">{</span>
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onServiceConnected</span><span class="o">(</span><span class="n">ComponentName</span> <span class="n">className</span><span class="o">,</span> <span class="n">IBinder</span> <span class="n">service</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">iHermesService</span> <span class="o">=</span> <span class="n">IHermesService</span><span class="o">.</span><span class="na">Stub</span><span class="o">.</span><span class="na">asInterface</span><span class="o">((</span><span class="n">IBinder</span><span class="o">)</span> <span class="n">service</span><span class="o">);</span>
+        <span class="k">try</span> <span class="o">{</span>
+            <span class="n">uuid</span> <span class="o">=</span> <span class="n">iHermesService</span><span class="o">.</span><span class="na">register</span><span class="o">(</span><span class="s">"some.android.app"</span><span class="o">,</span> <span class="s">"string"</span><span class="o">,</span> <span class="s">"sensor_type"</span><span class="o">,</span> <span class="kc">null</span><span class="o">,</span> <span class="kc">null</span><span class="o">);</span>
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">RemoteException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+        <span class="o">}</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">uuid</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span>
+            <span class="k">return</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onServiceDisconnected</span><span class="o">(</span><span class="n">ComponentName</span> <span class="n">componentName</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">iHermesService</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+    <span class="o">}</span>
+<span class="o">};</span>
+</code></pre><h2 id='finalizing-the-service-connection-establishment'>Finalizing the service connection establishment</h2>
+<p>The ServiceConnection object has been initialized, but it has not been
+triggered yet. Now you need to connect it to an implementation of the
+<code>IHermesService</code>, specifically the <code>LedgerService</code> class of the Hermes
+application. The following code achieves  that:</p>
+<pre class="highlight java tab-java"><code><span class="kn">import</span> <span class="nn">static</span> <span class="n">android</span><span class="o">.</span><span class="na">content</span><span class="o">.</span><span class="na">pm</span><span class="o">.</span><span class="na">PackageManager</span><span class="o">.*;</span>
+
+<span class="n">PackageInfo</span> <span class="n">otherApp</span><span class="o">;</span>
+<span class="k">try</span> <span class="o">{</span>
+    <span class="n">otherApp</span> <span class="o">=</span> <span class="n">getBaseContext</span><span class="o">().</span><span class="na">getPackageManager</span><span class="o">().</span><span class="na">getPackageInfo</span><span class="o">(</span><span class="s">"org.hermes"</span><span class="o">,</span> <span class="n">GET_SERVICES</span><span class="o">);</span>
+<span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">NameNotFoundException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+    <span class="c1">// Hermes application is definitely not installed in the system!</span>
+    <span class="k">return</span><span class="o">;</span>
+<span class="o">}</span>
+
+<span class="c1">// We are still not sure that the Hermes application is installed.</span>
+<span class="c1">// We need to do one final check to ensure that the LedgerService in particular is present in</span>
+<span class="c1">// the system.</span>
+<span class="n">ServiceInfo</span> <span class="n">hermesService</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+<span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span> <span class="o">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="n">otherApp</span><span class="o">.</span><span class="na">services</span><span class="o">.</span><span class="na">length</span> <span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+    <span class="n">ServiceInfo</span> <span class="n">serviceInfo</span> <span class="o">=</span> <span class="n">otherApp</span><span class="o">.</span><span class="na">services</span><span class="o">[</span><span class="n">i</span><span class="o">];</span>
+    <span class="k">if</span> <span class="o">(</span><span class="n">serviceInfo</span><span class="o">.</span><span class="na">name</span><span class="o">.</span><span class="na">equals</span><span class="o">(</span><span class="s">"org.hermes.LedgerService"</span><span class="o">))</span> <span class="o">{</span>
+        <span class="n">hermesService</span> <span class="o">=</span> <span class="n">serviceInfo</span><span class="o">;</span>
+        <span class="k">break</span><span class="o">;</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+<span class="k">if</span> <span class="o">(</span><span class="n">hermesService</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+    <span class="c1">// packages of the Hermes application are installed but not the LedgerService</span>
+<span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
+    <span class="n">Intent</span> <span class="n">intent</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Intent</span><span class="o">();</span>
+    <span class="n">intent</span><span class="o">.</span><span class="na">setComponent</span><span class="o">(</span><span class="k">new</span> <span class="n">ComponentName</span><span class="o">(</span><span class="n">hermesService</span><span class="o">.</span><span class="na">packageName</span><span class="o">,</span> <span class="n">hermesService</span><span class="o">.</span><span class="na">name</span><span class="o">));</span>
+    <span class="k">if</span> <span class="o">(</span><span class="n">getBaseContext</span><span class="o">().</span><span class="na">bindService</span><span class="o">(</span><span class="n">intent</span><span class="o">,</span> <span class="n">serviceConnection</span><span class="o">,</span> <span class="n">Context</span><span class="o">.</span><span class="na">BIND_AUTO_CREATE</span><span class="o">))</span> <span class="o">{</span>
+        <span class="c1">// now we have finallu established a connection to the ledger service</span>
+    <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
+        <span class="c1">// there was some error and we can not finish establishing the connection</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre><h2 id='sending-data-to-the-application'>Sending data to the application</h2>
+<p>Once a sensor has been registered, you can start streaming data immediately.
+There are two methods that you can use: <code>sendData</code> and <code>sendDataString</code>,
+depending on the type of data you wish to send. There is no reason to send
+data with a certain rate, but keep in mind that you have no control over how
+data will be broadcast to the network. The Hermes Application will buffer
+these data and will broadcast them as soon as possible, but keep in mind
+that smartphones are subject to bad or non-existent network connectivity,
+so some of the packets might not make it. A small example of code that
+invokes the <code>sendDataString</code> method is the following:</p>
+<pre class="highlight java tab-java"><code><span class="n">JSONObject</span> <span class="n">json</span> <span class="o">=</span> <span class="k">new</span> <span class="n">JSONObject</span><span class="o">();</span>
+<span class="n">json</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"lat"</span><span class="o">,</span> <span class="n">currentPosition</span><span class="o">.</span><span class="na">latitude</span><span class="o">);</span>
+<span class="n">json</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"lng"</span><span class="o">,</span> <span class="n">currentPosition</span><span class="o">.</span><span class="na">longitude</span><span class="o">);</span>
+<span class="n">json</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"timestamp"</span><span class="o">,</span> <span class="n">unixTime</span><span class="o">);</span>
+<span class="n">String</span> <span class="n">res</span> <span class="o">=</span> <span class="n">iHermesService</span><span class="o">.</span><span class="na">sendDataString</span><span class="o">(</span><span class="n">uuid</span><span class="o">,</span> <span class="n">json</span><span class="o">.</span><span class="na">toString</span><span class="o">(),</span> <span class="kc">null</span><span class="o">,</span> <span class="kc">null</span><span class="o">,</span> <span class="kc">null</span><span class="o">,</span> <span class="kc">null</span><span class="o">,</span> <span class="kc">null</span><span class="o">,</span> <span class="kc">null</span><span class="o">,</span> <span class="o">-</span><span class="mi">1</span><span class="o">,</span> <span class="kc">null</span><span class="o">);</span>
+</code></pre><h2 id='privacy-concerns-and-integration'>Privacy concerns and integration</h2>
+<p>An application like Hermes obviously comes with some privacy issues. The point
+behind the architecture of the application is that the user must <strong>always</strong>
+be in control and have final say over what is being streamed. In order for
+any data to be streamed, the user must log in to the application and
+explicitly allow it to start broadcasting data. When a new application
+connects to the Hermes application, it will appear in the sensor list. Even if
+the service connection has been established and data packets have started
+arriving, nothing will be streamed until the user allows it. The application
+does perform some buffering internally to allow the user some time to react
+and ensure that as few packets as possible are dropped during phases of poor
+or non-existent network connectivity.</p>
+<h1 id='streaming-protocol'>Streaming Protocol</h1>
+<p>There is nothing in the architecture that forces a specific protocol to be
+used for streaming data into a ledger. Every advertisement in a marketplace
+contains a string that shows which protocol is used for a stream. The
+supported protocols are the following:</p>
+
+<ol>
+<li>Hermes Plaintext,</li>
+<li>Hermes Plaintext v2 (under development),
+...</li>
+</ol>
+<h2 id='hermes-plaintext'>Hermes Plaintext</h2>
+<p>This is the default protocol used by the application to stream its data. It
+builds a linked list on top of the ledger, where each node contains one or
+more packets of data. The header of the node contains the address of the next
+and the previous node and the signature of the contents of the node. The
+contents of the nodes are signed with the key of the Hermes application. All
+fields are separated with a double colon. Each packet of data is encoded into
+a string using the <a href="https://github.com/metrics20/go-metrics20">Carbon 2.0 format</a>.</p>
+<h2 id='hermes-plaintext-v2'>Hermes Plaintext v2</h2>
+<p>Pretty much the same as v1 except that it allows the data inside the node to
+be encrypted and be chunked. Some ledgers do not allow an arbitrary amount of
+data to be stored in each packet, so this protocol handles this allowing the
+data of one packet to be split into multiple nodes. It also makes more efficient
+use of space because it doesn&#39;t replicate the headers of each packet.</p>
+<h1 id='marketplace'>Marketplace</h1>
+<p>The marketplace can be used to create advertisements and requests for streams
+of data. The REST API of the marketplace is versioned.</p>
+
+<p>Under construction...</p>
+<h1 id='errors'>Errors</h1>
+<aside class="notice">
+This error section is stored in a separate file in <code>includes/_errors.md</code>. Slate allows you to optionally separate out your docs into many files...just save them to the <code>includes</code> folder and add them to the top of your <code>index.md</code>'s frontmatter. Files are included in the order listed.
+</aside>
+
+<p>The Kittn API uses the following error codes:</p>
+
+<table><thead>
+<tr>
+<th>Error Code</th>
+<th>Meaning</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>400</td>
+<td>Bad Request -- Your request is invalid.</td>
+</tr>
+<tr>
+<td>401</td>
+<td>Unauthorized -- Your API key is wrong.</td>
+</tr>
+<tr>
+<td>403</td>
+<td>Forbidden -- The kitten requested is hidden for administrators only.</td>
+</tr>
+<tr>
+<td>404</td>
+<td>Not Found -- The specified kitten could not be found.</td>
+</tr>
+<tr>
+<td>405</td>
+<td>Method Not Allowed -- You tried to access a kitten with an invalid method.</td>
+</tr>
+<tr>
+<td>406</td>
+<td>Not Acceptable -- You requested a format that isn&#39;t json.</td>
+</tr>
+<tr>
+<td>410</td>
+<td>Gone -- The kitten requested has been removed from our servers.</td>
+</tr>
+<tr>
+<td>418</td>
+<td>I&#39;m a teapot.</td>
+</tr>
+<tr>
+<td>429</td>
+<td>Too Many Requests -- You&#39;re requesting too many kittens! Slow down!</td>
+</tr>
+<tr>
+<td>500</td>
+<td>Internal Server Error -- We had a problem with our server. Try again later.</td>
+</tr>
+<tr>
+<td>503</td>
+<td>Service Unavailable -- We&#39;re temporarily offline for maintenance. Please try again later.</td>
+</tr>
+</tbody></table>
+
+      </div>
+      <div class="dark-box">
+          <div class="lang-selector">
+                <a href="#" data-language-name="java">java</a>
+          </div>
+      </div>
+    </div>
+  </body>
+</html>
