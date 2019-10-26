@@ -1,5 +1,6 @@
 plugins {
     id("com.android.library")
+    id( "com.adarshr.test-logger") version "2.0.0"
     kotlin("android")
     kotlin("android.extensions")
 }
@@ -17,6 +18,17 @@ android {
     }
     sourceSets["main"].java.srcDir("src/main/kotlin")
     sourceSets["test"].java.srcDir("src/test/kotlin")
+    testOptions {
+        unitTests.apply {
+            isReturnDefaultValues = true
+            all(KotlinClosure1<Any, Test>({
+                (this as Test).also {
+                        useJUnitPlatform()
+                    }
+                }, this)
+            )
+        }
+    }
 }
 
 dependencies {
@@ -34,8 +46,5 @@ dependencies {
     testImplementation("org.bitcoinj:bitcoinj-core:0.15.2")
     testImplementation("org.junit.jupiter:junit-jupiter:5.5.1")
     testImplementation("org.junit.jupiter:junit-jupiter-params:5.5.1")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.5.1")
 }
-
-//tasks.named<Test>("test") {
-//    useJUnitPlatform()
-//}
