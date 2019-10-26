@@ -79,8 +79,8 @@ class Mnemonic(val entropy: ByteArray, val network: Network, checksum: Byte,
                 bitSet.copyFromInt(wordIndex, bitSetIndex, 11)
                 bitSetIndex += 11
             }
-            val entropy = bitSet.asByteArray(0, entropyBitSize)
-            val checksum = bitSet.asByteArray(entropyBitSize, entropyAndChecksumBitSize)[0]
+            val entropy = bitSet.toByteArray(0, entropyBitSize)
+            val checksum = bitSet.toByteArray(entropyBitSize, entropyAndChecksumBitSize)[0]
             return Mnemonic(entropy, Network.MAINNET, checksum, words, passphrase)
         }
     }
@@ -95,7 +95,7 @@ class Mnemonic(val entropy: ByteArray, val network: Network, checksum: Byte,
         val expectedChecksumBitNum = (words.size * 11) / 33
         val expectedChecksumBits: Byte = BitSet(expectedChecksumBitNum)
             .apply { copyFromByte(expectedChecksum[0], 0, expectedChecksumBitNum, bitOffset = 8 - expectedChecksumBitNum) }
-            .asByteArray(0, expectedChecksumBitNum)[0]
+            .toByteArray(0, expectedChecksumBitNum)[0]
         if (checksum != expectedChecksumBits) throw InvalidChecksum()
 
         // Get seed
