@@ -48,7 +48,7 @@ object BTCKeyEncoder: KeyEncoder<ExPrivKey, ExPubKey>() {
 
 object BTCSigner: BaseECDSASigner() {
 
-    override fun sign(key: SecP256K1PrivKey, data: ByteArray): ByteArray{
+    override fun sign(key: SecP256K1PrivKey, data: ByteArray): ByteArray {
         val signature = chainSign(
             key = key,
             prefix = "Bitcoin Signed Message:\n",

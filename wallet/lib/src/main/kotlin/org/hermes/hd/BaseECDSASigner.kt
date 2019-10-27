@@ -39,6 +39,7 @@ abstract class BaseECDSASigner: Signer<SecP256K1PrivKey> {
                 data
 
         val hashed = recDigest(msgBytes, hashRounds, digest)
-        return key.sign(hashed)
+        val (r, s, rY) = key.rawSign(hashed)
+        return ECDSASignature(r, s, rY)
     }
 }
