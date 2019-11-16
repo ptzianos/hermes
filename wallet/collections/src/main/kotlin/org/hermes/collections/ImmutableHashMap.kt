@@ -1,10 +1,12 @@
-package org.hermes.utils
+package org.hermes.collections
+
+import java.util.*
 
 /**
- * FrozenHashMap is a HashMap that will not accept any new
- * keys after the end of the constructor.
+ * ImmutableHashMap is a HashMap that will not accept any new
+ * keys after the constructor has returned.
  */
-class FrozenHashMap<K,  V>(inputFunction: (FrozenHashMap<K, V>) -> Unit) : HashMap<K, V>() {
+class ImmutableHashMap<K,  V>(inputFunction: (ImmutableHashMap<K, V>) -> Unit) : HashMap<K, V>() {
 
     private var noNewKeys = false
 
@@ -15,7 +17,7 @@ class FrozenHashMap<K,  V>(inputFunction: (FrozenHashMap<K, V>) -> Unit) : HashM
 
     override fun put(key: K, value: V): V? {
         return if (noNewKeys) null
-               else super.put(key, value)
+        else super.put(key, value)
     }
 
     override fun putAll(from: Map<out K, V>) {
@@ -25,6 +27,6 @@ class FrozenHashMap<K,  V>(inputFunction: (FrozenHashMap<K, V>) -> Unit) : HashM
 
     override fun putIfAbsent(key: K, value: V): V? {
         return if (noNewKeys) null
-               else super.putIfAbsent(key, value)
+        else super.putIfAbsent(key, value)
     }
 }

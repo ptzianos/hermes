@@ -6,11 +6,7 @@ buildscript {
         jcenter()
         mavenCentral()
     }
-    dependencies {
-        classpath("com.android.tools.build:gradle:3.5.1")
-        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.3.50")
-        classpath("org.jetbrains.kotlin:kotlin-android-extensions:1.3.50")
-    }
+    dependencies {}
 }
 
 allprojects {
@@ -22,6 +18,6 @@ allprojects {
     }
     ext {
         set("bc_version", "1.61")
-        set("kotlin_version", "1.3.50")
+        set("kotlinVersion", "1.3.50")
     }
 }

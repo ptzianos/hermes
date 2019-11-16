@@ -17,7 +17,10 @@ ansible/inventory/nodes/**/*.yml
 
 # Gradle
 **/.gradle
-android-client/gradle/wrapper/gradle-wrapper.jar
+**/gradle-wrapper.jar
+
+# Jars
+**/libs
 
 # IntelliJ
 **/.idea
@@ -26,9 +29,9 @@ android-client/gradle/wrapper/gradle-wrapper.jar
 # Android
 **/local.properties
 
-# Android Client artifacts
+# Java/Kotlin artifacts
 android-client/app/src/main/jniLibs/
-android-client/app/build/
+**/build/
 android-client/captures/
 
 # Temporary Vim files
@@ -51,7 +54,3 @@ ansible/roles/hermes-node/files/*.apk
 # Carbon Ledger Stuff
 carbon-ledger/build
 carbon-ledger/dist
-
-# Android Client artifacts
-wallet/build/
-wallet/lib/build/

@@ -1,5 +1,7 @@
 package org.hermes.collections
 
+import java.util.*
+
 /**
  * A HashSet that once created can not be modified.
  */
@@ -25,20 +27,5 @@ open class ImmutableHashSet<E>(collection: Collection<E>) {
 
     fun size(): Int {
         return this.hashSet.size
-    }
-}
-
-/**
- * An immutable hash set that also allows the user to use it as an array.
- */
-class OrderedImmutableHashSet<E>(al: List<E>): ImmutableHashSet<E>(al) {
-    private val orderedList: List<E> = al
-
-    operator fun get(i: Int): E {
-        return orderedList[i]
-    }
-
-    fun indexOf(elem: E): Int {
-        return orderedList.indexOf(elem)
     }
 }
