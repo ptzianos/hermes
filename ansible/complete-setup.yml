@@ -3,18 +3,34 @@
   hosts: common_hosts
   roles:
     - common
+  tags:
+    - common
 
 - name: PostgreSQL installation and configuration
   hosts: hermes_db_hosts
   roles:
     - postgres
+  tags:
+    - db
 
 - name: HAProxy installation and configuration
   hosts: haproxy_hosts
   roles:
+    - haproxy
+  tags:
     - haproxy
 
 - name: Hermes API server installation
   hosts: hermes_api_hosts
   roles:
     - hermes-node
+  tags:
+    - api
+
+- name: RabbitMQ instance setup
+  hosts: rabbitmq_hosts
+  roles:
+    - rabbitmq-node
+  tags:
+    - rabbitmq
+
