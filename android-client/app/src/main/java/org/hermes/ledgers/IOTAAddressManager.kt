@@ -2,14 +2,14 @@ package org.hermes.ledgers
 
 import android.content.SharedPreferences
 import android.util.Log
-import org.hermes.repositories.CryptoRepository
-import org.hermes.repositories.SensorRepository
-import org.hermes.iota.Seed
-import org.iota.jota.pow.SpongeFactory
-import org.iota.jota.utils.IotaAPIUtils
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
+import org.hermes.bip44.iota.Seed
+import org.hermes.repositories.CryptoRepository
+import org.hermes.repositories.SensorRepository
+import org.iota.jota.pow.SpongeFactory
+import org.iota.jota.utils.IotaAPIUtils
 
 
 class UnknownClient: Exception()
