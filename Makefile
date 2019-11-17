@@ -23,3 +23,9 @@ wallet-%:
 market-%:
 	cd markett && make $*
 
+client-wallet-jars:
+	cd wallet && make jars
+	cp wallet/collections/build/libs/collections-1.0.jar android-client/app/libs/
+	cp wallet/extensions/build/libs/extensions-1.0.jar android-client/app/libs/
+	cp wallet/bip44/build/libs/bip44-1.0.jar android-client/app/libs/
+
