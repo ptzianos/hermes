@@ -25,7 +25,6 @@ import dagger.Module
 import javax.inject.Inject
 import org.hermes.R
 
-
 /**
  * Fragment used for managing interactions for and presentation of a navigation drawer.
  * See the [design guidelines](https://developer.android.com/design/patterns/navigation-drawer.html#Interaction)
