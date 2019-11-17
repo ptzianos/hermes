@@ -25,7 +25,10 @@ market-%:
 
 client-wallet-jars:
 	cd wallet && make jars
-	cp wallet/collections/build/libs/collections-1.0.jar android-client/app/libs/
-	cp wallet/extensions/build/libs/extensions-1.0.jar android-client/app/libs/
-	cp wallet/bip44/build/libs/bip44-1.0.jar android-client/app/libs/
+	cp wallet/collections/build/libs/collections-1.0.0.jar android-client/app/libs/
+	cp wallet/extensions/build/libs/extensions-1.0.0.jar android-client/app/libs/
+	cp wallet/ternary/build/libs/ternary-1.0.0.jar android-client/app/libs/
+	cp wallet/bip32/build/libs/bip32-1.0.0.jar android-client/app/libs/
+	cp wallet/bip39/build/libs/bip39-1.0.0.jar android-client/app/libs/
+	cp wallet/bip44/build/libs/bip44-1.0.0.jar android-client/app/libs/
 
