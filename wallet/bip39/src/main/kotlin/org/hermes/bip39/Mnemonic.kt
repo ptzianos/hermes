@@ -82,7 +82,7 @@ class Mnemonic(
             var bitSetIndex = 0
             for (word in words) {
                 val wordIndex = EnglishWordlist.index[word] ?: continue
-                bitSet.copyFromInt(wordIndex, bitSetIndex, 11)
+                bitSet.copyFromInt(wordIndex, bitSetIndex, 11, preserveEndianness = true)
                 bitSetIndex += 11
             }
             val entropy = bitSet.toByteArray(0, entropyBitSize)
@@ -102,7 +102,15 @@ class Mnemonic(
         // Extract the n leftmost bits of the checksum. Since Java is big endian, these will be extracted from the
         // first byte of the checksum.
         val expectedChecksumBits: Byte = BitSet(expectedChecksumBitNum)
-            .apply { copyFromByte(expectedChecksum[0], 0, expectedChecksumBitNum, bitOffset = 8 - expectedChecksumBitNum) }
+            .apply {
+                copyFromByte(
+                    expectedChecksum[0],
+                    0,
+                    expectedChecksumBitNum,
+                    bitOffset = 8 - expectedChecksumBitNum,
+                    preserveEndianness = true
+                )
+            }
             .toByteArray(0, expectedChecksumBitNum)[0]
         if (checksum != expectedChecksumBits) throw InvalidChecksum()
 
