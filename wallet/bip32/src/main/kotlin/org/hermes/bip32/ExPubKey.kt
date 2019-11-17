@@ -1,13 +1,10 @@
 package org.hermes.bip32
 
 import java.math.BigInteger
-
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
-
 import org.bouncycastle.math.ec.ECPoint
 import org.bouncycastle.math.ec.FixedPointCombMultiplier
-
 import org.hermes.crypto.CryptoAlgorithms
 import org.hermes.crypto.SecP256K1PrivKey
 import org.hermes.crypto.SecP256K1PubKey
@@ -20,17 +17,20 @@ class ExPubKey(
     override val parent: BIP32PubKey?,
     override val chainCode: ByteArray,
     override val path: String,
-    x : BigInteger,
+    x: BigInteger,
     y: BigInteger,
     val encoder: KeyEncoder<ExPrivKey, ExPubKey> = BTCKeyEncoder
-):
-    SecP256K1PubKey(x, y), BIP32PubKey {
+) : SecP256K1PubKey(x, y), BIP32PubKey {
 
     override fun getEncoded(): ByteArray = bcPoint.getEncoded(true)
 
-    constructor(parent: BIP32PubKey?, chainCode: ByteArray, path: String, publicKeyECPoint: ECPoint,
-                encoder: KeyEncoder<ExPrivKey, ExPubKey> = BTCKeyEncoder
-    ):
+    constructor(
+        parent: BIP32PubKey?,
+        chainCode: ByteArray,
+        path: String,
+        publicKeyECPoint: ECPoint,
+        encoder: KeyEncoder<ExPrivKey, ExPubKey> = BTCKeyEncoder
+    ) :
             this(
                 parent, chainCode, path,
                 publicKeyECPoint.affineXCoord.toBigInteger(),
@@ -38,7 +38,7 @@ class ExPubKey(
                 encoder
             )
 
-    constructor(parent: BIP32PubKey?, chainCode: ByteArray, path: String, rawKey: BigInteger):
+    constructor(parent: BIP32PubKey?, chainCode: ByteArray, path: String, rawKey: BigInteger) :
             this(
                 parent, chainCode, path,
                 FixedPointCombMultiplier()
@@ -46,9 +46,13 @@ class ExPubKey(
                     .normalize()
             )
 
-    constructor(parent: BIP32PubKey?, chainCode: ByteArray, path: String, privateKey: SecP256K1PrivKey,
-                encoder: KeyEncoder<ExPrivKey, ExPubKey> = BTCKeyEncoder
-    ):
+    constructor(
+        parent: BIP32PubKey?,
+        chainCode: ByteArray,
+        path: String,
+        privateKey: SecP256K1PrivKey,
+        encoder: KeyEncoder<ExPrivKey, ExPubKey> = BTCKeyEncoder
+    ) :
             this(parent, chainCode, path,
                 FixedPointCombMultiplier()
                     .multiply(Secp256K1Curve.X9ECParameters.g, privateKey.value)

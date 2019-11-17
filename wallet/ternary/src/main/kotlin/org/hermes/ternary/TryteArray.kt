@@ -1,10 +1,8 @@
 package org.hermes.ternary
 
 import java.math.BigInteger
-import java.util.*
-
+import java.util.LinkedList
 import org.bouncycastle.pqc.math.linearalgebra.IntegerFunctions.pow
-
 import org.iota.jota.utils.TrytesConverter
 
 /**
@@ -35,7 +33,7 @@ class TryteArray {
      * Every character must belong to the balanced trinary alphabet.
      */
     constructor(charArray: CharArray) {
-        trytes = Array(charArray.size) { i ->  Tryte(charArray[i]) }
+        trytes = Array(charArray.size) { i -> Tryte(charArray[i]) }
     }
 
     constructor(byteArray: ByteArray) {

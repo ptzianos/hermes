@@ -8,8 +8,7 @@ import java.security.PrivateKey
 import java.security.SecureRandom
 import java.security.interfaces.ECPrivateKey
 import java.security.spec.ECParameterSpec
-import java.util.*
-
+import java.util.Arrays
 import org.bouncycastle.asn1.ASN1Object
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier
@@ -25,15 +24,12 @@ import org.bouncycastle.math.ec.FixedPointCombMultiplier
 import org.bouncycastle.util.encoders.Hex
 import org.bouncycastle.util.io.pem.PemObject
 import org.bouncycastle.util.io.pem.PemWriter
-
 import org.hermes.encoders.Base58
-
 
 open class SecP256K1PrivKey : PrivateKey, ECPrivateKey {
     companion object {
-        fun random(): SecP256K1PrivKey {
-            return SecP256K1PrivKey(key = BigInteger(256, SecureRandom.getInstance("SHA1PRNG")))
-        }
+        fun random(): SecP256K1PrivKey =
+            SecP256K1PrivKey(key = BigInteger(256, SecureRandom.getInstance("SHA1PRNG")))
 
         fun validateWIFCheckSum(wifStr: String): Boolean {
             val extendedCheckSummedBytes = Base58.decode(wifStr)
@@ -118,7 +114,7 @@ open class SecP256K1PrivKey : PrivateKey, ECPrivateKey {
         return try {
             val info = PrivateKeyInfo(AlgorithmIdentifier(X9ObjectIdentifiers.id_ecPublicKey, params), keyStructure)
             val asn1Object = info.parsePrivateKey() as ASN1Object
-            pemWriter.writeObject(PemObject ("EC PRIVATE KEY", asn1Object.getEncoded("DER")))
+            pemWriter.writeObject(PemObject("EC PRIVATE KEY", asn1Object.getEncoded("DER")))
             pemWriter.flush()
             pemWriter.close()
             stringWriter.toString().toByteArray()

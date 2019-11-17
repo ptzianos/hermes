@@ -1,14 +1,12 @@
 package org.hermes.bip32
 
 import java.lang.Exception
-
 import org.bouncycastle.pqc.math.linearalgebra.IntegerFunctions.pow
-
 import org.hermes.extensions.endsWithAnyOf
 
 object BIP32 {
 
-    class InvalidPath: Exception()
+    class InvalidPath : Exception()
 
     val HARDENED_BIT = pow(2.toLong(), 31)
     val HARDENED_KEY_OFFSET = pow(2.toLong(), 31)

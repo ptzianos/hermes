@@ -5,7 +5,7 @@ import org.hermes.encoders.Base58
 import org.hermes.extensions.extendOrReduceTo
 import org.hermes.extensions.toByteArray
 
-object BTCKeyEncoder: KeyEncoder<ExPrivKey, ExPubKey>() {
+object BTCKeyEncoder : KeyEncoder<ExPrivKey, ExPubKey>() {
     // TODO: Find a way to remove the options map
     override fun encodePrivateKey(key: ExPrivKey, options: Map<String, Any>): String =
         Base58.toBase58String(

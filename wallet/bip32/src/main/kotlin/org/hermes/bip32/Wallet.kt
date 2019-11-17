@@ -2,7 +2,6 @@ package org.hermes.bip32
 
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
-
 import org.hermes.crypto.CryptoAlgorithms
 import org.hermes.extensions.toBigInt
 

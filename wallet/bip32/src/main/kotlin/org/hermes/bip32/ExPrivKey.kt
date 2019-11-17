@@ -1,10 +1,8 @@
 package org.hermes.bip32
 
 import java.math.BigInteger
-
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
-
 import org.hermes.crypto.CryptoAlgorithms
 import org.hermes.crypto.SecP256K1PrivKey
 import org.hermes.crypto.Secp256K1Curve

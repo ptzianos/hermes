@@ -3,7 +3,7 @@ package org.hermes.bip32
 import java.lang.Exception
 
 interface KeyRegistry {
-    class DuplicateKey: Exception()
+    class DuplicateKey : Exception()
 
     /**
      * Return the key that corresponds to this path.

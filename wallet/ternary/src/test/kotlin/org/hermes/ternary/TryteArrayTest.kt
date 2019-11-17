@@ -1,8 +1,8 @@
 package org.hermes.ternary
 
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.Assertions.*
 import java.math.BigInteger
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Test
 
 internal class TryteArrayTest {
 
@@ -59,5 +59,4 @@ internal class TryteArrayTest {
             "bla".toByteArray().toTryteArray().toString()
         )
     }
-
 }

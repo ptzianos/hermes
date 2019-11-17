@@ -2,8 +2,7 @@ package org.hermes.ternary
 
 import java.security.SecureRandom
 
-class InvalidTryte: Exception()
-
+class InvalidTryte : Exception()
 
 class Tryte {
 

@@ -1,7 +1,6 @@
 package org.hermes.ternary
 
-
-class InvalidTrit: Exception()
+class InvalidTrit : Exception()
 
 /**
  * A class that represents a single trit of the balanced trinary system.
@@ -52,7 +51,7 @@ class Trit(i: Int) {
         return false
     }
 
-    override fun toString(): String = when(i) {
+    override fun toString(): String = when (i) {
         -1 -> "T"
         else -> i.toString()
     }

@@ -1,18 +1,21 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-import java.net.URI
 
 buildscript {
     val kotlinVersion = "1.3.50"
+    val ktLintVersion = "9.1.1"
     repositories {
         mavenCentral()
+        maven(url = "https://plugins.gradle.org/m2/")
     }
     dependencies {
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
+        classpath("org.jlleitschuh.gradle:ktlint-gradle:$ktLintVersion")
     }
 }
 
 plugins {
     id("org.jetbrains.kotlin.jvm").version("1.3.50")
+    id("org.jlleitschuh.gradle.ktlint").version("9.1.1")
     id("java-library")
 }
 
@@ -21,7 +24,6 @@ version = "1.0"
 
 repositories {
     mavenCentral()
-    maven { url = URI.create("https://jitpack.io") }
 }
 
 sourceSets["main"].java.srcDir("src/main/kotlin")

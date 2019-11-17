@@ -1,9 +1,8 @@
 package org.hermes.bip32
 
 import org.bouncycastle.util.encoders.Hex
-
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.Assertions.*
 
 internal class WalletTest {
 
@@ -22,7 +21,7 @@ internal class WalletTest {
             "15mKKb2eos1hWa6tisdPwwDC1a5J1y9nma",
             wallet["m"].public.address
         )
-        ////////////////////////////////////////////////////////////////////////////////
+        // //////////////////////////////////////////////////////////////////////////////
         assertEquals(
             "xprv9uHRZZhk6KAJC1avXpDAp4MDc3sQKNxDiPvvkX8Br5ngLNv1TxvUxt4cV1rGL5hj6KCesnDYUhd7oWgT11eZG7XnxHrnYeSvkzY7d2bhkJ7",
             wallet["m/0H"].toString()
@@ -35,7 +34,7 @@ internal class WalletTest {
             "19Q2WoS5hSS6T8GjhK8KZLMgmWaq4neXrh",
             wallet["m/0H"].public.address
         )
-        ////////////////////////////////////////////////////////////////////////////////
+        // //////////////////////////////////////////////////////////////////////////////
         assertEquals(
             "xprv9wTYmMFdV23N2TdNG573QoEsfRrWKQgWeibmLntzniatZvR9BmLnvSxqu53Kw1UmYPxLgboyZQaXwTCg8MSY3H2EU4pWcQDnRnrVA1xe8fs",
             wallet["m/0H/1"].toString()
@@ -48,7 +47,7 @@ internal class WalletTest {
             "1JQheacLPdM5ySCkrZkV66G2ApAXe1mqLj",
             wallet["m/0H/1"].public.address
         )
-        ////////////////////////////////////////////////////////////////////////////////
+        // //////////////////////////////////////////////////////////////////////////////
         assertEquals(
             "xprv9z4pot5VBttmtdRTWfWQmoH1taj2axGVzFqSb8C9xaxKymcFzXBDptWmT7FwuEzG3ryjH4ktypQSAewRiNMjANTtpgP4mLTj34bhnZX7UiM",
             wallet["m/0H/1/2H"].toString()
@@ -61,7 +60,7 @@ internal class WalletTest {
             "1NjxqbA9aZWnh17q1UW3rB4EPu79wDXj7x",
             wallet["m/0H/1/2H"].public.address
         )
-        ////////////////////////////////////////////////////////////////////////////////
+        // //////////////////////////////////////////////////////////////////////////////
         assertEquals(
             "xprvA2JDeKCSNNZky6uBCviVfJSKyQ1mDYahRjijr5idH2WwLsEd4Hsb2Tyh8RfQMuPh7f7RtyzTtdrbdqqsunu5Mm3wDvUAKRHSC34sJ7in334",
             wallet["m/0H/1/2H/2"].toString()
@@ -74,7 +73,7 @@ internal class WalletTest {
             "1LjmJcdPnDHhNTUgrWyhLGnRDKxQjoxAgt",
             wallet["m/0H/1/2H/2"].public.address
         )
-        ////////////////////////////////////////////////////////////////////////////////
+        // //////////////////////////////////////////////////////////////////////////////
         assertEquals(
             "xprvA41z7zogVVwxVSgdKUHDy1SKmdb533PjDz7J6N6mV6uS3ze1ai8FHa8kmHScGpWmj4WggLyQjgPie1rFSruoUihUZREPSL39UNdE3BBDu76",
             wallet["m/0H/1/2H/2/1000000000"].toString()

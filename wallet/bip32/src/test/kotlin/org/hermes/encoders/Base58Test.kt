@@ -1,9 +1,8 @@
 package org.hermes.encoders
 
 import org.bouncycastle.util.encoders.Hex
-
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.Assertions.*
 
 /**
  * Test vectors based on @see{https://github.com/luke-jr/libbase58}

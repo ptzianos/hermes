@@ -4,13 +4,11 @@ import java.math.BigInteger
 import java.security.PublicKey
 import java.security.interfaces.ECPublicKey
 import java.security.spec.ECParameterSpec
-
 import org.bouncycastle.math.ec.ECPoint
 import org.bouncycastle.math.ec.FixedPointCombMultiplier
 import org.bouncycastle.util.encoders.Hex
 
-
-open class SecP256K1PubKey(val x: BigInteger, val y: BigInteger): PublicKey, ECPublicKey {
+open class SecP256K1PubKey(val x: BigInteger, val y: BigInteger) : PublicKey, ECPublicKey {
     companion object {
         fun fromBitcoinPubKey(pubKey: String): SecP256K1PubKey {
             if (!pubKey.startsWith("04")) throw Exception("Not a Bitcoin pub key hex")
@@ -31,11 +29,11 @@ open class SecP256K1PubKey(val x: BigInteger, val y: BigInteger): PublicKey, ECP
     // The encoded field as a Hex string
     val encodedHex: String by lazy { Hex.toHexString(encoded) }
 
-    constructor(publicKeyECPoint: ECPoint): this(
+    constructor(publicKeyECPoint: ECPoint) : this(
         publicKeyECPoint.affineXCoord.toBigInteger(),
         publicKeyECPoint.affineYCoord.toBigInteger())
 
-    constructor(privateKey: SecP256K1PrivKey):
+    constructor(privateKey: SecP256K1PrivKey) :
         this(
             FixedPointCombMultiplier()
             .multiply(

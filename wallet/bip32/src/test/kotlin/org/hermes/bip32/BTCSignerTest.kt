@@ -1,11 +1,9 @@
 package org.hermes.bip32
 
 import org.bouncycastle.util.Strings
-
 import org.hermes.crypto.SecP256K1PrivKey
-
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.Assertions.*
 
 internal class BTCSignerTest {
 
@@ -15,10 +13,12 @@ internal class BTCSignerTest {
 
     @Test
     fun sign() {
-          assertEquals(
+        assertEquals(
             "G0orznlzaawDMgoOYJHpeNc70XycJ6V45ktP0aoir1eXG8lIAQ6/44Evyh3jWeYxGtzaSIQ+pPNSzfAtHjU7ei0=",
-            this@BTCSignerTest.sign("0x0c28fca386c7a227600b2fe50b7cae11ec86d3bf1fbe471be89827e19d72aa1d",
-                                    "blaa")
+            this@BTCSignerTest.sign(
+                "0x0c28fca386c7a227600b2fe50b7cae11ec86d3bf1fbe471be89827e19d72aa1d",
+                "blaa"
+            )
         )
     }
 

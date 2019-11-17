@@ -2,7 +2,6 @@ package org.hermes.bip44.iota
 
 import org.hermes.bip32.BIP32PubKey
 import org.hermes.ternary.TryteArray
-
 import org.iota.jota.pow.SpongeFactory
 import org.iota.jota.utils.Checksum
 import org.iota.jota.utils.Converter
@@ -29,7 +28,7 @@ class IOTAExPubKey(
     override val address: String by lazy { Checksum.addChecksum(Converter.trytes(addressTrits)) }
 
     override fun child(index: Long): BIP32PubKey {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
     }
 
     override fun getAlgorithm(): String = "Kerl"

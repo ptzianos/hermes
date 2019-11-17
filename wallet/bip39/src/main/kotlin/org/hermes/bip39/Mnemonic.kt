@@ -2,15 +2,11 @@ package org.hermes.bip39
 
 import java.nio.ByteBuffer
 import java.security.SecureRandom
-import java.util.*
-
+import java.util.BitSet
 import javax.crypto.SecretKeyFactory
 import javax.crypto.spec.PBEKeySpec
-
 import kotlin.math.pow
-
 import org.bouncycastle.util.encoders.Hex
-
 import org.hermes.crypto.CryptoAlgorithms
 import org.hermes.crypto.SHA256
 import org.hermes.extensions.copyFromByte
@@ -21,8 +17,13 @@ import org.hermes.extensions.toByteArray
  * An implementation of the algorithm described in BIP 39 for generating a mnemonic sentence.
  * @see{https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki}
  */
-class Mnemonic(val entropy: ByteArray, val network: Network, checksum: Byte,
-               words: Array<String>, passphrase: String = "") {
+class Mnemonic(
+    val entropy: ByteArray,
+    val network: Network,
+    checksum: Byte,
+    words: Array<String>,
+    passphrase: String = ""
+) {
 
     enum class Entropy(val i: Int) {
         SIZE_128(128),
@@ -37,8 +38,8 @@ class Mnemonic(val entropy: ByteArray, val network: Network, checksum: Byte,
         TESTNET(Hex.decode("04358394"))
     }
 
-    class InvalidWord: Exception()
-    class InvalidChecksum: Exception()
+    class InvalidWord : Exception()
+    class InvalidChecksum : Exception()
 
     companion object {
         fun new(size: Entropy, passphrase: String = ""): Mnemonic {
@@ -98,6 +99,8 @@ class Mnemonic(val entropy: ByteArray, val network: Network, checksum: Byte,
         // Calculate checksum of the entropy
         val expectedChecksum = SHA256.impl.digest(entropy)
         val expectedChecksumBitNum = (words.size * 11) / 33
+        // Extract the n leftmost bits of the checksum. Since Java is big endian, these will be extracted from the
+        // first byte of the checksum.
         val expectedChecksumBits: Byte = BitSet(expectedChecksumBitNum)
             .apply { copyFromByte(expectedChecksum[0], 0, expectedChecksumBitNum, bitOffset = 8 - expectedChecksumBitNum) }
             .toByteArray(0, expectedChecksumBitNum)[0]

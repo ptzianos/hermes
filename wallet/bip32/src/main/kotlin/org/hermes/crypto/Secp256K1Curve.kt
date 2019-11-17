@@ -5,14 +5,12 @@ import java.security.spec.ECFieldFp
 import java.security.spec.ECParameterSpec
 import java.security.spec.ECPoint
 import java.security.spec.EllipticCurve
-
 import org.bouncycastle.asn1.x9.X962Parameters
 import org.bouncycastle.asn1.x9.X9ECParameters
 import org.bouncycastle.crypto.ec.CustomNamedCurves
 import org.bouncycastle.crypto.params.ECDomainParameters
 import org.bouncycastle.math.ec.FixedPointUtil
 import org.bouncycastle.util.encoders.Hex
-
 
 /**
  * Object that contains all the important bits and pieces for generating Keypairs

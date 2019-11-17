@@ -3,11 +3,10 @@ package org.hermes.bip32
 import java.lang.Exception
 import java.security.PrivateKey
 
+interface BIP32Key : PrivateKey {
+    class InvalidIndex : Exception()
 
-interface BIP32Key: PrivateKey {
-    class InvalidIndex: Exception()
-
-    class NoSibling: Exception()
+    class NoSibling : Exception()
 
     companion object {
         /**

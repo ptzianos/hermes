@@ -5,7 +5,7 @@ package org.hermes.bip32
  * an in-memory HashMap. When an application is shut down, all keys are
  * lost.
  */
-class InMemoryKeyRegistry: KeyRegistry {
+class InMemoryKeyRegistry : KeyRegistry {
     private val registry = HashMap<String, BIP32Key>()
 
     override fun get(path: String): BIP32Key? = registry[path]

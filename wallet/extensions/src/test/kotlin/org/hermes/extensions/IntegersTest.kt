@@ -1,11 +1,10 @@
 package org.hermes.extensions
 
 import org.bouncycastle.util.encoders.Hex
-
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-internal class IntegersKtTest {
+internal class IntegersTest {
 
     @Test
     fun IntToByteArray() {
@@ -20,5 +19,4 @@ internal class IntegersKtTest {
         val h5 = Hex.toHexString(630.toByteArray())
         assertEquals("0276", h5)
     }
-
 }

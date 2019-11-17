@@ -1,13 +1,12 @@
 package org.hermes.crypto
 
 import java.lang.Exception
-
 import javax.crypto.SecretKeyFactory
 import javax.crypto.spec.PBEKeySpec
 
 object PasswordHasher {
 
-    class WrongHashFormatException: Exception()
+    class WrongHashFormatException : Exception()
 
     /**
      * Unpacks the components of a hash from the string and returns them.
@@ -18,17 +17,18 @@ object PasswordHasher {
             throw WrongHashFormatException()
         }
         return HashedPassword(
-                subStrings[0],
-                subStrings[1].toInt(),
-                subStrings[2].toByteArray(),
-                subStrings[3].toByteArray()
+            subStrings[0],
+            subStrings[1].toInt(),
+            subStrings[2].toByteArray(),
+            subStrings[3].toByteArray()
         )
     }
 
-    fun hashPassword(password: CharArray,
-                     salt: ByteArray = PasswordHashingParameters.Salt,
-                     iterations: Int = PasswordHashingParameters.Iterations
-                     ): HashedPassword {
+    fun hashPassword(
+        password: CharArray,
+        salt: ByteArray = PasswordHashingParameters.Salt,
+        iterations: Int = PasswordHashingParameters.Iterations
+    ): HashedPassword {
         val passwordBasedEncryptionSpec = PBEKeySpec(
                 password,
                 salt,
@@ -44,5 +44,4 @@ object PasswordHasher {
                 .map { b: Byte -> String.format("%02X", b) }
                 .fold("") { acc, i -> acc + i }
     }
-
 }

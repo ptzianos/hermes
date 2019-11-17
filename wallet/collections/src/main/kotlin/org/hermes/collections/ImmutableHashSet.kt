@@ -1,6 +1,7 @@
 package org.hermes.collections
 
-import java.util.*
+import java.util.HashSet
+import kotlin.collections.Collection
 
 /**
  * A HashSet that once created can not be modified.

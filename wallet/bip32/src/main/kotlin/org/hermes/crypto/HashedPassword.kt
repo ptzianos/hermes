@@ -1,9 +1,11 @@
 package org.hermes.crypto
 
-data class HashedPassword(val hashingAlgorithm: String = CryptoAlgorithms.PBKDF2_HMC_SHA1 ,
-                          val iterations: Int = PasswordHashingParameters.Iterations,
-                          val salt: ByteArray = PasswordHashingParameters.Salt,
-                          val hash: ByteArray) {
+data class HashedPassword(
+    val hashingAlgorithm: String = CryptoAlgorithms.PBKDF2_HMC_SHA1,
+    val iterations: Int = PasswordHashingParameters.Iterations,
+    val salt: ByteArray = PasswordHashingParameters.Salt,
+    val hash: ByteArray
+) {
     override fun toString(): String {
         return hashingAlgorithm + "\$$iterations" + "\$${PasswordHasher.bytesToHex(salt)}" +
                 "\$${PasswordHasher.bytesToHex(hash)}"

@@ -1,7 +1,8 @@
-GRADLEW=./gradlew
+GRADLE=./gradlew
 
 .PHONY: tests
 tests:
+	$(GRADLE) test
 
 %.tests:
 	$(GRADLE) $*:test
@@ -36,15 +37,20 @@ bip39.build: collections.jar extensions.jar bip32.jar
 	$(GRADLE) bip39:build
 
 .PHONY: bip44.build
-bip44.build: collections.jar extensions.jar ternary.jar bip32.jar bip39.jar
+bip44.build: collections.jar extensions.jar ternary.jar bip32.jar
 	mkdir -p bip44/libs
 	cp collections/build/libs/collections-1.0.jar bip44/libs/
 	cp extensions/build/libs/extensions-1.0.jar bip44/libs/
 	cp ternary/build/libs/ternary-1.0.jar bip44/libs/
 	cp bip32/build/libs/bip32-1.0.jar bip44/libs/
-	cp bip39/build/libs/bip39-1.0.jar bip44/libs/
 	$(GRADLE) bip44:build
 
 %.build:
 	$(GRADLE) $*:build
+
+%.lint:
+	$(GRADLE) $*:ktlintCheck
+
+lint:
+	$(GRADLE) ktlintCheck
 

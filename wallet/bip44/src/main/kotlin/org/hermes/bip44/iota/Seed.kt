@@ -1,11 +1,10 @@
 package org.hermes.bip44.iota
 
-import org.hermes.ternary.Tryte
 import org.hermes.ternary.InvalidTryte
-
+import org.hermes.ternary.Tryte
 import org.iota.jota.utils.Converter
 
-class InvalidSeedException: Exception()
+class InvalidSeedException : Exception()
 
 /**
  * Re-implementation of some cryptographic utilities used by the IOTA
@@ -45,8 +44,9 @@ class Seed(val value: CharArray) {
     fun validate() {
         if (value.size != MAX_SEED_LENGTH) throw InvalidSeedException()
         for (c: Char in value) {
-            try { Tryte(c) }
-            catch (t: InvalidTryte) { throw InvalidSeedException() }
+            try {
+                Tryte(c)
+            } catch (t: InvalidTryte) { throw InvalidSeedException() }
         }
     }
 

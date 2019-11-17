@@ -1,9 +1,7 @@
 package org.hermes.ternary
 
-import java.util.*
-
+import java.util.LinkedList
 import org.bouncycastle.pqc.math.linearalgebra.IntegerFunctions.pow
-
 
 /**
  * A class that represents a sequence of trits. It does not necessarily mean that the trits
@@ -61,7 +59,7 @@ class TritArray {
     fun zip(otherArray: TritArray): List<Pair<Trit, Trit>> {
         val zipped = LinkedList<Pair<Trit, Trit>>()
         for (i: Int in 0 until Math.max(size, otherArray.size)) {
-            when{
+            when {
                 i >= size -> zipped.add(Pair(Trit(0), otherArray.tritArray[i]))
                 i >= otherArray.size -> zipped.add(Pair(tritArray[i], Trit(0)))
                 else -> zipped.add(Pair(tritArray[i], otherArray.tritArray[i]))
@@ -223,9 +221,9 @@ class TritArray {
         val array: Array<Tryte> = Array(tryteArraySize) { Tryte.zero }
         for (i in 0 until tryteArraySize) {
             array[i] = Tryte(
-                safeGet(i*3),
-                safeGet(i*3 + 1),
-                safeGet(i*3 + 2)
+                safeGet(i * 3),
+                safeGet(i * 3 + 1),
+                safeGet(i * 3 + 2)
             )
         }
         return TryteArray(*array)

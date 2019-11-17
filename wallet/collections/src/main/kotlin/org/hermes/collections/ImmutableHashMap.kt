@@ -1,12 +1,12 @@
 package org.hermes.collections
 
-import java.util.*
+import java.util.HashMap
 
 /**
  * ImmutableHashMap is a HashMap that will not accept any new
  * keys after the constructor has returned.
  */
-class ImmutableHashMap<K,  V>(inputFunction: (ImmutableHashMap<K, V>) -> Unit) : HashMap<K, V>() {
+class ImmutableHashMap<K, V>(inputFunction: (ImmutableHashMap<K, V>) -> Unit) : HashMap<K, V>() {
 
     private var noNewKeys = false
 

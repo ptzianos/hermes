@@ -2,7 +2,6 @@ package org.hermes.crypto
 
 import java.lang.Exception
 import java.math.BigInteger
-
 import org.bouncycastle.util.encoders.Hex
 
 /**
@@ -11,7 +10,7 @@ import org.bouncycastle.util.encoders.Hex
  */
 class ECDSASignature(val r: BigInteger, val s: BigInteger, val rY: BigInteger? = null) {
 
-    class NoEvenBit: Exception()
+    class NoEvenBit : Exception()
 
     val TWO = BigInteger(byteArrayOf(2.toByte()))
     val vb: Byte?
@@ -32,8 +31,9 @@ class ECDSASignature(val r: BigInteger, val s: BigInteger, val rY: BigInteger? =
         }
         rb = normalizeByteArray(r.toByteArray())
         sb = normalizeByteArray(s.toByteArray())
-        canonicalSb = if (s.multiply(TWO) < Secp256K1Curve.n) sb
-                      else normalizeByteArray(Secp256K1Curve.X9ECParameters.n.subtract(s).toByteArray())
+        canonicalSb =
+            if (s.multiply(TWO) < Secp256K1Curve.n) sb
+            else normalizeByteArray(Secp256K1Curve.X9ECParameters.n.subtract(s).toByteArray())
         if (rY == null) vb = null
         else {
             val yMod2 = rY.mod(TWO).toInt()
@@ -64,11 +64,11 @@ class ECDSASignature(val r: BigInteger, val s: BigInteger, val rY: BigInteger? =
      * Returns the ECDSA signature as a hexed string
      */
     fun toHexedBinary(): String = Hex.toHexString(toBinaryFormat())
-    //DER encoding
+    // DER encoding
     //
-    //For reference, here is how to encode signatures correctly in DER format.
+    // For reference, here is how to encode signatures correctly in DER format.
     //
-    //0x30 [total-length] 0x02 [R-length] [R] 0x02 [S-length] [S] [sighash-type]
+    // 0x30 [total-length] 0x02 [R-length] [R] 0x02 [S-length] [S] [sighash-type]
     //
     //    total-length: 1-byte length descriptor of everything that follows, excluding the sighash byte.
     //    R-length: 1-byte length descriptor of the R value that follows.
@@ -77,7 +77,7 @@ class ECDSASignature(val r: BigInteger, val s: BigInteger, val rY: BigInteger? =
     //    S: arbitrary-length big-endian encoded S value. The same rules apply as for R.
     //    sighash-type: 1-byte hashtype flag (only 0x01, 0x02, 0x03, 0x81, 0x82 and 0x83 are allowed).
     //
-    //This is already enforced by the reference client as of version 0.8.0 (only as relay policy, not as a consensus rule).
+    // This is already enforced by the reference client as of version 0.8.0 (only as relay policy, not as a consensus rule).
     //
-    //This rule, combined with the low S requirement above, results in S-length being at most 32 (and R-length at most 33), and the total signature size being at most 72 bytes (and on average 71.494 bytes).
+    // This rule, combined with the low S requirement above, results in S-length being at most 32 (and R-length at most 33), and the total signature size being at most 72 bytes (and on average 71.494 bytes).
 }

@@ -3,7 +3,6 @@ package org.hermes.bip44.iota
 import java.security.NoSuchAlgorithmException
 import javax.crypto.SecretKeyFactory
 import javax.crypto.spec.PBEKeySpec
-
 import org.hermes.bip32.BIP32
 import org.hermes.bip32.BIP32Key
 import org.hermes.bip32.BIP32PubKey
@@ -13,7 +12,6 @@ import org.hermes.extensions.toByteArray
 import org.hermes.extensions.toTritArray
 import org.hermes.extensions.toTryteArray
 import org.hermes.ternary.TryteArray
-
 import org.iota.jota.pow.SpongeFactory
 import org.iota.jota.utils.Signing
 

@@ -2,13 +2,12 @@ package org.hermes.bip32
 
 import java.lang.Exception
 import java.security.PublicKey
-
 import org.hermes.crypto.RIPEMD
 import org.hermes.crypto.SHA256
 
-interface BIP32PubKey: PublicKey {
+interface BIP32PubKey : PublicKey {
 
-    class NoPubKey: Exception()
+    class NoPubKey : Exception()
 
     val path: String
 

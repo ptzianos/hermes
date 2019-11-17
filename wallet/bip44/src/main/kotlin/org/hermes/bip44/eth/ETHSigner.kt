@@ -4,7 +4,7 @@ import org.hermes.bip32.BaseECDSASigner
 import org.hermes.crypto.ECDSASignature
 import org.hermes.crypto.SecP256K1PrivKey
 
-object ETHSigner: BaseECDSASigner() {
+object ETHSigner : BaseECDSASigner() {
     override fun sign(key: SecP256K1PrivKey, data: ByteArray): ByteArray {
         val signature = chainSign(
             key = key,

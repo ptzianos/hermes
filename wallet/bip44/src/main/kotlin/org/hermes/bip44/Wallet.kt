@@ -1,8 +1,12 @@
 package org.hermes.bip44
 
 import java.lang.Exception
-
-import org.hermes.bip32.*
+import org.hermes.bip32.BIP32
+import org.hermes.bip32.BIP32Key
+import org.hermes.bip32.BTCKeyEncoder
+import org.hermes.bip32.ExPrivKey
+import org.hermes.bip32.InMemoryKeyRegistry
+import org.hermes.bip32.KeyRegistry
 import org.hermes.bip32.Wallet as BIP32Wallet
 import org.hermes.bip44.eth.ETHKeyEncoder
 import org.hermes.bip44.iota.IOTAExPrivKey
@@ -10,7 +14,7 @@ import org.hermes.extensions.toTritArray
 
 class Wallet(seed: ByteArray, keyRegistry: KeyRegistry = InMemoryKeyRegistry()) {
 
-    class InvalidCoinType(): Exception()
+    class InvalidCoinType : Exception()
 
     /**
      * ExtendedWallet is a class that extends the standard BIP32 compliant wallet so
@@ -21,9 +25,8 @@ class Wallet(seed: ByteArray, keyRegistry: KeyRegistry = InMemoryKeyRegistry()) 
      * The ExtendedWallet is seeded once and can then be re-used for multiple different
      * currencies from the same application.
      */
-    class ExtendedWallet(seed: ByteArray, private val keyRegistry: KeyRegistry = InMemoryKeyRegistry()):
-        BIP32Wallet(seed, keyRegistry)
-    {
+    class ExtendedWallet(seed: ByteArray, private val keyRegistry: KeyRegistry = InMemoryKeyRegistry()) :
+        BIP32Wallet(seed, keyRegistry) {
 
         companion object {
             val BIP44Path = BIP32.normalizeToStr("m/44'") // "m/2147483692" // m/44'
@@ -55,8 +58,7 @@ class Wallet(seed: ByteArray, keyRegistry: KeyRegistry = InMemoryKeyRegistry()) 
                             bip44Key.public.encoded,
                             bip44Key.chainCode)
                         IOTAExPrivKey(childPath, bip44Key, chainCode, key.toTritArray().toTryteArray())
-                    }
-                    else {
+                    } else {
                         // Standard ExPrivKeys
                         val encoder = when (coinEntry.symbol) {
                             "ETH" -> ETHKeyEncoder

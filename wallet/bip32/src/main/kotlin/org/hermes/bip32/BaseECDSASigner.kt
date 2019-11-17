@@ -1,16 +1,15 @@
 package org.hermes.bip32
 
 import java.security.MessageDigest
-
 import org.hermes.crypto.ECDSASignature
 import org.hermes.crypto.SecP256K1PrivKey
 import org.hermes.extensions.toByteArray
 
-abstract class BaseECDSASigner: Signer<SecP256K1PrivKey> {
+abstract class BaseECDSASigner : Signer<SecP256K1PrivKey> {
 
     tailrec fun recDigest(msg: ByteArray, round: Int, digest: MessageDigest = MessageDigest.getInstance("SHA-256")): ByteArray {
         val d = digest.digest(msg)
-        return when(round) {
+        return when (round) {
             1 -> d
             else -> recDigest(d, round - 1, digest)
         }
@@ -21,7 +20,11 @@ abstract class BaseECDSASigner: Signer<SecP256K1PrivKey> {
      * that loosely follow the Electrum style signatures.
      */
     fun chainSign(
-        key: SecP256K1PrivKey, prefix: String, data: ByteArray, hashRounds: Int = 1, digest: MessageDigest
+        key: SecP256K1PrivKey,
+        prefix: String,
+        data: ByteArray,
+        hashRounds: Int = 1,
+        digest: MessageDigest
     ): ECDSASignature {
         val prefixLength = prefix.length
         val messageLength = data.size

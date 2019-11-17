@@ -3,7 +3,7 @@ package org.hermes.ternary
 import org.hermes.collections.ImmutableHashSet
 import org.hermes.collections.OrderedImmutableHashSet
 
-class OutOfTernaryBounds: Exception()
+class OutOfTernaryBounds : Exception()
 
 /**
  * General properties of the Balanced Trinary system used inside IOTA.

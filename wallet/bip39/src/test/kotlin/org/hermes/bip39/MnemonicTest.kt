@@ -2,8 +2,7 @@ package org.hermes.bip39
 
 import org.bouncycastle.util.encoders.Hex
 import org.hermes.bip32.Wallet
-
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
 
@@ -17,7 +16,6 @@ class MnemonicTest {
 
     companion object {
 
-//        @Parameterized.Parameters(name = "{index}: testBIP39({0}) = {2}")
         @JvmStatic
         fun BIP39TestVectors(): Collection<Array<String>> = listOf(
             arrayOf(

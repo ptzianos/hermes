@@ -6,7 +6,7 @@ import org.hermes.bip32.ExPubKey
 import org.hermes.bip32.KeyEncoder
 import org.hermes.crypto.Keccak
 
-object ETHKeyEncoder: KeyEncoder<ExPrivKey, ExPubKey>() {
+object ETHKeyEncoder : KeyEncoder<ExPrivKey, ExPubKey>() {
     override fun encodePrivateKey(key: ExPrivKey, options: Map<String, Any>): String =
         // Drop the 0x00 byte at the beginning
         Hex.toHexString(key.value.toByteArray().drop(1).toByteArray())

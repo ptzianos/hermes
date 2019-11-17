@@ -1,7 +1,8 @@
 package org.hermes.ternary
 
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.Assertions.*
 
 internal class TryteTest {
 
@@ -30,5 +31,4 @@ internal class TryteTest {
         assertEquals(Tryte('Y').decimalValue, 12)
         assertEquals(13, (Tryte('N') + Tryte('Y')).decimalValue)
     }
-
 }
