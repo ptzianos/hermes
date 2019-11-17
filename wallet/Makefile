@@ -51,6 +51,10 @@ bip44.build: collections.jar extensions.jar ternary.jar bip32.jar
 %.lint:
 	$(GRADLE) $*:ktlintCheck
 
+.PHONY: lint
 lint:
 	$(GRADLE) ktlintCheck
+
+.PHONY: jars
+jars: collections.jar extensions.jar ternary.jar bip32.jar bip39.jar bip44.jar
 
