@@ -3,24 +3,20 @@ package org.hermes.repositories
 import android.app.Application
 import android.content.SharedPreferences
 import android.util.Log
-
 import java.security.*
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
-
 import org.bouncycastle.jce.provider.BouncyCastleProvider
 import org.bouncycastle.jcajce.provider.digest.SHA3
 import org.bouncycastle.util.encoders.Hex
-
 import org.hermes.HermesRoomDatabase
 import org.hermes.R
+import org.hermes.bip32.BTCSigner
+import org.hermes.bip44.iota.Seed
 import org.hermes.crypto.PasswordHasher
 import org.hermes.crypto.SecP256K1PrivKey
 import org.hermes.crypto.SecP256K1PubKey
-import org.hermes.hd.BTCSigner
-import org.hermes.iota.Seed
-
 
 @Singleton
 class CryptoRepository @Inject constructor(

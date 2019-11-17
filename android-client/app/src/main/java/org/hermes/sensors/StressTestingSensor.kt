@@ -12,7 +12,7 @@ import kotlinx.coroutines.launch
 import org.hermes.BACKGROUND
 import org.hermes.LedgerService
 import org.hermes.entities.Sensor
-import org.hermes.iota.IOTA
+import org.hermes.IOTA
 import org.hermes.repositories.SensorRepository
 
 /**

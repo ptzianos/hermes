@@ -2,9 +2,6 @@ package org.hermes.fragments
 
 
 import android.content.Context
-import androidx.fragment.app.Fragment
-import androidx.core.view.GravityCompat
-import androidx.drawerlayout.widget.DrawerLayout
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.PorterDuff
@@ -21,9 +18,11 @@ import android.view.ViewGroup
 import android.widget.*
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.res.ResourcesCompat.getDrawable
+import androidx.core.view.GravityCompat
+import androidx.drawerlayout.widget.DrawerLayout
+import androidx.fragment.app.Fragment
 import dagger.Module
 import javax.inject.Inject
-
 import org.hermes.R
 
 

@@ -7,17 +7,15 @@ import androidx.room.Room
 import com.google.gson.GsonBuilder
 import dagger.Module
 import dagger.Provides
-import okhttp3.OkHttpClient
 import java.security.KeyStore
+import java.util.concurrent.TimeUnit
 import javax.inject.Named
 import javax.inject.Singleton
-import retrofit2.Retrofit
+import okhttp3.OkHttpClient
 import retrofit2.converter.gson.GsonConverterFactory
-import java.util.concurrent.TimeUnit
-
+import retrofit2.Retrofit
 import org.hermes.HermesRoomDatabase
 import org.hermes.R
-
 
 @Module
 class HermesModule {
@@ -56,6 +54,7 @@ class HermesModule {
                     .connectTimeout(20, TimeUnit.SECONDS)
                     .readTimeout(30, TimeUnit.SECONDS)
                     .writeTimeout(30, TimeUnit.SECONDS)
-                    .build())
+                    .build()
+            )
     }
 }

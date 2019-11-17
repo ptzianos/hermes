@@ -1,12 +1,9 @@
 package org.hermes.utils
 
 import android.util.Log
-import org.bouncycastle.util.encoders.Hex
+import java.lang.StringBuilder
 import org.hermes.crypto.SecP256K1PrivKey
 import org.iota.jota.utils.TrytesConverter
-import java.lang.StringBuilder
-import java.security.PrivateKey
-import java.security.Signature
 
 /**
  * Split a string into strings of maximum size equal to chunkSize.
@@ -43,17 +40,9 @@ fun String.splitInChunks(chunkSize: Int): Array<String> {
 /**
  * Convert ASCII to trytes.
  */
-fun String.toTrytes(): String {
-    return TrytesConverter.asciiToTrytes(this)
-}
+fun String.toTrytes(): String = TrytesConverter.asciiToTrytes(this)
 
-fun String.stripPaddingOfTrytes(): String {
-    return this.trimEnd('9')
-}
-
-fun String.prepend(header: String): String {
-    return header + this
-}
+fun String.prepend(header: String): String = header + this
 
 fun String.sign(header: String = "", privateKey: SecP256K1PrivKey,
                 separator: String = ""): String {
@@ -68,18 +57,4 @@ fun String.sign(header: String = "", privateKey: SecP256K1PrivKey,
         Log.e("String","Could not find algorithm to sign the message $e")
         this
     }
-}
-
-fun String.endsWithAnyOf(vararg s: String): Boolean {
-    for (_s in s)
-        if (this.endsWith(_s))
-            return true
-    return false
-}
-
-fun String.startsWithAnyOf(collection: Collection<String>): Boolean {
-    for (prefix in collection)
-        if (this.startsWith(prefix))
-            return true
-    return false
 }

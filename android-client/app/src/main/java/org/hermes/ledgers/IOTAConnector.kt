@@ -3,33 +3,33 @@ package org.hermes.ledgers
 
 import android.content.SharedPreferences
 import android.util.Log
-
 import java.lang.Exception
 import java.lang.StringBuilder
 import javax.inject.Inject
 import javax.inject.Named
-
 import kotlinx.coroutines.*
-
 import org.apache.commons.lang3.StringUtils
-
+import org.hermes.BACKGROUND
+import org.hermes.HermesClientApp
+import org.hermes.HermesRoomDatabase
 import org.iota.jota.IotaAPI
 import org.iota.jota.model.Bundle
 import org.iota.jota.model.Transaction
 import org.iota.jota.utils.Constants
 import org.iota.jota.utils.InputValidator
-
-import org.threeten.bp.OffsetDateTime
-
-import org.hermes.*
 import org.hermes.crypto.SecP256K1PrivKey
 import org.hermes.entities.Event
-import org.hermes.iota.IOTA
-import org.hermes.iota.Seed
+import org.hermes.IOTA
+import org.hermes.Metric20
+import org.hermes.bip44.iota.Seed
 import org.hermes.repositories.MetadataRepository
 import org.hermes.repositories.SensorRepository
-import org.hermes.utils.*
-
+import org.hermes.ternary.toTrytes
+import org.hermes.utils.SQLiteTypeConverter
+import org.hermes.utils.prepend
+import org.hermes.utils.sign
+import org.hermes.utils.splitInChunks
+import org.threeten.bp.OffsetDateTime
 
 class IOTAConnector(val seed: Seed, private val privateKey: SecP256K1PrivKey, app: HermesClientApp) {
 
