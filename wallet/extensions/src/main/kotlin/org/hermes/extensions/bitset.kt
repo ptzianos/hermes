@@ -18,16 +18,27 @@ import java.util.BitSet
  * @param bits number of bits to be copied
  * @param bitOffset from which bit of the bitset will the copying begin
  */
-fun BitSet.copyFromInt(_int: Int, start: Int, bits: Int, bitOffset: Int = 0): BitSet {
+fun BitSet.copyFromInt(
+    _int: Int,
+    start: Int,
+    bits: Int,
+    bitOffset: Int = 0,
+    preserveEndianness: Boolean = false
+): BitSet {
     for (i in 0 until bits) {
-        if (_int and (1 shl (bitOffset + i)) > 0)
-            flip(start + i)
+        if (_int and (1 shl (bitOffset + i)) > 0) {
+            if (preserveEndianness) {
+                flip(start + bits - i - 1)
+            } else {
+                flip(start + i)
+            }
+        }
     }
     return this
 }
 
-fun BitSet.copyFromByte(byte: Byte, start: Int, bits: Int, bitOffset: Int = 0) =
-    copyFromInt(byte.toInt(), start, bits, bitOffset)
+fun BitSet.copyFromByte(byte: Byte, start: Int, bits: Int, bitOffset: Int = 0, preserveEndianness: Boolean = false) =
+    copyFromInt(byte.toInt(), start, bits, bitOffset, preserveEndianness)
 
 fun BitSet.toString(from: Int, to: Int): String =
     (from until to)

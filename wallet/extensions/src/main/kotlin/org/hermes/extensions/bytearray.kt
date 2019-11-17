@@ -1,7 +1,6 @@
 package org.hermes.extensions
 
 import java.math.BigInteger
-import org.hermes.ternary.TryteArray
 
 /* ktlint-disable indent */
 /* ktlint-disable no-multi-spaces */
@@ -26,5 +25,3 @@ fun ByteArray.toBigInt(positive: Boolean = false): BigInteger = when {
     else ->     BigInteger(this)
 }
 /* ktlint-enable no-multi-spaces */
-
-fun ByteArray.toTryteArray(): TryteArray = TryteArray(this)
