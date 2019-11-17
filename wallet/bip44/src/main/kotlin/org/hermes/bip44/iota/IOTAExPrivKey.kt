@@ -9,9 +9,9 @@ import org.hermes.bip32.BIP32PubKey
 import org.hermes.crypto.CryptoAlgorithms
 import org.hermes.extensions.extendOrReduceTo
 import org.hermes.extensions.toByteArray
-import org.hermes.extensions.toTritArray
-import org.hermes.extensions.toTryteArray
 import org.hermes.ternary.TryteArray
+import org.hermes.ternary.toTritArray
+import org.hermes.ternary.toTryteArray
 import org.iota.jota.pow.SpongeFactory
 import org.iota.jota.utils.Signing
 

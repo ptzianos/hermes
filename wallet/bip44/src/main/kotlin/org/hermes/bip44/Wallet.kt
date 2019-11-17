@@ -10,7 +10,7 @@ import org.hermes.bip32.KeyRegistry
 import org.hermes.bip32.Wallet as BIP32Wallet
 import org.hermes.bip44.eth.ETHKeyEncoder
 import org.hermes.bip44.iota.IOTAExPrivKey
-import org.hermes.extensions.toTritArray
+import org.hermes.ternary.toTritArray
 
 class Wallet(seed: ByteArray, keyRegistry: KeyRegistry = InMemoryKeyRegistry()) {
 
