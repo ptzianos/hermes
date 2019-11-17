@@ -3,6 +3,7 @@ package org.hermes.ternary
 import java.math.BigInteger
 import java.util.LinkedList
 import org.bouncycastle.pqc.math.linearalgebra.IntegerFunctions.pow
+import org.hermes.extensions.toByteArray
 import org.iota.jota.utils.TrytesConverter
 
 /**
@@ -99,16 +100,7 @@ fun String.toTrytes(): String = TrytesConverter.asciiToTrytes(this)
 
 fun String.stripPaddingOfTrytes(): String = this.trimEnd('9')
 
-fun Long.toByteArray(): ByteArray = this.toBigInteger().toByteArray()
-
 fun Long.toTryteArray(): TryteArray = TryteArray(this.toByteArray())
-
-fun Int.toByteArray(): ByteArray {
-    return when {
-        this < 256 -> byteArrayOf(this.toByte())
-        else -> (this / 256).toByteArray() + (this % 256).toByteArray()
-    }
-}
 
 fun Int.toTryteArray(): TryteArray = TryteArray(this.toByteArray())
 
