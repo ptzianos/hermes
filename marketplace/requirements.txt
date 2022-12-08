@@ -5,7 +5,7 @@ backcall==0.1.0
 -e git+https://github.com/sylvandb/pybitcointools.git@f19385d60cfa45e7140ae0d82eb32976cf96d2d5#egg=bitcoin
 blinker==1.4
 Cerberus==1.3.1
-certifi==2019.3.9
+certifi==2022.12.7
 chardet==3.0.4
 Click==7.0
 coverage==4.5.3
